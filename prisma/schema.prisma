@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN_JENJANG
+  GURU
+  SANTRI
+}
+
+enum SemesterNama {
+  GANJIL
+  GENAP
+}
+
+model User {
+  id        Int                @id @default(autoincrement())
+  nama      String
+  email     String             @unique
+  password  String
+  role      Role
+  jenjangId Int?
+  jenjang   JenjangPendidikan? @relation(fields: [jenjangId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([jenjangId])
+}
+
+model JenjangPendidikan {
+  id                 Int             @id @default(autoincrement())
+  nama               String
+  singkatan          String
+  
+  // Profil Jenjang
+  npsn               String?
+  namaKepalaMadrasah String?
+  nipKepalaMadrasah  String?
+  alamat             String?         @db.Text
+  telepon            String?
+  email              String?
+  logoUrl            String?
+
+  users              User[]
+  santriJenjang      SantriJenjang[]
+  kelas              KelasFormal[]
+  gurus              Guru[]          @relation("GuruJenjangs")
+  sarpras            SarprasJenjang[]
+}
+
+model TahunAjaran {
+  id          Int           @id @default(autoincrement())
+  nama        String        @unique
+  isActive    Boolean       @default(false)
+  semester    Semester[]
+  kelasFormal KelasFormal[]
+}
+
+model Semester {
+  id            Int          @id @default(autoincrement())
+  nama          SemesterNama
+  tahunAjaranId Int
+  tahunAjaran   TahunAjaran  @relation(fields: [tahunAjaranId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  isActive      Boolean      @default(false)
+
+  @@unique([tahunAjaranId, nama])
+}
+
+model Guru {
+  id                 Int                 @id @default(autoincrement())
+  nama               String
+  nip                String?             @unique
+  email              String              @unique
+  password           String              @default("$2b$10$qTWxb4MAxuVYju.SFeZrreZMKo/9OfBaxs4WpB7x.9geRPxTdNQtq") // default: password123
+  
+  niPPPK             String?
+  nuptk              String?
+  nik                String?
+  tempatLahir        String?
+  tanggalLahir       DateTime?
+  jenisKelamin       String?
+  agama              String?
+  alamatLengkap      String?             @db.Text
+  noTelepon          String?
+  pendidikanTerakhir String?
+  jurusan            String?
+  statusPegawai      String?
+  tmt                DateTime?
+  namaIbuKandung     String?
+
+  jenjangs           JenjangPendidikan[] @relation("GuruJenjangs")
+  waliKelas          KelasFormal[]
+}
+
+model Santri {
+  id               Int               @id @default(autoincrement())
+  nisn             String            @unique
+  password         String            @default("$2b$10$qTWxb4MAxuVYju.SFeZrreZMKo/9OfBaxs4WpB7x.9geRPxTdNQtq") // default: password123
+  
+  namaLengkap      String
+  nik              String?
+  tempatLahir      String?
+  tanggalLahir     DateTime?
+  jenisKelamin     String?
+  alamat           String?           @db.Text
+  noTelepon        String?
+  kebutuhanKhusus  String?
+  disabilitas      String?
+  noKipPip         String?
+  namaAyah         String?
+  namaIbu          String?
+
+  riwayatKesehatan String?           @db.Text
+  // jenjangId, statusMukim, isAlumni dipindah ke SantriJenjang
+  jenjangs         SantriJenjang[]
+  riwayatKelas     RiwayatKelas[]
+}
+
+model SantriJenjang {
+  id               Int               @id @default(autoincrement())
+  santriId         Int
+  jenjangId        Int
+  
+  statusMukim      Boolean           @default(false)
+  isAlumni         Boolean           @default(false)
+  tahunLulusId     Int?
+  keteranganLulus  String?           @db.Text
+
+  santri           Santri            @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  jenjang          JenjangPendidikan @relation(fields: [jenjangId], references: [id], onDelete: Restrict)
+
+  @@unique([santriId, jenjangId])
+  @@index([jenjangId])
+}
+
+model KelasFormal {
+  id            Int               @id @default(autoincrement())
+  namaKelas     String
+  jenjangId     Int
+  jenjang       JenjangPendidikan @relation(fields: [jenjangId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  waliKelasId   Int?
+  waliKelas     Guru?             @relation(fields: [waliKelasId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  tahunAjaranId Int
+  tahunAjaran   TahunAjaran       @relation(fields: [tahunAjaranId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  anggota       RiwayatKelas[]
+
+  @@unique([jenjangId, namaKelas, tahunAjaranId])
+  @@index([waliKelasId])
+  @@index([tahunAjaranId])
+}
+
+model RiwayatKelas {
+  id            Int         @id @default(autoincrement())
+  santriId      Int
+  santri        Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  kelasFormalId Int
+  kelasFormal   KelasFormal @relation(fields: [kelasFormalId], references: [id], onDelete: Cascade)
+
+  @@unique([santriId, kelasFormalId])
+  @@index([santriId])
+  @@index([kelasFormalId])
+}
+
+model ProfilPesantren {
+  id            Int     @id @default(autoincrement())
+  namaPesantren String
+  nspp          String?
+  alamatLengkap String? @db.Text
+  telepon       String?
+  email         String?
+  website       String?
+  namaPimpinan  String?
+  logoUrl       String?
+}
+
+model SarprasPesantren {
+  id             Int      @id @default(autoincrement())
+  namaBarang     String
+  kodeBarang     String?
+  kategori       String?
+  jumlah         Int      @default(0)
+  kondisiBaik    Int      @default(0)
+  kondisiRusak   Int      @default(0)
+  sumberDana     String?
+  tahunPerolehan Int?
+  keterangan     String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SarprasJenjang {
+  id             Int      @id @default(autoincrement())
+  jenjangId      Int
+  jenjang        JenjangPendidikan @relation(fields: [jenjangId], references: [id], onDelete: Cascade)
+  namaBarang     String
+  kodeBarang     String?
+  kategori       String?
+  jumlah         Int      @default(0)
+  kondisiBaik    Int      @default(0)
+  kondisiRusak   Int      @default(0)
+  sumberDana     String?
+  tahunPerolehan Int?
+  keterangan     String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([jenjangId])
+}
