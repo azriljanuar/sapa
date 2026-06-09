@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import type { JenjangPendidikan, User } from "@/generated/prisma/client"
+import type { JenjangPendidikan, User } from "@prisma/client"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 

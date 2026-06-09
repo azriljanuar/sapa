@@ -21,7 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { createSarprasPesantren, updateSarprasPesantren, deleteSarprasPesantren } from "./actions"
-import { SarprasPesantren } from "@/generated/prisma/client"
+import { SarprasPesantren } from "@prisma/client"
 
 export function SarprasPesantrenClient({ initialData }: { initialData: SarprasPesantren[] }) {
   const [data, setData] = useState<SarprasPesantren[]>(initialData)

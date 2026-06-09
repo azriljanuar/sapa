@@ -21,7 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { createSarprasJenjang, updateSarprasJenjang, deleteSarprasJenjang } from "./actions"
-import { SarprasJenjang } from "@/generated/prisma/client"
+import { SarprasJenjang } from "@prisma/client"
 
 export function SarprasJenjangClient({ initialData, jenjangName }: { initialData: SarprasJenjang[], jenjangName: string }) {
   const [data, setData] = useState<SarprasJenjang[]>(initialData)
