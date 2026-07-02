@@ -1,5 +1,6 @@
 import { jwtVerify, SignJWT } from "jose"
 import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 import prisma from "./prisma"
 
 const secretKey = process.env.JWT_SECRET || "default_secret_key_please_change_in_production"
@@ -59,7 +60,7 @@ export async function getLoggedInAdminJenjang() {
   const session = await getSession()
 
   if (!session || session.role !== "ADMIN_JENJANG") {
-    throw new Error("Tidak ada sesi ADMIN_JENJANG yang valid. Silakan login terlebih dahulu.")
+    redirect("/login")
   }
 
   const user = await prisma.user.findUnique({
@@ -68,7 +69,7 @@ export async function getLoggedInAdminJenjang() {
   })
 
   if (!user || user.role !== "ADMIN_JENJANG") {
-    throw new Error("User tidak valid atau bukan ADMIN_JENJANG.")
+    redirect("/login")
   }
 
   if (!user.jenjangId) {
@@ -89,7 +90,7 @@ export async function getLoggedInSuperAdmin() {
   const session = await getSession()
 
   if (!session || session.role !== "SUPER_ADMIN") {
-    throw new Error("Tidak ada sesi SUPER_ADMIN yang valid. Silakan login terlebih dahulu.")
+    redirect("/login")
   }
 
   const user = await prisma.user.findUnique({
@@ -97,7 +98,7 @@ export async function getLoggedInSuperAdmin() {
   })
 
   if (!user || user.role !== "SUPER_ADMIN") {
-    throw new Error("User tidak valid atau bukan SUPER_ADMIN.")
+    redirect("/login")
   }
 
   return {
