@@ -18,6 +18,8 @@ function createPrismaClient() {
     password: decodeURIComponent(parsed.password || ""),
     database,
     connectionLimit: 5,
+    connectTimeout: 10000,
+    ssl: parsed.searchParams.get("ssl-mode") === "REQUIRED" ? { rejectUnauthorized: false } : undefined
   })
 
   return new PrismaClient({
