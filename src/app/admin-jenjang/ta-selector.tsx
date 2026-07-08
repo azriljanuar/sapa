@@ -38,12 +38,18 @@ export function TaSelector({
         onValueChange={handleChange}
       >
         <SelectTrigger className="w-full bg-slate-50 h-8 text-xs font-medium border-slate-200">
-          <SelectValue placeholder="Pilih Tahun Ajaran" />
+          <SelectValue placeholder="Pilih Tahun Ajaran">
+            {(val: string) => {
+              const selectedItem = items.find(ta => ta.id.toString() === val)
+              if (!selectedItem) return "Pilih Tahun Ajaran"
+              return selectedItem.isActive ? `${selectedItem.nama} (Aktif)` : selectedItem.nama
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {items.map(ta => (
-            <SelectItem key={ta.id} value={ta.id.toString()}>
-              {ta.nama} {ta.isActive && "(Aktif)"}
+            <SelectItem key={ta.id} value={ta.id.toString()} label={ta.isActive ? `${ta.nama} (Aktif)` : ta.nama}>
+              {ta.isActive ? `${ta.nama} (Aktif)` : ta.nama}
             </SelectItem>
           ))}
         </SelectContent>

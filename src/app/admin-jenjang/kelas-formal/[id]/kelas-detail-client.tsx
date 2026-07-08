@@ -329,7 +329,12 @@ export function KelasDetailClient({
                 onValueChange={(val) => setTargetKelasId(Number(val))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih Kelas..." />
+                  <SelectValue placeholder="Pilih Kelas...">
+                        {(val: string) => {
+                          const k = nextTaClasses?.find(kelas => kelas.id.toString() === val)
+                          return k ? k.namaKelas : "Pilih Kelas..."
+                        }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {nextTaClasses && nextTaClasses.length > 0 ? (

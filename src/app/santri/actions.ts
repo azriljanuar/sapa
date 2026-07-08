@@ -5,6 +5,8 @@ import { z } from "zod"
 import prisma from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
 import bcrypt from "bcryptjs"
+import { writeFileSync, mkdirSync, existsSync } from "fs"
+import { join } from "path"
 
 const profilSchema = z.object({
   namaLengkap: z.string().min(2, "Nama minimal 2 karakter"),
@@ -79,4 +81,65 @@ export async function updateProfilSantri(santriIds: number[], values: z.infer<ty
     if (error instanceof Error) return { success: false, error: error.message }
     return { success: false, error: "Gagal memperbarui profil" }
   }
+}
+
+export async function uploadFotoWajahAction(santriIds: number[], formData: FormData) {
+  try {
+    const session = await getSession()
+    if (!session || session.role !== "SANTRI") throw new Error("Unauthorized")
+
+    const file = formData.get("file") as File
+    if (!file) throw new Error("File not found")
+
+    const validSantris = await prisma.santri.findMany({
+      where: {
+        id: { in: santriIds },
+        nisn: session.email // validasi kepemilikan
+      }
+    })
+
+    if (validSantris.length === 0) throw new Error("Unauthorized")
+
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const uploadDir = join(process.cwd(), "public", "uploads", "profiles")
+    
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true })
+    }
+
+    const filename = `santri_${session.email}_${Date.now()}.png`
+    writeFileSync(join(uploadDir, filename), buffer)
+    
+    const fileUrl = `/uploads/profiles/${filename}`
+
+    await prisma.santri.updateMany({
+      where: { id: { in: santriIds } },
+      data: { fotoWajah: fileUrl }
+    })
+
+    revalidatePath("/santri")
+    return { success: true, url: fileUrl }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export async function getTemplateKartuAction() {
+  const session = await getSession()
+  if (!session || session.role !== "SANTRI") return null
+
+  const santri = await prisma.santri.findUnique({
+    where: { id: session.id },
+  })
+
+  if (!santri || !santri.jenjangId) return null
+
+  return prisma.templateKartu.findUnique({
+    where: {
+      jenjangId_tipe: {
+        jenjangId: santri.jenjangId,
+        tipe: "SANTRI"
+      }
+    }
+  })
 }

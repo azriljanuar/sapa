@@ -15,7 +15,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { updateProfilGuru } from "./actions"
+import { updateProfilGuru, uploadFotoWajahAction } from "./actions"
+import { Camera } from "lucide-react"
+import { IdCardPreview } from "@/components/id-card-preview"
 
 const profilSchema = z.object({
   nama: z.string().min(2, "Nama minimal 2 karakter"),
@@ -37,10 +39,11 @@ const profilSchema = z.object({
   namaIbuKandung: z.string().optional().nullable(),
 })
 
-export function GuruProfilClient({ guru }: { guru: any }) {
+export function GuruProfilClient({ guru, templateKartu }: { guru: any, templateKartu: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [password, setPassword] = useState("")
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
 
   const form = useForm<z.infer<typeof profilSchema>>({
     resolver: zodResolver(profilSchema),
@@ -80,18 +83,69 @@ export function GuruProfilClient({ guru }: { guru: any }) {
     } catch (error) {
       alert("Terjadi kesalahan saat memperbarui profil.")
     } finally {
-      setIsSubmitting(false)
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return
+    const file = e.target.files[0]
+    
+    setIsUploadingPhoto(true)
+    const formData = new FormData()
+    formData.append("file", file)
+    
+    try {
+      const res = await uploadFotoWajahAction(formData)
+      if (res.success) {
+        alert("Foto profil berhasil diperbarui!")
+        window.location.reload()
+      } else {
+        alert("Gagal mengupload foto: " + res.error)
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan saat mengupload foto.")
+    } finally {
+      setIsUploadingPhoto(false)
     }
   }
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="font-semibold text-lg">Biodata Pribadi</h2>
-        <Button variant={isEditing ? "outline" : "default"} onClick={() => setIsEditing(!isEditing)}>
-          {isEditing ? "Batal Edit" : "Edit Profil"}
-        </Button>
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-xl shadow-sm border flex flex-col md:flex-row items-center gap-6">
+        <div className="relative group">
+          <div className="w-32 h-32 rounded-full overflow-hidden bg-slate-100 border-4 border-white shadow-sm flex items-center justify-center">
+            {guru.fotoWajah ? (
+              <img src={guru.fotoWajah} alt="Foto Profil" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-slate-400 text-sm text-center">Belum ada foto</span>
+            )}
+          </div>
+          <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+            <Camera className="w-6 h-6 mr-1" />
+            <span className="text-xs font-medium">Ubah</span>
+            <input 
+              type="file" 
+              className="hidden" 
+              accept="image/png, image/jpeg" 
+              onChange={handlePhotoUpload}
+              disabled={isUploadingPhoto}
+            />
+          </label>
+        </div>
+        <div className="text-center md:text-left flex-1">
+          <h2 className="text-xl font-bold text-slate-800">{guru.nama}</h2>
+          <p className="text-sm text-slate-500">{guru.email}</p>
+          {isUploadingPhoto && <p className="text-xs text-blue-600 mt-2 animate-pulse">Sedang mengupload...</p>}
+        </div>
+        <div className="w-full md:w-auto mt-4 md:mt-0">
+          <IdCardPreview user={guru} tipe="GURU" template={templateKartu} />
+        </div>
       </div>
+
+      <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="font-semibold text-lg">Biodata Pribadi</h2>
+          <Button variant={isEditing ? "outline" : "default"} onClick={() => setIsEditing(!isEditing)}>
+            {isEditing ? "Batal Edit" : "Edit Profil"}
+          </Button>
+        </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -342,6 +396,7 @@ export function GuruProfilClient({ guru }: { guru: any }) {
           )}
         </form>
       </Form>
+    </div>
     </div>
   )
 }

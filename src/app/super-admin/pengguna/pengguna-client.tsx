@@ -169,7 +169,12 @@ function CreateUserDialog({ jenjang }: { jenjang: JenjangOption[] }) {
                     onValueChange={(v) => field.onChange(Number(v))}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih jenjang" />
+                      <SelectValue placeholder="Pilih jenjang">
+                        {(val: string) => {
+                          const j = jenjang.find((jen: any) => jen.id.toString() === val)
+                          return j ? j.nama : "Pilih jenjang"
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {jenjang.map((j) => (
@@ -322,7 +327,12 @@ function EditUserDialog({
                     onValueChange={(v) => field.onChange(Number(v))}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih jenjang" />
+                      <SelectValue placeholder="Pilih jenjang">
+                        {(val: string) => {
+                          const j = jenjang.find((jen: any) => jen.id.toString() === val)
+                          return j ? j.nama : "Pilih jenjang"
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {jenjang.map((j) => (

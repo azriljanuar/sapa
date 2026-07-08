@@ -269,12 +269,17 @@ export function KelasClient({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Pilih Guru..." />
+                          <SelectValue placeholder="Pilih Guru...">
+                            {(val: string) => {
+                              const guru = guruList.find(g => g.id.toString() === val)
+                              return guru ? guru.nama : "Pilih Guru..."
+                            }}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {guruList.map(guru => (
-                          <SelectItem key={guru.id} value={guru.id.toString()}>
+                          <SelectItem key={guru.id} value={guru.id.toString()} label={guru.nama}>
                             {guru.nama}
                           </SelectItem>
                         ))}

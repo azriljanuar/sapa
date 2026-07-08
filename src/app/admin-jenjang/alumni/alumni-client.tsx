@@ -268,7 +268,12 @@ export function AlumniClient({
                 onValueChange={(val) => setTargetJenjangId(Number(val))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih Jenjang..." />
+                  <SelectValue placeholder="Pilih Jenjang...">
+                    {(val: string) => {
+                      const j = jenjangList.find(jen => jen.id.toString() === val)
+                      return j ? j.nama : "Pilih Jenjang..."
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {jenjangList.length > 0 ? (

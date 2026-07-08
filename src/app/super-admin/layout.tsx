@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { type ReactNode } from "react"
-import { LayoutDashboard, CalendarDays, GraduationCap, Users, LogOut, UserCheck, Building, Box } from "lucide-react"
+import { LayoutDashboard, CalendarDays, GraduationCap, Users, LogOut, UserCheck, Building, Box, Search, Bell } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,13 +10,18 @@ export default function SuperAdminLayout({ children }: { children: ReactNode }) 
   return (
     <div className="min-h-screen bg-slate-50 text-foreground flex flex-col md:flex-row">
       {/* Sidebar - Hidden on very small screens, fixed width on md+ */}
-      <aside className="w-full md:w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col">
-        <div className="h-16 flex items-center px-6 border-b border-slate-100">
+      <aside className="w-full md:w-64 bg-white border-r border-slate-100 flex-shrink-0 flex flex-col">
+        <div className="h-16 flex items-center px-6 border-b border-transparent">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">S</span>
+            <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center shrink-0">
+              <span className="text-white font-bold text-sm">S</span>
             </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900">SIAKAD</span>
+            <div className="flex flex-col text-slate-900">
+              <span className="text-xl font-bold leading-none tracking-tight">SAPA</span>
+              <span className="text-[0.45rem] font-medium leading-[1.1] mt-0.5 whitespace-normal break-words max-w-[55px]">
+                Sistem Akademik Pesantren Al-Ittihaad
+              </span>
+            </div>
             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 uppercase tracking-wider ml-1">
               Super
             </span>
@@ -24,6 +29,9 @@ export default function SuperAdminLayout({ children }: { children: ReactNode }) 
         </div>
 
         <div className="flex-1 overflow-auto py-6 px-4">
+          <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+            Main Menu
+          </p>
           <nav className="flex flex-col gap-1.5">
             <Link
               href="/super-admin"
@@ -68,6 +76,13 @@ export default function SuperAdminLayout({ children }: { children: ReactNode }) 
               Pengguna
             </Link>
             <Link
+              href="/super-admin/santri"
+              className={cn(buttonVariants({ variant: "ghost" }), "justify-start text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium")}
+            >
+              <Users className="mr-3 h-5 w-5 opacity-70" />
+              Data Santri
+            </Link>
+            <Link
               href="/super-admin/guru"
               className={cn(buttonVariants({ variant: "ghost" }), "justify-start text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium")}
             >
@@ -85,38 +100,47 @@ export default function SuperAdminLayout({ children }: { children: ReactNode }) 
           }}>
             <button
               type="submit"
-              className={cn(buttonVariants({ variant: "ghost" }), "w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 font-medium")}
+              className={cn(buttonVariants({ variant: "ghost" }), "w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 font-bold rounded-xl")}
             >
               <LogOut className="mr-3 h-5 w-5" />
-              Keluar Sesi
+              Log Out
             </button>
           </form>
         </div>
       </aside>
 
-      {/* Main Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm shadow-slate-100/50">
-          <div className="flex items-center">
-            <h1 className="text-xl font-semibold text-slate-800 tracking-tight">Super Admin Panel</h1>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
+        <header className="h-16 shrink-0 bg-transparent flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="hidden sm:flex max-w-lg w-full relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search for staffs, student or bills" 
+                className="w-full pl-11 bg-white border-0 shadow-sm focus-visible:ring-1 focus-visible:ring-emerald-500 rounded-full h-11 text-sm text-slate-700 outline-none"
+              />
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex flex-col items-end mr-2">
-              <span className="text-sm font-semibold text-slate-700">Ahmad Super</span>
-              <span className="text-xs text-slate-500">Administrator Utama</span>
+            <button className="p-2 text-slate-600 hover:text-slate-900 relative rounded-full hover:bg-slate-200/50 transition-colors">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            </button>
+            
+            <div className="flex items-center gap-3">
+              <Avatar className="h-9 w-9 ring-2 ring-white shadow-sm">
+                <AvatarImage src={`https://api.dicebear.com/7.x/notionists/svg?seed=SuperAdmin`} alt="Super Admin" />
+                <AvatarFallback className="bg-emerald-100 text-emerald-700">SA</AvatarFallback>
+              </Avatar>
             </div>
-            <Avatar className="h-9 w-9 ring-2 ring-slate-100">
-              <AvatarImage src="https://github.com/shadcn.png" alt="@admin" />
-              <AvatarFallback className="bg-primary/10 text-primary font-medium">SA</AvatarFallback>
-            </Avatar>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-8">
-          <div className="mx-auto max-w-6xl">
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
             {children}
           </div>
         </main>

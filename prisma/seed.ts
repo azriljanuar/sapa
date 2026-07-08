@@ -1,7 +1,5 @@
-import { PrismaClient } from "../src/generated/prisma"
+import { prisma } from "../src/lib/prisma"
 import bcrypt from "bcryptjs"
-
-const prisma = new PrismaClient()
 
 async function main() {
   const password = await bcrypt.hash("password123", 10)
@@ -39,7 +37,21 @@ async function main() {
     }
   })
 
-  console.log("Seeding sukses: admin.smp@pesantren.com / password123")
+  // Buat Super Admin
+  await prisma.user.upsert({
+    where: { email: "super.admin@pesantren.com" },
+    update: {},
+    create: {
+      nama: "Super Admin",
+      email: "super.admin@pesantren.com",
+      password,
+      role: "SUPER_ADMIN",
+    }
+  })
+
+  console.log("Seeding sukses:")
+  console.log("- Super Admin: super.admin@pesantren.com / password123")
+  console.log("- Admin SMP: admin.smp@pesantren.com / password123")
 }
 
 main()

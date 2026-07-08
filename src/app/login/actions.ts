@@ -58,26 +58,15 @@ export async function loginAction(prevState: unknown, formData: FormData) {
         roleToRedirect = "GURU"
       }
       else {
-        // 3. Cek tabel Santri (Login pakai NISN)
+        // Cek apakah ini percobaan login Santri (yang pindah ke halaman khusus)
         const santri = await prisma.santri.findFirst({
           where: { nisn: validated.username }
         })
-
         if (santri) {
-          const passwordMatch = await bcrypt.compare(validated.password, santri.password)
-          if (!passwordMatch) return { error: "Username atau password salah." }
-          
-          await createSession({
-            id: santri.id,
-            email: santri.nisn, // Simpan NISN di field email pada session payload
-            role: "SANTRI",
-            jenjangId: null, // Santri akan mengakses semua data terkait NISN-nya
-          })
-          roleToRedirect = "SANTRI"
+          return { error: "Akun Santri tidak bisa login di sini. Silakan gunakan portal Login Santri." }
         }
-        else {
-          return { error: "Username atau password salah." }
-        }
+
+        return { error: "Username atau password salah." }
       }
     }
     

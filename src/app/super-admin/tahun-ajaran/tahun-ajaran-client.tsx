@@ -22,8 +22,9 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 
-import { createTahunAjaran, deleteTahunAjaran, setTahunAjaranAktif, setSemesterAktif } from "./actions"
+import { createTahunAjaran, deleteTahunAjaran, toggleTahunAjaranAktif, toggleSemesterAktif } from "./actions"
 
 type SemesterType = {
   id: number
@@ -76,9 +77,10 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
     }
   }
 
-  const handleSetAktifTA = async (id: number) => {
-    if (!confirm("Aktifkan Tahun Ajaran ini? Ini akan menonaktifkan tahun ajaran lainnya.")) return
-    const res = await setTahunAjaranAktif(id)
+  const handleToggleAktifTA = async (id: number, targetState: boolean) => {
+    if (targetState && !confirm("Aktifkan Tahun Ajaran ini? Ini akan menonaktifkan tahun ajaran lainnya.")) return
+    if (!targetState && !confirm("Nonaktifkan Tahun Ajaran ini?")) return
+    const res = await toggleTahunAjaranAktif(id, targetState)
     if (res.success) {
       window.location.reload()
     } else {
@@ -86,8 +88,8 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
     }
   }
 
-  const handleSetAktifSemester = async (id: number) => {
-    const res = await setSemesterAktif(id)
+  const handleToggleAktifSemester = async (id: number, targetState: boolean) => {
+    const res = await toggleSemesterAktif(id, targetState)
     if (res.success) {
       window.location.reload()
     } else {
@@ -126,27 +128,31 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
                   <TableCell className="font-medium text-slate-500">{item.id}</TableCell>
                   <TableCell className="font-bold text-slate-900">{item.nama}</TableCell>
                   <TableCell>
-                    {item.isActive ? (
-                      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shadow-none">Aktif</Badge>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={() => handleSetAktifTA(item.id)} className="h-7 text-xs">
-                        Set Aktif
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Switch 
+                        checked={item.isActive} 
+                        onCheckedChange={(checked) => handleToggleAktifTA(item.id, checked)} 
+                      />
+                      <span className={`text-sm font-medium ${item.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        {item.isActive ? 'Aktif' : 'Tidak Aktif'}
+                      </span>
+                    </div>
                   </TableCell>
                   {/* Semester Ganjil */}
                   <TableCell>
                     {(() => {
                       const sem = item.semester.find(s => s.nama === "GANJIL")
                       if (!sem) return "-"
-                      return sem.isActive ? (
-                        <div className="flex items-center text-emerald-600 text-sm font-medium">
-                          <CheckCircle2 className="h-4 w-4 mr-1" /> Aktif
+                      return (
+                        <div className="flex items-center gap-2">
+                          <Switch 
+                            checked={sem.isActive} 
+                            onCheckedChange={(checked) => handleToggleAktifSemester(sem.id, checked)} 
+                          />
+                          <span className={`text-sm font-medium ${sem.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
+                            {sem.isActive ? 'Aktif' : 'Tidak Aktif'}
+                          </span>
                         </div>
-                      ) : (
-                        <button onClick={() => handleSetAktifSemester(sem.id)} className="flex items-center text-slate-400 hover:text-slate-600 text-sm transition-colors">
-                          <Circle className="h-4 w-4 mr-1" /> Set Aktif
-                        </button>
                       )
                     })()}
                   </TableCell>
@@ -155,14 +161,16 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
                     {(() => {
                       const sem = item.semester.find(s => s.nama === "GENAP")
                       if (!sem) return "-"
-                      return sem.isActive ? (
-                        <div className="flex items-center text-emerald-600 text-sm font-medium">
-                          <CheckCircle2 className="h-4 w-4 mr-1" /> Aktif
+                      return (
+                        <div className="flex items-center gap-2">
+                          <Switch 
+                            checked={sem.isActive} 
+                            onCheckedChange={(checked) => handleToggleAktifSemester(sem.id, checked)} 
+                          />
+                          <span className={`text-sm font-medium ${sem.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
+                            {sem.isActive ? 'Aktif' : 'Tidak Aktif'}
+                          </span>
                         </div>
-                      ) : (
-                        <button onClick={() => handleSetAktifSemester(sem.id)} className="flex items-center text-slate-400 hover:text-slate-600 text-sm transition-colors">
-                          <Circle className="h-4 w-4 mr-1" /> Set Aktif
-                        </button>
                       )
                     })()}
                   </TableCell>

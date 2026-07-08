@@ -51,6 +51,8 @@ model JenjangPendidikan {
   kelas              KelasFormal[]
   gurus              Guru[]          @relation("GuruJenjangs")
   sarpras            SarprasJenjang[]
+  mataPelajaran      MataPelajaran[]
+  templateKartu      TemplateKartu[]
 }
 
 model TahunAjaran {
@@ -59,6 +61,7 @@ model TahunAjaran {
   isActive    Boolean       @default(false)
   semester    Semester[]
   kelasFormal KelasFormal[]
+  pengampu    PengampuMataPelajaran[]
 }
 
 model Semester {
@@ -69,6 +72,7 @@ model Semester {
   isActive      Boolean      @default(false)
 
   @@unique([tahunAjaranId, nama])
+  jadwalPelajaran JadwalPelajaran[]
 }
 
 model Guru {
@@ -92,9 +96,11 @@ model Guru {
   statusPegawai      String?
   tmt                DateTime?
   namaIbuKandung     String?
+  fotoWajah          String?             @db.Text
 
   jenjangs           JenjangPendidikan[] @relation("GuruJenjangs")
   waliKelas          KelasFormal[]
+  pengampu           PengampuMataPelajaran[]
 }
 
 model Santri {
@@ -114,6 +120,7 @@ model Santri {
   noKipPip         String?
   namaAyah         String?
   namaIbu          String?
+  fotoWajah        String?           @db.Text
 
   riwayatKesehatan String?           @db.Text
   // jenjangId, statusMukim, isAlumni dipindah ke SantriJenjang
@@ -148,6 +155,7 @@ model KelasFormal {
   tahunAjaranId Int
   tahunAjaran   TahunAjaran       @relation(fields: [tahunAjaranId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   anggota       RiwayatKelas[]
+  pengampu      PengampuMataPelajaran[]
 
   @@unique([jenjangId, namaKelas, tahunAjaranId])
   @@index([waliKelasId])
@@ -209,5 +217,82 @@ model SarprasJenjang {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  @@index([jenjangId])
+}
+
+model MataPelajaran {
+  id          Int               @id @default(autoincrement())
+  nama        String
+  kode        String?
+  kkm         Float?
+  jenjangId   Int
+  jenjang     JenjangPendidikan @relation(fields: [jenjangId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  pengampu    PengampuMataPelajaran[]
+
+  @@index([jenjangId])
+}
+
+model PengampuMataPelajaran {
+  id              Int           @id @default(autoincrement())
+  mataPelajaranId Int
+  mataPelajaran   MataPelajaran @relation(fields: [mataPelajaranId], references: [id], onDelete: Cascade)
+  kelasFormalId   Int
+  kelasFormal     KelasFormal   @relation(fields: [kelasFormalId], references: [id], onDelete: Cascade)
+  guruId          Int
+  guru            Guru          @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  tahunAjaranId   Int
+  tahunAjaran     TahunAjaran   @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
+
+  @@unique([mataPelajaranId, kelasFormalId, tahunAjaranId])
+  @@index([kelasFormalId])
+  @@index([guruId])
+  @@index([tahunAjaranId])
+  jadwalPelajaran JadwalPelajaran[]
+}
+
+enum Hari {
+  SENIN
+  SELASA
+  RABU
+  KAMIS
+  JUMAT
+  SABTU
+  MINGGU
+}
+
+model JadwalPelajaran {
+  id            Int                   @id @default(autoincrement())
+  pengampuId    Int
+  pengampu      PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
+  semesterId    Int
+  semester      Semester              @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  hari          Hari
+  jamMulai      String
+  jamSelesai    String
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([pengampuId])
+  @@index([semesterId])
+}
+
+enum TipeKartu {
+  GURU
+  SANTRI
+}
+
+model TemplateKartu {
+  id        Int               @id @default(autoincrement())
+  jenjangId Int
+  jenjang   JenjangPendidikan @relation(fields: [jenjangId], references: [id], onDelete: Cascade)
+  tipe      TipeKartu
+  frontUrl  String?           @db.Text
+  backUrl   String?           @db.Text
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@unique([jenjangId, tipe])
   @@index([jenjangId])
 }

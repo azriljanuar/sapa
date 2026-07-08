@@ -5,6 +5,8 @@ import { z } from "zod"
 import prisma from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
 import bcrypt from "bcryptjs"
+import { writeFileSync, mkdirSync, existsSync } from "fs"
+import { join } from "path"
 
 const profilSchema = z.object({
   nama: z.string().min(2, "Nama minimal 2 karakter"),
@@ -85,4 +87,58 @@ export async function updateProfilGuru(values: z.infer<typeof profilSchema>, pas
     if (error instanceof Error) return { success: false, error: error.message }
     return { success: false, error: "Gagal memperbarui profil" }
   }
+}
+
+export async function uploadFotoWajahAction(formData: FormData) {
+  try {
+    const session = await getSession()
+    if (!session || session.role !== "GURU") throw new Error("Unauthorized")
+
+    const file = formData.get("file") as File
+    if (!file) throw new Error("File not found")
+
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const uploadDir = join(process.cwd(), "public", "uploads", "profiles")
+    
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true })
+    }
+
+    const filename = `guru_${session.id}_${Date.now()}.png`
+    writeFileSync(join(uploadDir, filename), buffer)
+    
+    const fileUrl = `/uploads/profiles/${filename}`
+
+    await prisma.guru.update({
+      where: { id: session.id },
+      data: { fotoWajah: fileUrl }
+    })
+
+    revalidatePath("/guru")
+    return { success: true, url: fileUrl }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export async function getTemplateKartuAction() {
+  const session = await getSession()
+  if (!session || session.role !== "GURU") return null
+
+  const guru = await prisma.guru.findUnique({
+    where: { id: session.id },
+    include: { jenjangs: true }
+  })
+
+  if (!guru || guru.jenjangs.length === 0) return null
+
+  // Pakai jenjang pertama
+  return prisma.templateKartu.findUnique({
+    where: {
+      jenjangId_tipe: {
+        jenjangId: guru.jenjangs[0].id,
+        tipe: "GURU"
+      }
+    }
+  })
 }

@@ -20,30 +20,73 @@ export default async function AdminJenjangDashboard() {
       {/* Kolom Utama */}
       <div className="space-y-8">
         
-        {/* Banner Utama */}
-        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-md border-0 h-64 md:h-72 flex items-center p-8 md:p-12">
-          {/* Background Image Absolute */}
-          <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
-            <Image 
-              src="/images/banner_islamic.png" 
-              alt="Banner Background" 
-              fill 
-              className="object-cover"
-              priority
-            />
+        {/* Header Dashboard Minimalis */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Dashboard</h1>
+          <div className="flex items-center gap-4 text-sm font-medium text-slate-500 border-b border-slate-200 pb-2">
+            <span className="hover:text-slate-900 cursor-pointer">This week</span>
+            <span className="text-emerald-700 border-b-2 border-emerald-700 pb-2 -mb-[9px]">Last week</span>
+            <span className="hover:text-slate-900 cursor-pointer">Last month</span>
+            <span className="hover:text-slate-900 cursor-pointer">Last year</span>
           </div>
-          
-          <div className="relative z-10 w-full">
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">Hi, {admin.nama} 👋</h1>
-            <p className="text-blue-100 text-lg md:text-xl max-w-lg leading-relaxed">
-              Selamat datang di Dasbor SIAKAD {admin.jenjang?.nama}. The expert in anything was once a beginner!
-            </p>
+        </div>
+
+        {/* Statistik / Overview Area ala Tarifa */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card 1: Students */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4">
+              <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center">
+                <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+              </div>
+              Total Santri Aktif
+            </div>
+            <div className="flex items-end gap-3 mb-6">
+              <span className="text-4xl font-bold text-slate-900">{jumlahSantri}</span>
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md mb-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                100%
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <div>
+                <p className="text-slate-500">Total Enrolled</p>
+                <p className="font-bold text-slate-900 text-lg">{jumlahSantri}</p>
+              </div>
+              <div>
+                <p className="text-slate-500">Inactive/Alumni</p>
+                <p className="font-bold text-slate-900 text-lg">0</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Staff */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4">
+              <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center">
+                <Users className="w-3.5 h-3.5 text-blue-600" />
+              </div>
+              Total Guru Terdaftar
+            </div>
+            <div className="flex items-end gap-3 mb-6">
+              <span className="text-4xl font-bold text-slate-900">{jumlahGuru}</span>
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded-md mb-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                100%
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <div>
+                <p className="text-slate-500">Total Kelas</p>
+                <p className="font-bold text-slate-900 text-lg">{jumlahKelas}</p>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-xl font-bold text-slate-800">Quick Access</h2>
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-4">Quick Access</h2>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -119,65 +162,6 @@ export default async function AdminJenjangDashboard() {
 
           </div>
         </div>
-
-        {/* Statistik / Attendance Area */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xl font-bold text-slate-800">Sistem Overview</h2>
-          </div>
-          
-          <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-            <div className="grid grid-cols-3 gap-4 md:gap-8">
-              
-              {/* Circle 1 */}
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="12" fill="none" />
-                    <circle cx="50" cy="50" r="40" stroke="#10b981" strokeWidth="12" fill="none" strokeDasharray="251.2" strokeDashoffset={251.2 - (251.2 * 1)} strokeLinecap="round" />
-                  </svg>
-                  <div className="absolute text-2xl sm:text-4xl font-bold text-slate-800">{jumlahSantri}</div>
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                  <span className="text-sm sm:text-base font-medium text-slate-600">Total Santri</span>
-                </div>
-              </div>
-
-              {/* Circle 2 */}
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="12" fill="none" />
-                    <circle cx="50" cy="50" r="40" stroke="#3b82f6" strokeWidth="12" fill="none" strokeDasharray="251.2" strokeDashoffset={251.2 - (251.2 * 1)} strokeLinecap="round" />
-                  </svg>
-                  <div className="absolute text-2xl sm:text-4xl font-bold text-slate-800">{jumlahGuru}</div>
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                  <span className="text-sm sm:text-base font-medium text-slate-600">Total Guru</span>
-                </div>
-              </div>
-
-              {/* Circle 3 */}
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="12" fill="none" />
-                    <circle cx="50" cy="50" r="40" stroke="#f59e0b" strokeWidth="12" fill="none" strokeDasharray="251.2" strokeDashoffset={251.2 - (251.2 * 1)} strokeLinecap="round" />
-                  </svg>
-                  <div className="absolute text-2xl sm:text-4xl font-bold text-slate-800">{jumlahKelas}</div>
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-                  <span className="text-sm sm:text-base font-medium text-slate-600">Total Kelas</span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
       </div>
 
       {/* Kolom Kanan (Profil Admin & Ringkasan) */}
@@ -207,9 +191,9 @@ export default async function AdminJenjangDashboard() {
             </div>
           </div>
 
-          <div className="w-full mt-6 bg-blue-600 rounded-2xl p-4 text-white flex justify-between items-center shadow-md">
+          <div className="w-full mt-6 bg-emerald-600 rounded-2xl p-4 text-white flex justify-between items-center shadow-md">
             <div className="text-left">
-              <p className="text-blue-200 text-xs uppercase tracking-wider font-semibold">ID Pengguna</p>
+              <p className="text-emerald-200 text-xs uppercase tracking-wider font-semibold">ID Pengguna</p>
               <p className="font-bold text-lg leading-none mt-1">#{admin.id}</p>
             </div>
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">

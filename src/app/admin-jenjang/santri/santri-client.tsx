@@ -34,6 +34,7 @@ import {
   FormDescription,
 } from "@/components/ui/form"
 import { createSantri, updateSantri, deleteSantri, importSantriExcel } from "./actions"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const santriSchema = z.object({
   id: z.number().optional(),
@@ -459,7 +460,7 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>
               {editingData ? "Edit Data Santri" : "Tambah Data Santri"}
@@ -468,8 +469,18 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="max-h-[60vh] overflow-y-auto space-y-4 px-1">
-                <FormField
+              <Tabs defaultValue="bio" className="w-full">
+                <TabsList className="grid w-full grid-cols-5 mb-4">
+                  <TabsTrigger value="bio">Bio</TabsTrigger>
+                  <TabsTrigger value="akademik">Akademik</TabsTrigger>
+                  <TabsTrigger value="orangtua">Orang Tua</TabsTrigger>
+                  <TabsTrigger value="medis">Medis</TabsTrigger>
+                  <TabsTrigger value="kehadiran">Kehadiran</TabsTrigger>
+                </TabsList>
+                
+                <div className="max-h-[50vh] overflow-y-auto px-1">
+                  <TabsContent value="bio" className="space-y-4 mt-0">
+                    <FormField
                   control={form.control}
                   name="nisn"
                   render={({ field }) => (
@@ -572,21 +583,9 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
                     name="noTelepon"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>No Telepon</FormLabel>
+                        <FormLabel>No Telepon Siswa (opsional)</FormLabel>
                         <FormControl>
                           <Input placeholder="08xxx" {...field} value={field.value || ""} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="noKipPip"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>No KIP / PIP</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nomor KIP/PIP" {...field} value={field.value || ""} />
                         </FormControl>
                       </FormItem>
                     )}
@@ -605,7 +604,24 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
                     </FormItem>
                   )}
                 />
+              </TabsContent>
 
+              <TabsContent value="akademik" className="space-y-4 mt-0">
+                <FormField
+                  control={form.control}
+                  name="noKipPip"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>No KIP / PIP</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nomor KIP/PIP" {...field} value={field.value || ""} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
+
+              <TabsContent value="orangtua" className="space-y-4 mt-0">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -632,7 +648,9 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
                     )}
                   />
                 </div>
+              </TabsContent>
 
+              <TabsContent value="medis" className="space-y-4 mt-0">
                 <FormField
                   control={form.control}
                   name="kebutuhanKhusus"
@@ -677,7 +695,54 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
                     </FormItem>
                   )}
                 />
+              </TabsContent>
+
+                <TabsContent value="kehadiran" className="space-y-4 mt-0">
+                  <div className="bg-white p-4 rounded-xl border border-slate-100">
+                    <h3 className="font-semibold text-sm mb-4">Agustus 2026</h3>
+                    <div className="grid grid-cols-7 gap-1 text-center mb-1">
+                      {['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(day => (
+                        <div key={day} className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{day}</div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {/* Dummy offset */}
+                      <div className="aspect-square"></div>
+                      <div className="aspect-square"></div>
+                      <div className="aspect-square"></div>
+                      <div className="aspect-square"></div>
+                      <div className="aspect-square"></div>
+                      {Array.from({ length: 31 }).map((_, i) => {
+                        const isWeekend = (i + 1) % 7 === 0 || (i + 2) % 7 === 0
+                        if (isWeekend) return <div key={i} className="aspect-square flex items-center justify-center rounded text-xs font-medium bg-slate-50 border border-slate-100 text-slate-400">{i+1}</div>
+                        
+                        const isAbsent = i === 4 || i === 12 || i === 18
+                        return (
+                          <div 
+                            key={i} 
+                            className={`aspect-square flex items-center justify-center rounded text-xs font-medium border ${
+                              isAbsent 
+                                ? "bg-red-50 border-red-200 text-red-600" 
+                                : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                            }`}
+                          >
+                            {i+1}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div className="mt-4 flex gap-4 border-t border-slate-100 pt-3">
+                      <div className="flex items-center gap-1 text-xs text-slate-600">
+                        <div className="w-3 h-3 rounded-sm bg-emerald-50 border border-emerald-200"></div> Hadir
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-slate-600">
+                        <div className="w-3 h-3 rounded-sm bg-red-50 border border-red-200"></div> Absen
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
               </div>
+            </Tabs>
               
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" type="button" onClick={handleCloseDialog}>

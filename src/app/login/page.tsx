@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginAction, { error: "" })
@@ -16,7 +17,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900">
         <Image
           src="/images/banner_islamic.png"
-          alt="SIAKAD Background"
+          alt="SAPA Background"
           fill
           className="object-cover opacity-60"
           priority
@@ -36,11 +37,14 @@ export default function LoginPage() {
       {/* Right side - Login Form */}
       <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:w-1/2 lg:px-20 xl:px-24 bg-slate-50">
         <div className="mx-auto w-full max-w-sm lg:max-w-md">
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-             <div className="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
+          <div className="text-center mb-8">
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-4xl font-black text-slate-900 tracking-tight leading-none">SAPA</span>
+              <span className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-widest text-center whitespace-normal break-words max-w-[200px]">
+                Sistem Akademik Pesantren Al-Ittihaad
+              </span>
             </div>
-            <span className="text-2xl font-bold text-slate-900">SIAKAD</span>
+            <p className="text-sm text-slate-500 mt-3">Silakan masuk menggunakan kredensial Anda</p>
           </div>
 
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-slate-900">
@@ -107,6 +111,13 @@ export default function LoginPage() {
                 </Button>
               </div>
             </form>
+
+            <div className="mt-8 text-center text-sm text-slate-500">
+              Anda adalah Santri?{" "}
+              <Link href="/login-santri" className="font-semibold leading-6 text-blue-600 hover:text-blue-500">
+                Login di sini
+              </Link>
+            </div>
           </div>
         </div>
       </div>

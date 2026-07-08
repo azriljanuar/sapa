@@ -106,23 +106,31 @@ export async function deleteTahunAjaran(id: number) {
   }
 }
 
-export async function setTahunAjaranAktif(id: number) {
+export async function toggleTahunAjaranAktif(id: number, targetState: boolean) {
   try {
     const session = await getSession()
     if (!session || session.role !== "SUPER_ADMIN") throw new Error("Unauthorized")
 
-    await prisma.$transaction([
-      // Matikan semua TA
-      prisma.tahunAjaran.updateMany({
-        where: { isActive: true },
-        data: { isActive: false }
-      }),
-      // Hidupkan TA yang dipilih
-      prisma.tahunAjaran.update({
+    if (targetState) {
+      await prisma.$transaction([
+        // Matikan semua TA
+        prisma.tahunAjaran.updateMany({
+          where: { isActive: true },
+          data: { isActive: false }
+        }),
+        // Hidupkan TA yang dipilih
+        prisma.tahunAjaran.update({
+          where: { id },
+          data: { isActive: true }
+        })
+      ])
+    } else {
+      // Nonaktifkan saja
+      await prisma.tahunAjaran.update({
         where: { id },
-        data: { isActive: true }
+        data: { isActive: false }
       })
-    ])
+    }
 
     return { success: true }
   } catch (error: any) {
@@ -130,23 +138,31 @@ export async function setTahunAjaranAktif(id: number) {
   }
 }
 
-export async function setSemesterAktif(semesterId: number) {
+export async function toggleSemesterAktif(semesterId: number, targetState: boolean) {
   try {
     const session = await getSession()
     if (!session || session.role !== "SUPER_ADMIN") throw new Error("Unauthorized")
 
-    await prisma.$transaction([
-      // Matikan semua semester
-      prisma.semester.updateMany({
-        where: { isActive: true },
-        data: { isActive: false }
-      }),
-      // Hidupkan semester yang dipilih
-      prisma.semester.update({
+    if (targetState) {
+      await prisma.$transaction([
+        // Matikan semua semester
+        prisma.semester.updateMany({
+          where: { isActive: true },
+          data: { isActive: false }
+        }),
+        // Hidupkan semester yang dipilih
+        prisma.semester.update({
+          where: { id: semesterId },
+          data: { isActive: true }
+        })
+      ])
+    } else {
+      // Nonaktifkan saja
+      await prisma.semester.update({
         where: { id: semesterId },
-        data: { isActive: true }
+        data: { isActive: false }
       })
-    ])
+    }
 
     return { success: true }
   } catch (error: any) {

@@ -301,7 +301,13 @@ export function GuruClient({ initialData, jenjangList }: { initialData: GuruType
         </div>
         <Select value={filterJenjang} onValueChange={(val) => setFilterJenjang(val || "ALL")}>
           <SelectTrigger className="w-full sm:w-[180px] bg-slate-50">
-            <SelectValue placeholder="Filter Jenjang" />
+            <SelectValue placeholder="Filter Jenjang">
+              {(val: string) => {
+                if (val === "ALL") return "Semua Jenjang"
+                const j = jenjangList.find(jen => jen.id.toString() === val)
+                return j ? j.nama : "Filter Jenjang"
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">Semua Jenjang</SelectItem>
@@ -312,7 +318,14 @@ export function GuruClient({ initialData, jenjangList }: { initialData: GuruType
         </Select>
         <Select value={filterGender} onValueChange={(val) => setFilterGender(val || "ALL")}>
           <SelectTrigger className="w-full sm:w-[160px] bg-slate-50">
-            <SelectValue placeholder="Filter Jenis Kelamin" />
+            <SelectValue placeholder="Filter Jenis Kelamin">
+              {(val: string) => {
+                if (val === "ALL") return "Semua L/P"
+                if (val === "L") return "Laki-laki (L)"
+                if (val === "P") return "Perempuan (P)"
+                return "Filter Jenis Kelamin"
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">Semua L/P</SelectItem>
@@ -490,7 +503,13 @@ export function GuruClient({ initialData, jenjangList }: { initialData: GuruType
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Pilih L/P" />
+                            <SelectValue placeholder="Pilih L/P">
+                              {(val: string) => {
+                                if (val === "L") return "Laki-laki"
+                                if (val === "P") return "Perempuan"
+                                return "Pilih L/P"
+                              }}
+                            </SelectValue>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
