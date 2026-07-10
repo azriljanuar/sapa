@@ -83,6 +83,10 @@ export function GuruProfilClient({ guru, templateKartu }: { guru: any, templateK
     } catch (error) {
       alert("Terjadi kesalahan saat memperbarui profil.")
     } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return
     const file = e.target.files[0]
