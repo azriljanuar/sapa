@@ -246,16 +246,18 @@ export function KartuIdentitasClient() {
           </DialogHeader>
             
             <div className="p-8 overflow-y-auto flex-1 flex flex-col items-center">
-              <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
-                <div className="flex flex-col items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-500">Tampak Depan</span>
-                  {renderCardPreviewFront(previewUser.user, previewUser.tipe, activeTemplate, frontRef)}
+              {previewUser && (
+                <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-500">Tampak Depan</span>
+                    {renderCardPreviewFront(previewUser.user, previewUser.tipe, activeTemplate, frontRef)}
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-500">Tampak Belakang</span>
+                    {renderCardPreviewBack(previewUser.user, previewUser.tipe, activeTemplate, backRef)}
+                  </div>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-500">Tampak Belakang</span>
-                  {renderCardPreviewBack(previewUser.user, previewUser.tipe, activeTemplate, backRef)}
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="p-4 border-t bg-white flex justify-end gap-3">
