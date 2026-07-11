@@ -130,14 +130,15 @@ export async function getTemplateKartuAction() {
 
   const santri = await prisma.santri.findUnique({
     where: { id: session.id },
+    include: { jenjangs: true }
   })
 
-  if (!santri || !santri.jenjangId) return null
+  if (!santri || santri.jenjangs.length === 0) return null
 
   return prisma.templateKartu.findUnique({
     where: {
       jenjangId_tipe: {
-        jenjangId: santri.jenjangId,
+        jenjangId: santri.jenjangs[0].jenjangId,
         tipe: "SANTRI"
       }
     }
