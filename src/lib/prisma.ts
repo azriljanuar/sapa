@@ -19,6 +19,7 @@ function createPrismaClient() {
     database,
     connectionLimit: 5,
     connectTimeout: 10000,
+    allowPublicKeyRetrieval: true,
     ssl: parsed.searchParams.get("ssl-mode") === "REQUIRED" ? { rejectUnauthorized: false } : undefined
   })
 
