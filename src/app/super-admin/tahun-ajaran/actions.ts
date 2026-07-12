@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
+import { revalidatePath } from "next/cache"
 
 export async function createTahunAjaran(formData: FormData) {
   try {
@@ -60,6 +61,7 @@ export async function createTahunAjaran(formData: FormData) {
       }
     }
 
+    revalidatePath("/super-admin/tahun-ajaran")
     return { success: true }
   } catch (error: any) {
     return { error: error.message || "Terjadi kesalahan" }
@@ -100,6 +102,7 @@ export async function deleteTahunAjaran(id: number) {
       prisma.tahunAjaran.delete({ where: { id } })
     ])
 
+    revalidatePath("/super-admin/tahun-ajaran")
     return { success: true }
   } catch (error: any) {
     return { error: error.message || "Terjadi kesalahan" }
@@ -132,6 +135,7 @@ export async function toggleTahunAjaranAktif(id: number, targetState: boolean) {
       })
     }
 
+    revalidatePath("/super-admin/tahun-ajaran")
     return { success: true }
   } catch (error: any) {
     return { error: error.message || "Terjadi kesalahan" }
@@ -164,6 +168,7 @@ export async function toggleSemesterAktif(semesterId: number, targetState: boole
       })
     }
 
+    revalidatePath("/super-admin/tahun-ajaran")
     return { success: true }
   } catch (error: any) {
     return { error: error.message || "Terjadi kesalahan" }

@@ -84,6 +84,29 @@ export async function POST(request: Request) {
       }
     }
 
+    // 3. Cek di tabel User (Admin Jenjang / Super Admin) (berdasarkan Email atau Nama)
+    const admin = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { nama: identifier }
+        ]
+      }
+    })
+
+    if (admin) {
+      const isPasswordValid = bcrypt.compareSync(password, admin.password)
+      if (isPasswordValid) {
+        // Hilangkan password sebelum dikembalikan
+        const { password: _, ...userWithoutPassword } = admin
+        return NextResponse.json({
+          success: true,
+          type: admin.role, // Akan mengembalikan "SUPER_ADMIN" atau "ADMIN_JENJANG"
+          user: userWithoutPassword
+        })
+      }
+    }
+
     // Jika sampai di sini, berarti identifier tidak ditemukan ATAU password salah
     return NextResponse.json(
       { success: false, message: "Username atau Password salah." },
