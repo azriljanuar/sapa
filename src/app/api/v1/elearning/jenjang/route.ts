@@ -11,8 +11,7 @@ export async function GET(request: Request) {
       select: {
         id: true,
         nama: true,
-        singkatan: true,
-        deskripsi: true
+        singkatan: true
       },
       orderBy: {
         id: 'asc'
