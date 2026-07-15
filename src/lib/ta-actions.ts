@@ -2,10 +2,10 @@
 
 import { cookies } from "next/headers"
 
-export async function setSelectedTahunAjaran(taId: number) {
+export async function setSelectedSemesterCookie(semesterId: number) {
   const cookieStore = await cookies()
   // Simpan selama 30 hari
-  cookieStore.set("selected_ta_id", taId.toString(), {
+  cookieStore.set("selected_semester_id", semesterId.toString(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

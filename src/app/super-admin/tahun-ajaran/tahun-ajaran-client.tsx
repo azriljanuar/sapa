@@ -115,81 +115,63 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
             <TableRow>
               <TableHead className="w-[80px]">ID</TableHead>
               <TableHead>Tahun Ajaran</TableHead>
-              <TableHead>Status TA</TableHead>
-              <TableHead>Semester Ganjil</TableHead>
-              <TableHead>Semester Genap</TableHead>
+              <TableHead>Status Global (Default)</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.length > 0 ? (
-              data.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium text-slate-500">{item.id}</TableCell>
-                  <TableCell className="font-bold text-slate-900">{item.nama}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Switch 
-                        checked={item.isActive} 
-                        onCheckedChange={(checked) => handleToggleAktifTA(item.id, checked)} 
-                      />
-                      <span className={`text-sm font-medium ${item.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        {item.isActive ? 'Aktif' : 'Tidak Aktif'}
-                      </span>
-                    </div>
-                  </TableCell>
-                  {/* Semester Ganjil */}
-                  <TableCell>
-                    {(() => {
-                      const sem = item.semester.find(s => s.nama === "GANJIL")
-                      if (!sem) return "-"
-                      return (
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={sem.isActive} 
-                            onCheckedChange={(checked) => handleToggleAktifSemester(sem.id, checked)} 
-                          />
-                          <span className={`text-sm font-medium ${sem.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-                            {sem.isActive ? 'Aktif' : 'Tidak Aktif'}
-                          </span>
+              data.map((item) => {
+                const activeSem = item.semester.find(s => s.isActive)
+                const isTaActive = item.isActive
+                
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium text-slate-500">{item.id}</TableCell>
+                    <TableCell className="font-bold text-slate-900">{item.nama}</TableCell>
+                    <TableCell>
+                      {isTaActive && activeSem ? (
+                        <Badge className="bg-emerald-500 hover:bg-emerald-600">
+                          Aktif ({activeSem.nama})
+                        </Badge>
+                      ) : (
+                        <div className="flex gap-2">
+                          {item.semester.map(sem => (
+                            <Button 
+                              key={sem.id}
+                              variant="outline" 
+                              size="sm"
+                              className="text-xs h-7"
+                              onClick={async () => {
+                                if(confirm(`Jadikan ${item.nama} - ${sem.nama} sebagai Default Global?`)) {
+                                  await handleToggleAktifTA(item.id, true)
+                                  await handleToggleAktifSemester(sem.id, true)
+                                }
+                              }}
+                            >
+                              Set {sem.nama}
+                            </Button>
+                          ))}
                         </div>
-                      )
-                    })()}
-                  </TableCell>
-                  {/* Semester Genap */}
-                  <TableCell>
-                    {(() => {
-                      const sem = item.semester.find(s => s.nama === "GENAP")
-                      if (!sem) return "-"
-                      return (
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            checked={sem.isActive} 
-                            onCheckedChange={(checked) => handleToggleAktifSemester(sem.id, checked)} 
-                          />
-                          <span className={`text-sm font-medium ${sem.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-                            {sem.isActive ? 'Aktif' : 'Tidak Aktif'}
-                          </span>
-                        </div>
-                      )
-                    })()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={item.isActive}
-                      className={item.isActive ? "opacity-50" : "text-destructive hover:text-destructive hover:bg-destructive/10"}
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={item.isActive}
+                        className={item.isActive ? "opacity-50" : "text-destructive hover:text-destructive hover:bg-destructive/10"}
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-slate-500">
+                <TableCell colSpan={4} className="h-32 text-center text-slate-500">
                   Belum ada data Tahun Ajaran.
                 </TableCell>
               </TableRow>

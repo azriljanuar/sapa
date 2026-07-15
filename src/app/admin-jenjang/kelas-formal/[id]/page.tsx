@@ -100,18 +100,19 @@ export default async function KelasFormalDetailPage({ params }: { params: Promis
     statusMukim: s.jenjangs[0]?.statusMukim || false
   }))
 
-  // Fetch data Tahun Ajaran Aktif untuk logika Kenaikan Kelas
-  const { getSelectedTahunAjaran } = await import("@/lib/ta-context")
-  const activeTa = await getSelectedTahunAjaran()
+  // Fetch data Semester Aktif/Context untuk logika Kenaikan Kelas
+  const { getSelectedSemester } = await import("@/lib/ta-context")
+  const activeSem = await getSelectedSemester()
+  const activeTa = activeSem?.tahunAjaran
   
   let canPromote = false
   let canGraduate = false
   let nextTaId: number | null = null
   let nextTaClasses: { id: number; namaKelas: string }[] = []
   
-  // Jika kelas ini berada di TA aktif, dan TA aktif sedang di semester GENAP
-  if (activeTa && kelas.tahunAjaranId === activeTa.id) {
-    const isGenap = activeTa.semester.some(s => s.isActive && s.nama === "GENAP")
+  // Jika kelas ini berada di TA yang sedang dipilih, dan semester yang dipilih adalah GENAP
+  if (activeTa && activeSem && kelas.tahunAjaranId === activeTa.id) {
+    const isGenap = activeSem.nama === "GENAP"
     
     if (isGenap) {
       canGraduate = true // Di semester genap, kelas manapun bisa diluluskan jika admin menghendaki

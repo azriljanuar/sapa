@@ -8,58 +8,82 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { setSelectedTahunAjaran } from "@/lib/ta-actions"
+import { setSelectedSemesterCookie } from "@/lib/ta-actions"
 
-type TaType = {
+type SemesterType = {
   id: number
   nama: string
   isActive: boolean
 }
 
+type TaType = {
+  id: number
+  nama: string
+  isActive: boolean
+  semester: SemesterType[]
+}
+
 export function TaSwitcher({
   tahunAjarans,
-  selectedId,
+  selectedSemesterId,
 }: {
   tahunAjarans: TaType[]
-  selectedId: number
+  selectedSemesterId: number | null
 }) {
   const [isPending, startTransition] = React.useTransition()
-  const selectedTa = tahunAjarans.find((ta) => ta.id === selectedId)
+
+  // Build a flat list of options
+  const options = tahunAjarans.flatMap((ta) => 
+    ta.semester.map((sem) => ({
+      id: sem.id,
+      label: `${ta.nama} - ${sem.nama}`,
+      isTaActive: ta.isActive,
+      isSemActive: sem.isActive
+    }))
+  )
+
+  const selectedOption = options.find((opt) => opt.id === selectedSemesterId)
 
   const handleChange = (val: string | null) => {
     if (!val) return
     startTransition(async () => {
-      await setSelectedTahunAjaran(Number(val))
+      await setSelectedSemesterCookie(Number(val))
       window.location.reload()
     })
   }
 
+  if (options.length === 0) {
+    return (
+      <div className="text-xs text-muted-foreground">Belum ada Tahun Ajaran</div>
+    )
+  }
+
   return (
     <Select 
-      value={selectedId.toString()} 
+      value={selectedSemesterId ? selectedSemesterId.toString() : ""} 
       onValueChange={handleChange}
       disabled={isPending}
     >
-      <SelectTrigger className="w-[180px] h-9 bg-white shadow-sm font-semibold border-slate-200">
+      <SelectTrigger className="w-[220px] h-9 bg-white shadow-sm font-semibold border-slate-200">
         <SelectValue>
-          {selectedTa ? (
+          {selectedOption ? (
             <span className="flex items-center gap-2">
-              <span className="text-emerald-700">{selectedTa.nama}</span>
-              {selectedTa.isActive && (
-                <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" title="Tahun Ajaran Aktif"></span>
+              <span className="text-emerald-700">{selectedOption.label}</span>
+              {(selectedOption.isTaActive && selectedOption.isSemActive) && (
+                <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" title="Semester Aktif"></span>
               )}
             </span>
           ) : (
-            "Pilih Tahun Ajaran"
+            "Pilih Semester"
           )}
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {tahunAjarans.map((ta) => (
-          <SelectItem key={ta.id} value={ta.id.toString()}>
+        {options.map((opt) => (
+          <SelectItem key={opt.id} value={opt.id.toString()}>
             <div className="flex items-center gap-2">
-              <span>{ta.nama}</span>
-              {ta.isActive && (
+              <span>{opt.label}</span>
+              {(opt.isTaActive && opt.isSemActive) && (
                 <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-sm font-semibold">
                   Aktif
                 </span>

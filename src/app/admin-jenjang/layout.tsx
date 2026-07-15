@@ -1,5 +1,4 @@
 import { type ReactNode } from "react"
-import { cookies } from "next/headers"
 import prisma from "@/lib/prisma"
 import { getLoggedInAdminJenjang } from "@/lib/auth"
 import { AdminJenjangLayoutClient } from "./admin-jenjang-layout-client"
@@ -10,25 +9,18 @@ export default async function AdminJenjangLayout({ children }: { children: React
   const admin = await getLoggedInAdminJenjang()
   
   const allTa = await prisma.tahunAjaran.findMany({
+    include: { semester: true },
     orderBy: { nama: 'desc' }
   })
   
-  const cookieStore = await cookies()
-  const cookieTaId = cookieStore.get("selected_ta_id")?.value
-  
-  let activeTaId = null
-  if (cookieTaId) {
-    activeTaId = Number(cookieTaId)
-  } else {
-    const activeTa = allTa.find(ta => ta.isActive)
-    if (activeTa) activeTaId = activeTa.id
-  }
+  const { getSelectedSemester } = await import("@/lib/ta-context")
+  const selectedSem = await getSelectedSemester()
 
   return (
     <AdminJenjangLayoutClient 
       admin={admin} 
-      allTa={allTa} 
-      activeTaId={activeTaId}
+      allTa={allTa as any} 
+      activeSemesterId={selectedSem?.id || null}
     >
       {children}
     </AdminJenjangLayoutClient>

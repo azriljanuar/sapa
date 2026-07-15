@@ -1,28 +1,50 @@
 import { cookies } from "next/headers"
 import prisma from "./prisma"
 
-export async function getSelectedTahunAjaran() {
+export async function getSelectedSemester() {
   const cookieStore = await cookies()
-  const taIdCookie = cookieStore.get("selected_ta_id")?.value
+  const semIdCookie = cookieStore.get("selected_semester_id")?.value
 
-  // Jika user punya preferensi TA di cookie
-  if (taIdCookie) {
-    const taId = parseInt(taIdCookie)
-    if (!isNaN(taId)) {
-      const ta = await prisma.tahunAjaran.findUnique({
-        where: { id: taId },
-        include: { semester: true }
+  // Jika user punya preferensi Semester di cookie
+  if (semIdCookie) {
+    const semId = parseInt(semIdCookie)
+    if (!isNaN(semId)) {
+      const semester = await prisma.semester.findUnique({
+        where: { id: semId },
+        include: { tahunAjaran: { include: { semester: true } } }
       })
-      if (ta) return ta
+      if (semester) return semester
     }
   }
 
-  // Jika tidak ada di cookie, atau TA di cookie sudah terhapus, gunakan yang aktif secara global
+  // Fallback: Cari Tahun Ajaran yang aktif, lalu ambil semester aktifnya
   const activeTa = await prisma.tahunAjaran.findFirst({
     where: { isActive: true },
     include: { semester: true },
     orderBy: { nama: 'desc' }
   })
 
-  return activeTa
+  if (activeTa && activeTa.semester.length > 0) {
+    const activeSem = activeTa.semester.find(s => s.isActive) || activeTa.semester[0]
+    return {
+      ...activeSem,
+      tahunAjaran: activeTa
+    }
+  }
+
+  return null
+}
+
+export async function getSelectedTahunAjaran() {
+  const semester = await getSelectedSemester()
+  if (semester && semester.tahunAjaran) {
+    return semester.tahunAjaran
+  }
+  
+  // Fallback jika tidak ada semester sama sekali
+  return await prisma.tahunAjaran.findFirst({
+    where: { isActive: true },
+    include: { semester: true },
+    orderBy: { nama: 'desc' }
+  })
 }

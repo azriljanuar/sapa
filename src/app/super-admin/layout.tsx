@@ -13,8 +13,12 @@ import { getSelectedTahunAjaran } from "@/lib/ta-context"
 export const dynamic = 'force-dynamic'
 
 export default async function SuperAdminLayout({ children }: { children: ReactNode }) {
-  const tahunAjarans = await prisma.tahunAjaran.findMany({ orderBy: { nama: 'desc' } })
-  const selectedTa = await getSelectedTahunAjaran()
+  const tahunAjarans = await prisma.tahunAjaran.findMany({ 
+    include: { semester: true },
+    orderBy: { nama: 'desc' } 
+  })
+  const { getSelectedSemester } = await import("@/lib/ta-context")
+  const selectedSem = await getSelectedSemester()
 
   return (
     <div className="min-h-screen bg-slate-50 text-foreground flex flex-col md:flex-row">
@@ -133,9 +137,7 @@ export default async function SuperAdminLayout({ children }: { children: ReactNo
           </div>
           
           <div className="flex items-center gap-4">
-            {selectedTa && (
-              <TaSwitcher tahunAjarans={tahunAjarans} selectedId={selectedTa.id} />
-            )}
+            <TaSwitcher tahunAjarans={tahunAjarans} selectedSemesterId={selectedSem?.id || null} />
             
             <button className="p-2 text-slate-600 hover:text-slate-900 relative rounded-full hover:bg-slate-200/50 transition-colors">
               <Bell className="h-5 w-5" />

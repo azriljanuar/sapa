@@ -23,13 +23,8 @@ export default async function JadwalPelajaranPage() {
     )
   }
 
-  // Get active Semester
-  const activeSemester = await prisma.semester.findFirst({
-    where: { 
-      tahunAjaranId: activeTa.id,
-      isActive: true
-    }
-  })
+  const { getSelectedSemester } = await import("@/lib/ta-context")
+  const activeSemester = await getSelectedSemester()
 
   // Get Kelas Formal
   const kelasFormalList = await prisma.kelasFormal.findMany({

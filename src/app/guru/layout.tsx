@@ -27,11 +27,15 @@ export default async function GuruLayout({ children }: { children: ReactNode }) 
     redirect("/login")
   }
 
-  const tahunAjarans = await prisma.tahunAjaran.findMany({ orderBy: { nama: 'desc' } })
-  const selectedTa = await getSelectedTahunAjaran()
+  const tahunAjarans = await prisma.tahunAjaran.findMany({ 
+    include: { semester: true },
+    orderBy: { nama: 'desc' } 
+  })
+  const { getSelectedSemester } = await import("@/lib/ta-context")
+  const selectedSem = await getSelectedSemester()
 
   return (
-    <GuruLayoutClient guru={guru} tahunAjarans={tahunAjarans} activeTaId={selectedTa?.id || null}>
+    <GuruLayoutClient guru={guru} tahunAjarans={tahunAjarans as any} activeSemesterId={selectedSem?.id || null}>
       {children}
     </GuruLayoutClient>
   )

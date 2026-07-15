@@ -18,12 +18,12 @@ export function AdminJenjangLayoutClient({
   children,
   admin,
   allTa,
-  activeTaId
+  activeSemesterId
 }: {
   children: React.ReactNode
   admin: any
   allTa: any[]
-  activeTaId: number | null
+  activeSemesterId: number | null
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
@@ -170,8 +170,8 @@ export function AdminJenjangLayoutClient({
           </div>
           
           <div className="flex items-center gap-4">
-            {activeTaId && (
-              <TaSwitcher tahunAjarans={allTa} selectedId={activeTaId} />
+            {activeSemesterId && (
+              <TaSwitcher tahunAjarans={allTa} selectedSemesterId={activeSemesterId} />
             )}
             
             <button className="p-2 text-slate-600 hover:text-slate-900 relative rounded-full hover:bg-slate-200/50 transition-colors">
