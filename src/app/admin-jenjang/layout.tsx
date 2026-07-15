@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma"
 import { getLoggedInAdminJenjang } from "@/lib/auth"
 import { AdminJenjangLayoutClient } from "./admin-jenjang-layout-client"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminJenjangLayout({ children }: { children: ReactNode }) {
   const admin = await getLoggedInAdminJenjang()
   

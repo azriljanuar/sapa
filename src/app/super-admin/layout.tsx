@@ -6,6 +6,8 @@ import { buttonVariants } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
+export const dynamic = 'force-dynamic'
+
 export default function SuperAdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-50 text-foreground flex flex-col md:flex-row">
