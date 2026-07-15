@@ -25,14 +25,13 @@ export default async function PengampuMapelPage({
   }
 
   // Cari Tahun Ajaran aktif
-  const activeTa = await prisma.tahunAjaran.findFirst({
-    where: { isActive: true }
-  })
+  const { getSelectedTahunAjaran } = await import("@/lib/ta-context")
+  const activeTa = await getSelectedTahunAjaran()
 
   if (!activeTa) {
     return (
       <div className="p-6 bg-red-50 text-red-600 rounded-lg">
-        Belum ada Tahun Ajaran yang aktif. Silakan hubungi Super Admin.
+        Belum ada Tahun Ajaran. Silakan hubungi Super Admin.
       </div>
     )
   }

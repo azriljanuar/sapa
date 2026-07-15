@@ -101,10 +101,8 @@ export default async function KelasFormalDetailPage({ params }: { params: Promis
   }))
 
   // Fetch data Tahun Ajaran Aktif untuk logika Kenaikan Kelas
-  const activeTa = await prisma.tahunAjaran.findFirst({
-    where: { isActive: true },
-    include: { semester: true }
-  })
+  const { getSelectedTahunAjaran } = await import("@/lib/ta-context")
+  const activeTa = await getSelectedTahunAjaran()
   
   let canPromote = false
   let canGraduate = false

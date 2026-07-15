@@ -4,6 +4,10 @@ import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { GuruLayoutClient } from "./guru-layout-client"
 
+import { getSelectedTahunAjaran } from "@/lib/ta-context"
+
+export const dynamic = 'force-dynamic'
+
 export default async function GuruLayout({ children }: { children: ReactNode }) {
   const session = await getSession()
   
@@ -23,8 +27,11 @@ export default async function GuruLayout({ children }: { children: ReactNode }) 
     redirect("/login")
   }
 
+  const tahunAjarans = await prisma.tahunAjaran.findMany({ orderBy: { nama: 'desc' } })
+  const selectedTa = await getSelectedTahunAjaran()
+
   return (
-    <GuruLayoutClient guru={guru}>
+    <GuruLayoutClient guru={guru} tahunAjarans={tahunAjarans} activeTaId={selectedTa?.id || null}>
       {children}
     </GuruLayoutClient>
   )

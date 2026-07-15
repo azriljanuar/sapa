@@ -9,7 +9,7 @@ import {
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { TaSelector } from "./ta-selector"
+import { TaSwitcher } from "@/components/ta-switcher"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -79,10 +79,6 @@ export function AdminJenjangLayoutClient({
         </div>
 
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
-          <div className="px-2">
-            <TaSelector items={allTa} currentTaId={activeTaId} />
-          </div>
-
           <div>
             <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
               Overview
@@ -174,6 +170,10 @@ export function AdminJenjangLayoutClient({
           </div>
           
           <div className="flex items-center gap-4">
+            {activeTaId && (
+              <TaSwitcher tahunAjarans={allTa} selectedId={activeTaId} />
+            )}
+            
             <button className="p-2 text-slate-600 hover:text-slate-900 relative rounded-full hover:bg-slate-200/50 transition-colors">
               <Bell className="h-5 w-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>

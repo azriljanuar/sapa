@@ -6,9 +6,16 @@ import { buttonVariants } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
+import { TaSwitcher } from "@/components/ta-switcher"
+import prisma from "@/lib/prisma"
+import { getSelectedTahunAjaran } from "@/lib/ta-context"
+
 export const dynamic = 'force-dynamic'
 
-export default function SuperAdminLayout({ children }: { children: ReactNode }) {
+export default async function SuperAdminLayout({ children }: { children: ReactNode }) {
+  const tahunAjarans = await prisma.tahunAjaran.findMany({ orderBy: { nama: 'desc' } })
+  const selectedTa = await getSelectedTahunAjaran()
+
   return (
     <div className="min-h-screen bg-slate-50 text-foreground flex flex-col md:flex-row">
       {/* Sidebar - Hidden on very small screens, fixed width on md+ */}
@@ -126,6 +133,10 @@ export default function SuperAdminLayout({ children }: { children: ReactNode }) 
           </div>
           
           <div className="flex items-center gap-4">
+            {selectedTa && (
+              <TaSwitcher tahunAjarans={tahunAjarans} selectedId={selectedTa.id} />
+            )}
+            
             <button className="p-2 text-slate-600 hover:text-slate-900 relative rounded-full hover:bg-slate-200/50 transition-colors">
               <Bell className="h-5 w-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>

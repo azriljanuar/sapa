@@ -11,13 +11,18 @@ import {
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { TaSwitcher } from "@/components/ta-switcher"
 
 export function GuruLayoutClient({ 
   children,
   guru,
+  tahunAjarans,
+  activeTaId,
 }: {
   children: React.ReactNode
   guru: any
+  tahunAjarans: any[]
+  activeTaId: number | null
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
@@ -152,6 +157,10 @@ export function GuruLayoutClient({
           </div>
           
           <div className="flex items-center gap-4">
+            {activeTaId && (
+              <TaSwitcher tahunAjarans={tahunAjarans} selectedId={activeTaId} />
+            )}
+            
             <button className="p-2 text-slate-600 hover:text-slate-900 relative rounded-full hover:bg-slate-200/50 transition-colors">
               <Bell className="h-5 w-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>

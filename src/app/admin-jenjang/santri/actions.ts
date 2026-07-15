@@ -277,9 +277,8 @@ export async function importSantriExcel(formData: FormData) {
       throw new Error("Gagal mendeteksi kolom NISN dan Nama di semua sheet Excel. Pastikan file memiliki header tersebut.")
     }
 
-    const activeTA = await prisma.tahunAjaran.findFirst({
-      where: { isActive: true }
-    })
+    const { getSelectedTahunAjaran } = await import("@/lib/ta-context")
+    const activeTA = await getSelectedTahunAjaran()
 
     const allClasses = activeTA ? await prisma.kelasFormal.findMany({
       where: { jenjangId: admin.jenjangId, tahunAjaranId: activeTA.id }

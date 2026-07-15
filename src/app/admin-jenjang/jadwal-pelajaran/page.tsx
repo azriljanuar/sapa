@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { JadwalClient } from "./jadwal-client"
+import { getSelectedTahunAjaran } from "@/lib/ta-context"
 
 export default async function JadwalPelajaranPage() {
   const session = await getSession()
@@ -9,16 +10,14 @@ export default async function JadwalPelajaranPage() {
     redirect("/login")
   }
 
-  // Get active TA
-  const activeTa = await prisma.tahunAjaran.findFirst({
-    where: { isActive: true }
-  })
+  // Get selected TA from context
+  const activeTa = await getSelectedTahunAjaran()
 
   if (!activeTa) {
     return (
       <div className="p-6">
         <div className="p-6 bg-red-50 text-red-600 rounded-lg">
-          Belum ada Tahun Ajaran yang aktif. Silakan hubungi Super Admin.
+          Belum ada Tahun Ajaran. Silakan hubungi Super Admin.
         </div>
       </div>
     )
