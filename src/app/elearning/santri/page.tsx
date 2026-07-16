@@ -1,15 +1,19 @@
 import { getSession } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import Link from "next/link"
-import { BookOpen, Calendar, ArrowRight, PlayCircle, Clock } from "lucide-react"
+import { 
+  BookOpen, FileText, ArrowRight, TrendingUp,
+  GraduationCap, Star, Sparkles
+} from "lucide-react"
 
 export default async function SantriDashboard() {
   const session = await getSession()
   
-  // Get active TA
-  const activeTA = await prisma.tahunAjaran.findFirst({ orderBy: { nama: 'desc' }, include: { semester: true } })
+  const activeTA = await prisma.tahunAjaran.findFirst({ 
+    orderBy: { nama: 'desc' }, 
+    include: { semester: true } 
+  })
 
-  // Cari kelas formal si santri
   const riwayatKelas = await prisma.riwayatKelas.findFirst({
     where: { 
       santriId: session?.id,
@@ -36,94 +40,126 @@ export default async function SantriDashboard() {
 
   const kelas = riwayatKelas?.kelasFormal
   const pengampuList = kelas?.pengampu || []
+  const totalMateri = pengampuList.reduce((a, p) => a + p._count.materiBelajar, 0)
+  const totalTugas = pengampuList.reduce((a, p) => a + p._count.tugas, 0)
 
-  // Count pending tugas (simple naive count, we'll implement real one later)
-  const pendingTugas = pengampuList.reduce((acc, p) => acc + p._count.tugas, 0)
+  const namaSantri = session?.email.split('@')[0] || 'Santri'
 
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden">
-        <div className="relative z-10">
-          <h2 className="text-3xl font-bold mb-3">Selamat belajar, {session?.email}! 🚀</h2>
-          <p className="text-emerald-100 max-w-xl text-lg mb-6">
-            Terus tingkatkan prestasimu. Saat ini kamu berada di {kelas ? kelas.namaKelas : "Belum ada kelas"} 
-            pada Tahun Ajaran {activeTA?.nama}.
-          </p>
-          <div className="flex gap-4">
-            <Link href="/elearning/santri/tugas" className="bg-white text-emerald-700 px-6 py-3 rounded-xl font-bold shadow hover:bg-emerald-50 transition">
-              Lihat Tugas ({pendingTugas})
+      <div className="relative bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-3xl p-8 md:p-10 text-white overflow-hidden shadow-xl">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-56 h-56 bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-400/20 rounded-full blur-3xl" />
+          <Sparkles className="absolute top-6 right-6 h-24 w-24 text-white/5" />
+        </div>
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Star className="h-4 w-4 text-yellow-300 fill-yellow-300" />
+              <span className="text-emerald-200 text-sm font-medium">Semangat belajar hari ini!</span>
+            </div>
+            <h2 className="text-3xl font-extrabold mb-2 capitalize">Halo, {namaSantri}! 🚀</h2>
+            <p className="text-emerald-200/80 max-w-md">
+              Kelas: <strong className="text-white">{kelas ? kelas.namaKelas : 'Belum ada kelas'}</strong>
+              {" · "}TA: <strong className="text-white">{activeTA?.nama || '-'}</strong>
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <Link 
+              href="/elearning/santri/tugas" 
+              className="bg-white text-emerald-700 hover:bg-emerald-50 px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-md"
+            >
+              <FileText className="h-4 w-4" />
+              Tugas Saya ({totalTugas})
             </Link>
           </div>
         </div>
-        {/* Decor */}
-        <div className="absolute right-0 top-0 w-64 h-full bg-white opacity-10 blur-3xl transform translate-x-1/2 rounded-full pointer-events-none"></div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold text-slate-800">Mata Pelajaran Kamu</h3>
-      </div>
-
-      {pengampuList.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500 shadow-sm">
-          Belum ada mata pelajaran yang ditambahkan di kelas kamu.
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pengampuList.map((p) => (
-            <div key={p.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all group flex flex-col">
-              <div className="h-28 bg-emerald-100 relative flex items-center justify-center">
-                <BookOpen className="h-12 w-12 text-emerald-300" />
-                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors"></div>
-              </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <div className="text-xs font-semibold text-emerald-600 mb-2 uppercase tracking-wider">
-                  Oleh: {p.guru.nama}
-                </div>
-                <h4 className="text-lg font-bold text-slate-900 mb-2 line-clamp-1">
-                  {p.mataPelajaran.nama}
-                </h4>
-                
-                <div className="flex items-center justify-between border-t pt-4 mt-auto">
-                  <div className="flex items-center text-xs text-slate-500 font-medium">
-                    <BookOpen className="h-4 w-4 mr-1 text-slate-400" /> {p._count.materiBelajar} Materi
-                  </div>
-                  <div className="flex items-center text-xs text-slate-500 font-medium text-amber-600">
-                    <FileText className="h-4 w-4 mr-1" /> {p._count.tugas} Tugas
-                  </div>
-                </div>
-              </div>
-              <Link href={`/elearning/santri/kelas/${p.id}`} className="bg-slate-50 p-3 text-center text-sm font-semibold text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors flex items-center justify-center gap-1 border-t border-slate-100">
-                Lihat Materi <ArrowRight className="h-4 w-4" />
-              </Link>
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Mata Pelajaran", value: pengampuList.length, icon: BookOpen, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Total Materi", value: totalMateri, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Total Tugas", value: totalTugas, icon: FileText, color: "text-orange-600", bg: "bg-orange-50" },
+          { label: "Guru Pengajar", value: pengampuList.length, icon: GraduationCap, color: "text-purple-600", bg: "bg-purple-50" },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all">
+            <div className={`h-10 w-10 ${stat.bg} rounded-xl flex items-center justify-center mb-3`}>
+              <stat.icon className={`h-5 w-5 ${stat.color}`} />
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+            <div className="text-3xl font-extrabold text-slate-800">{stat.value}</div>
+            <div className="text-sm text-slate-500 mt-0.5">{stat.label}</div>
+          </div>
+        ))}
+      </div>
 
-// Minimal stub component untuk fix TS error di atas
-function FileText(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" x2="8" y1="13" y2="13" />
-      <line x1="16" x2="8" y1="17" y2="17" />
-      <line x1="10" x2="8" y1="9" y2="9" />
-    </svg>
+      {/* Mata Pelajaran List */}
+      <div>
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-emerald-600" />
+            Mata Pelajaran Kamu
+          </h3>
+          <span className="text-sm text-slate-400">{pengampuList.length} mapel</span>
+        </div>
+
+        {pengampuList.length === 0 ? (
+          <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center shadow-sm">
+            <BookOpen className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500 font-medium">Belum ada mata pelajaran di kelas kamu</p>
+            <p className="text-slate-400 text-sm mt-1">Hubungi admin jika ini terjadi kesalahan</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {pengampuList.map((p) => (
+              <div key={p.id} className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex flex-col overflow-hidden">
+                {/* Color top */}
+                <div className="h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500" />
+                
+                {/* Icon area */}
+                <div className="h-24 bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-20">
+                    <BookOpen className="absolute -bottom-4 -right-4 h-20 w-20 text-emerald-300" />
+                  </div>
+                  <div className="relative z-10 h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-md">
+                    <BookOpen className="h-6 w-6 text-emerald-600" />
+                  </div>
+                </div>
+
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">
+                    Oleh: {p.guru.nama}
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-4 leading-tight group-hover:text-emerald-600 transition-colors">
+                    {p.mataPelajaran.nama}
+                  </h4>
+                  
+                  <div className="mt-auto grid grid-cols-2 gap-2 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <div className="text-center">
+                      <div className="text-xl font-extrabold text-slate-700">{p._count.materiBelajar}</div>
+                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mt-0.5">Materi</div>
+                    </div>
+                    <div className="text-center border-l border-slate-200">
+                      <div className="text-xl font-extrabold text-orange-600">{p._count.tugas}</div>
+                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mt-0.5">Tugas</div>
+                    </div>
+                  </div>
+                </div>
+
+                <Link 
+                  href={`/elearning/santri/kelas/${p.id}`} 
+                  className="flex items-center justify-center gap-2 py-3.5 text-sm font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors border-t border-emerald-100"
+                >
+                  Lihat Materi <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
