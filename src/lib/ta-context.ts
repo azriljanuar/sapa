@@ -17,15 +17,14 @@ export async function getSelectedSemester() {
     }
   }
 
-  // Fallback: Cari Tahun Ajaran yang aktif, lalu ambil semester aktifnya
+  // Fallback: Cari Tahun Ajaran terbaru (karena isActive ditiadakan)
   const activeTa = await prisma.tahunAjaran.findFirst({
-    where: { isActive: true },
     include: { semester: true },
     orderBy: { nama: 'desc' }
   })
 
   if (activeTa && activeTa.semester.length > 0) {
-    const activeSem = activeTa.semester.find(s => s.isActive) || activeTa.semester[0]
+    const activeSem = activeTa.semester[0] // Ambil semester pertama (misal GANJIL)
     return {
       ...activeSem,
       tahunAjaran: activeTa
@@ -43,7 +42,6 @@ export async function getSelectedTahunAjaran() {
   
   // Fallback jika tidak ada semester sama sekali
   return await prisma.tahunAjaran.findFirst({
-    where: { isActive: true },
     include: { semester: true },
     orderBy: { nama: 'desc' }
   })
