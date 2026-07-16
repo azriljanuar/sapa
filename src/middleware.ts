@@ -38,17 +38,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Jika user sudah login dan mengakses halaman login, redirect ke halaman sesuai role
+  // Jika user sudah login dan mengakses halaman login, redirect ke halaman utama (Landing Page / Portal)
   if (isAuthPage && session) {
     try {
-      const { payload } = await jwtVerify(session, encodedKey, {
+      await jwtVerify(session, encodedKey, {
         algorithms: ["HS256"],
       })
-      if (payload.role === "SUPER_ADMIN") {
-        return NextResponse.redirect(new URL("/super-admin", request.url))
-      } else if (payload.role === "ADMIN_JENJANG") {
-        return NextResponse.redirect(new URL("/admin-jenjang", request.url))
-      }
+      return NextResponse.redirect(new URL("/", request.url))
     } catch (error) {
       // Biarkan di halaman login jika token rusak
     }
@@ -58,5 +54,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin-jenjang/:path*", "/super-admin/:path*", "/login"],
+  matcher: ["/admin-jenjang/:path*", "/super-admin/:path*", "/guru/:path*", "/santri/:path*", "/elearning/:path*", "/login"],
 }

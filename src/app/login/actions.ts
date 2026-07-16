@@ -12,8 +12,6 @@ const loginSchema = z.object({
 })
 
 export async function loginAction(prevState: unknown, formData: FormData) {
-  let roleToRedirect = ""
-
   try {
     const rawData = {
       username: formData.get("username") as string,
@@ -37,7 +35,6 @@ export async function loginAction(prevState: unknown, formData: FormData) {
         role: user.role,
         jenjangId: user.jenjangId,
       })
-      roleToRedirect = user.role
     } 
     else {
       // 2. Cek tabel Guru (Login pakai Email)
@@ -55,35 +52,71 @@ export async function loginAction(prevState: unknown, formData: FormData) {
           role: "GURU",
           jenjangId: null, // Guru bisa m2m, jenjang di-handle terpisah
         })
-        roleToRedirect = "GURU"
       }
       else {
-        // Cek apakah ini percobaan login Santri (yang pindah ke halaman khusus)
+        // 3. Cek tabel Santri (Login pakai NISN)
         const santri = await prisma.santri.findFirst({
           where: { nisn: validated.username }
         })
+        
         if (santri) {
-          return { error: "Akun Santri tidak bisa login di sini. Silakan gunakan portal Login Santri." }
+          const passwordMatch = await bcrypt.compare(validated.password, santri.password)
+          if (!passwordMatch) return { error: "Username atau password salah." }
+          
+          await createSession({
+            id: santri.id,
+            email: santri.nisn,
+            role: "SANTRI",
+            jenjangId: null,
+          })
+        } else {
+          return { error: "Username atau password salah." }
         }
-
-        return { error: "Username atau password salah." }
       }
     }
     
   } catch (error) {
     if (error instanceof Error) return { error: error.message }
+    return { error: "Terjadi kesalahan" }
   }
 
-  // Redirect based on role
-  if (roleToRedirect === "SUPER_ADMIN") redirect("/super-admin")
-  else if (roleToRedirect === "ADMIN_JENJANG") redirect("/admin-jenjang")
-  else if (roleToRedirect === "GURU") redirect("/guru")
-  else if (roleToRedirect === "SANTRI") redirect("/santri")
-  else redirect("/login")
+  // Redirect to unified portal (landing page)
+  redirect("/")
 }
 
 export async function logoutAction() {
   const { deleteSession } = await import("@/lib/auth")
   await deleteSession()
-  redirect("/login")
+  redirect("/")
+}
+
+export async function searchSantriAction(query: string) {
+  if (!query || query.length < 3) {
+    return { success: false, error: "Ketik minimal 3 huruf untuk mencari" }
+  }
+
+  try {
+    const results = await prisma.santri.findMany({
+      where: {
+        OR: [
+          { namaLengkap: { contains: query } },
+          { nisn: { contains: query } }
+        ]
+      },
+      select: {
+        nisn: true,
+        namaLengkap: true,
+        jenjangs: {
+          include: {
+            jenjang: true
+          }
+        }
+      },
+      take: 10
+    })
+
+    return { success: true, data: results }
+  } catch (error) {
+    return { success: false, error: "Gagal melakukan pencarian" }
+  }
 }
