@@ -69,9 +69,7 @@ export function TaSwitcher({
           {selectedOption ? (
             <span className="flex items-center gap-2">
               <span className="text-emerald-700">{selectedOption.label}</span>
-              {(selectedOption.isTaActive && selectedOption.isSemActive) && (
-                <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" title="Semester Aktif"></span>
-              )}
+
             </span>
           ) : (
             "Pilih Semester"
@@ -83,11 +81,6 @@ export function TaSwitcher({
           <SelectItem key={opt.id} value={opt.id.toString()}>
             <div className="flex items-center gap-2">
               <span>{opt.label}</span>
-              {(opt.isTaActive && opt.isSemActive) && (
-                <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-sm font-semibold">
-                  Aktif
-                </span>
-              )}
             </div>
           </SelectItem>
         ))}

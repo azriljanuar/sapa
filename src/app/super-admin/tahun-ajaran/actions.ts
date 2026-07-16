@@ -37,7 +37,7 @@ export async function createTahunAjaran(formData: FormData) {
 
     // Jika tidak ketemu berdasarkan nama, gunakan TA yang sedang aktif sebagai referensi
     if (!prevTa) {
-      prevTa = await prisma.tahunAjaran.findFirst({ where: { isActive: true } })
+      prevTa = await prisma.tahunAjaran.findFirst({ orderBy: { nama: 'desc' } })
     }
 
     if (prevTa) {
@@ -85,9 +85,8 @@ export async function deleteTahunAjaran(id: number) {
 
     if (!ta) throw new Error("Tahun ajaran tidak ditemukan")
 
-    if (ta.isActive) {
-      throw new Error("Tidak dapat menghapus Tahun Ajaran yang sedang aktif!")
-    }
+    // Kita tidak perlu lagi mengecek isActive, cukup pastikan tidak ada data siswa.
+
 
     // Cek apakah sudah ada anggota kelas di TA ini
     const hasSiswa = ta.kelasFormal.some(k => k.anggota.length > 0)
@@ -109,68 +108,3 @@ export async function deleteTahunAjaran(id: number) {
   }
 }
 
-export async function toggleTahunAjaranAktif(id: number, targetState: boolean) {
-  try {
-    const session = await getSession()
-    if (!session || session.role !== "SUPER_ADMIN") throw new Error("Unauthorized")
-
-    if (targetState) {
-      await prisma.$transaction([
-        // Matikan semua TA
-        prisma.tahunAjaran.updateMany({
-          where: { isActive: true },
-          data: { isActive: false }
-        }),
-        // Hidupkan TA yang dipilih
-        prisma.tahunAjaran.update({
-          where: { id },
-          data: { isActive: true }
-        })
-      ])
-    } else {
-      // Nonaktifkan saja
-      await prisma.tahunAjaran.update({
-        where: { id },
-        data: { isActive: false }
-      })
-    }
-
-    revalidatePath("/super-admin/tahun-ajaran")
-    return { success: true }
-  } catch (error: any) {
-    return { error: error.message || "Terjadi kesalahan" }
-  }
-}
-
-export async function toggleSemesterAktif(semesterId: number, targetState: boolean) {
-  try {
-    const session = await getSession()
-    if (!session || session.role !== "SUPER_ADMIN") throw new Error("Unauthorized")
-
-    if (targetState) {
-      await prisma.$transaction([
-        // Matikan semua semester
-        prisma.semester.updateMany({
-          where: { isActive: true },
-          data: { isActive: false }
-        }),
-        // Hidupkan semester yang dipilih
-        prisma.semester.update({
-          where: { id: semesterId },
-          data: { isActive: true }
-        })
-      ])
-    } else {
-      // Nonaktifkan saja
-      await prisma.semester.update({
-        where: { id: semesterId },
-        data: { isActive: false }
-      })
-    }
-
-    revalidatePath("/super-admin/tahun-ajaran")
-    return { success: true }
-  } catch (error: any) {
-    return { error: error.message || "Terjadi kesalahan" }
-  }
-}

@@ -42,14 +42,14 @@ export function TaSelector({
             {(val: string) => {
               const selectedItem = items.find(ta => ta.id.toString() === val)
               if (!selectedItem) return "Pilih Tahun Ajaran"
-              return selectedItem.isActive ? `${selectedItem.nama} (Aktif)` : selectedItem.nama
+              return selectedItem.nama
             }}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {items.map(ta => (
-            <SelectItem key={ta.id} value={ta.id.toString()} label={ta.isActive ? `${ta.nama} (Aktif)` : ta.nama}>
-              {ta.isActive ? `${ta.nama} (Aktif)` : ta.nama}
+            <SelectItem key={ta.id} value={ta.id.toString()} label={ta.nama}>
+              {ta.nama}
             </SelectItem>
           ))}
         </SelectContent>

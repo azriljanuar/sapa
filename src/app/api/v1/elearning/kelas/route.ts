@@ -19,7 +19,10 @@ export async function GET(request: Request) {
       whereClause.tahunAjaranId = parseInt(tahunAjaranId)
     } else {
       // By default only return classes from active academic year
-      whereClause.tahunAjaran = { isActive: true }
+      const activeTA = await prisma.tahunAjaran.findFirst({ orderBy: { nama: 'desc' } })
+      if (activeTA) {
+        whereClause.tahunAjaranId = activeTA.id
+      }
     }
 
     const kelas = await prisma.kelasFormal.findMany({

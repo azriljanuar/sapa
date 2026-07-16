@@ -17,7 +17,10 @@ export async function GET(request: Request) {
     if (tahunAjaranId) {
       whereClause.tahunAjaranId = parseInt(tahunAjaranId)
     } else {
-      whereClause.tahunAjaran = { isActive: true }
+      const activeTA = await prisma.tahunAjaran.findFirst({ orderBy: { nama: 'desc' } })
+      if (activeTA) {
+        whereClause.tahunAjaranId = activeTA.id
+      }
     }
     
     if (guruId) {

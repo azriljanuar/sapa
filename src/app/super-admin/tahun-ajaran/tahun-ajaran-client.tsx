@@ -24,7 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 
-import { createTahunAjaran, deleteTahunAjaran, toggleTahunAjaranAktif, toggleSemesterAktif } from "./actions"
+import { createTahunAjaran, deleteTahunAjaran } from "./actions"
 
 type SemesterType = {
   id: number
@@ -77,25 +77,6 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
     }
   }
 
-  const handleToggleAktifTA = async (id: number, targetState: boolean) => {
-    if (targetState && !confirm("Aktifkan Tahun Ajaran ini? Ini akan menonaktifkan tahun ajaran lainnya.")) return
-    if (!targetState && !confirm("Nonaktifkan Tahun Ajaran ini?")) return
-    const res = await toggleTahunAjaranAktif(id, targetState)
-    if (res.success) {
-      window.location.reload()
-    } else {
-      alert(res.error)
-    }
-  }
-
-  const handleToggleAktifSemester = async (id: number, targetState: boolean) => {
-    const res = await toggleSemesterAktif(id, targetState)
-    if (res.success) {
-      window.location.reload()
-    } else {
-      alert(res.error)
-    }
-  }
 
   return (
     <div className="space-y-6">

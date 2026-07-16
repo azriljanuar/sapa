@@ -8,13 +8,14 @@ export async function GET(request: Request) {
 
   try {
     const tahunAjaranAktif = await prisma.tahunAjaran.findFirst({
-      where: { isActive: true },
+      orderBy: { nama: 'desc' },
       select: {
         id: true,
         nama: true,
         isActive: true,
         semester: {
-          where: { isActive: true },
+          orderBy: { nama: 'asc' },
+          take: 1,
           select: {
             id: true,
             nama: true,
