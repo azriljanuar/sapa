@@ -250,16 +250,16 @@ model PengampuMataPelajaran {
   guru            Guru          @relation(fields: [guruId], references: [id], onDelete: Cascade)
   tahunAjaranId   Int
   tahunAjaran     TahunAjaran   @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
-
-  @@unique([mataPelajaranId, kelasFormalId, tahunAjaranId])
-  @@index([kelasFormalId])
-  @@index([guruId])
-  @@index([tahunAjaranId])
   jadwalPelajaran JadwalPelajaran[]
   jurnalMengajar  JurnalMengajar[]
   materiBelajar   MateriBelajar[]
   tugas           Tugas[]
   penilaianAkhir  PenilaianAkhir[]
+
+  @@unique([mataPelajaranId, kelasFormalId, tahunAjaranId])
+  @@index([kelasFormalId])
+  @@index([guruId])
+  @@index([tahunAjaranId])
 }
 
 enum Hari {
