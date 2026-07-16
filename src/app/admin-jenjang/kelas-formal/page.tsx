@@ -1,6 +1,6 @@
 import { getLoggedInAdminJenjang } from "@/lib/auth"
 import prisma from "@/lib/prisma"
-import { getSelectedTahunAjaran } from "@/lib/tahun-ajaran"
+import { getSelectedTahunAjaran } from "@/lib/ta-context"
 import { KelasClient } from "./kelas-client"
 
 export default async function KelasFormalPage() {

@@ -23,7 +23,7 @@ export async function createKelas(formData: FormData) {
 
     const validated = kelasSchema.parse(rawData)
 
-    const { getSelectedTahunAjaran } = await import("@/lib/tahun-ajaran")
+    const { getSelectedTahunAjaran } = await import("@/lib/ta-context")
     const activeTahunAjaran = await getSelectedTahunAjaran()
     
     if (!activeTahunAjaran) {
