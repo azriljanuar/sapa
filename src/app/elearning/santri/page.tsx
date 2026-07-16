@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { 
   BookOpen, FileText, ArrowRight, TrendingUp,
   GraduationCap, Star, Sparkles
@@ -8,7 +9,9 @@ import {
 
 export default async function SantriDashboard() {
   const session = await getSession()
-  
+  if (!session) redirect("/login")
+
+  // Santri login: session.id = santri.id, session.email = santri.nisn
   const activeTA = await prisma.tahunAjaran.findFirst({ 
     orderBy: { nama: 'desc' }, 
     include: { semester: true } 
@@ -16,7 +19,7 @@ export default async function SantriDashboard() {
 
   const riwayatKelas = await prisma.riwayatKelas.findFirst({
     where: { 
-      santriId: session?.id,
+      santriId: session.id,        // session.id = santri.id untuk SANTRI login
       kelasFormal: {
         tahunAjaranId: activeTA?.id
       }
@@ -38,12 +41,15 @@ export default async function SantriDashboard() {
     }
   })
 
+  // Ambil nama lengkap santri
+  const santri = await prisma.santri.findUnique({ where: { id: session.id } })
+
   const kelas = riwayatKelas?.kelasFormal
   const pengampuList = kelas?.pengampu || []
   const totalMateri = pengampuList.reduce((a, p) => a + p._count.materiBelajar, 0)
   const totalTugas = pengampuList.reduce((a, p) => a + p._count.tugas, 0)
 
-  const namaSantri = session?.email.split('@')[0] || 'Santri'
+  const namaSantri = santri?.namaLengkap || session.email
 
   return (
     <div className="space-y-8">
@@ -60,7 +66,7 @@ export default async function SantriDashboard() {
               <Star className="h-4 w-4 text-yellow-300 fill-yellow-300" />
               <span className="text-emerald-200 text-sm font-medium">Semangat belajar hari ini!</span>
             </div>
-            <h2 className="text-3xl font-extrabold mb-2 capitalize">Halo, {namaSantri}! 🚀</h2>
+            <h2 className="text-3xl font-extrabold mb-2">Halo, {namaSantri}! 🚀</h2>
             <p className="text-emerald-200/80 max-w-md">
               Kelas: <strong className="text-white">{kelas ? kelas.namaKelas : 'Belum ada kelas'}</strong>
               {" · "}TA: <strong className="text-white">{activeTA?.nama || '-'}</strong>
@@ -116,10 +122,8 @@ export default async function SantriDashboard() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {pengampuList.map((p) => (
               <div key={p.id} className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex flex-col overflow-hidden">
-                {/* Color top */}
                 <div className="h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500" />
                 
-                {/* Icon area */}
                 <div className="h-24 bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center relative overflow-hidden">
                   <div className="absolute inset-0 opacity-20">
                     <BookOpen className="absolute -bottom-4 -right-4 h-20 w-20 text-emerald-300" />

@@ -4,11 +4,15 @@ import prisma from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
+// Catatan: Untuk SANTRI login, session.id = santri.id dan session.email = santri.nisn
+// Lihat src/app/login/actions.ts untuk referensi
+
 export async function kumpulkanTugas(data: { tugasId: number; fileUrl?: string; catatanSantri?: string }) {
   const session = await getSession()
   if (!session || session.role !== "SANTRI") throw new Error("Unauthorized")
 
   try {
+    // session.id = santri.id untuk SANTRI login
     const result = await prisma.pengumpulanTugas.upsert({
       where: {
         tugasId_santriId: {

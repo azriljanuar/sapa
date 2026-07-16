@@ -1,15 +1,18 @@
 import { getSession } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { 
-  BookOpen, Users, ArrowRight, CheckCircle2, 
-  ClipboardList, FileText, BarChart3, 
-  TrendingUp, Calendar, AlertCircle
+  BookOpen, ArrowRight, CheckCircle2, 
+  FileText, BarChart3, ClipboardList,
+  TrendingUp, Calendar, AlertCircle, Users
 } from "lucide-react"
 
 export default async function GuruDashboard() {
   const session = await getSession()
-  
+  if (!session) redirect("/login")
+
+  // Guru login: session.id = guru.id, session.email = guru.email
   const activeTA = await prisma.tahunAjaran.findFirst({ 
     orderBy: { nama: 'desc' }, 
     include: { semester: true } 
@@ -17,7 +20,7 @@ export default async function GuruDashboard() {
 
   const pengampu = await prisma.pengampuMataPelajaran.findMany({
     where: { 
-      guruId: session?.id,
+      guruId: session.id,        // session.id IS guru.id (see login/actions.ts)
       tahunAjaranId: activeTA?.id
     },
     include: {
@@ -36,7 +39,7 @@ export default async function GuruDashboard() {
   const kehadiranToday = await prisma.kehadiranGuru.findUnique({
     where: {
       guruId_tanggal: {
-        guruId: session?.id!,
+        guruId: session.id,     // session.id IS guru.id
         tanggal: today
       }
     }
@@ -46,7 +49,9 @@ export default async function GuruDashboard() {
   const totalTugas = pengampu.reduce((a, p) => a + p._count.tugas, 0)
   const totalJurnal = pengampu.reduce((a, p) => a + p._count.jurnalMengajar, 0)
 
-  const namaGuru = session?.email.split('@')[0] || 'Guru'
+  // Ambil nama lengkap guru dari database
+  const guru = await prisma.guru.findUnique({ where: { id: session.id } })
+  const namaGuru = guru?.nama || session.email.split('@')[0]
 
   return (
     <div className="space-y-8">
@@ -59,9 +64,9 @@ export default async function GuruDashboard() {
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <p className="text-indigo-200 text-sm font-medium mb-2">Selamat datang kembali 👋</p>
-            <h2 className="text-3xl font-extrabold mb-2 capitalize">{namaGuru}</h2>
+            <h2 className="text-3xl font-extrabold mb-2">{namaGuru}</h2>
             <p className="text-indigo-200/80">
-              Tahun Ajaran <strong className="text-white">{activeTA?.nama || '-'}</strong> • {pengampu.length} Kelas Aktif
+              Tahun Ajaran <strong className="text-white">{activeTA?.nama || '-'}</strong> &middot; {pengampu.length} Kelas Aktif
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -128,7 +133,6 @@ export default async function GuruDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {pengampu.map((p) => (
               <div key={p.id} className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex flex-col overflow-hidden">
-                {/* Color strip */}
                 <div className="h-1.5 bg-gradient-to-r from-indigo-500 to-purple-500" />
                 
                 <div className="p-5 flex-1 flex flex-col">
