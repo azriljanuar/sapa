@@ -8,11 +8,16 @@ export default async function Home() {
 
   // Tentukan rute dashboard SIPD berdasarkan role
   let sipdRoute = "/login"
+  let elearningRoute = "/login"
   if (session) {
     if (session.role === "SUPER_ADMIN") sipdRoute = "/super-admin"
     else if (session.role === "ADMIN_JENJANG") sipdRoute = "/admin-jenjang"
     else if (session.role === "GURU") sipdRoute = "/guru"
     else if (session.role === "SANTRI") sipdRoute = "/santri"
+    
+    if (session.role === "GURU") elearningRoute = "/elearning/guru"
+    else if (session.role === "SANTRI") elearningRoute = "/elearning/santri"
+    else elearningRoute = "/elearning" // Fallback if admin tries to access
   }
 
   return (
@@ -114,8 +119,7 @@ export default async function Home() {
                   </div>
                 </Link>
 
-                {/* E-Learning Card */}
-                <Link href="/elearning" className="group block">
+                <Link href={elearningRoute} className="group block">
                   <div className="h-full bg-white rounded-3xl p-8 border border-slate-200 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-emerald-200 hover:-translate-y-1">
                     <div className="h-16 w-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                       <GraduationCap className="h-8 w-8" />

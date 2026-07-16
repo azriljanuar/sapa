@@ -101,6 +101,7 @@ model Guru {
   jenjangs           JenjangPendidikan[] @relation("GuruJenjangs")
   waliKelas          KelasFormal[]
   pengampu           PengampuMataPelajaran[]
+  kehadiran          KehadiranGuru[]
 }
 
 model Santri {
@@ -126,6 +127,10 @@ model Santri {
   // jenjangId, statusMukim, isAlumni dipindah ke SantriJenjang
   jenjangs         SantriJenjang[]
   riwayatKelas     RiwayatKelas[]
+  kehadiranHarian  KehadiranHarianSantri[]
+  absensiMapel     AbsensiMapel[]
+  pengumpulanTugas PengumpulanTugas[]
+  penilaianAkhir   PenilaianAkhir[]
 }
 
 model SantriJenjang {
@@ -156,6 +161,7 @@ model KelasFormal {
   tahunAjaran   TahunAjaran       @relation(fields: [tahunAjaranId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   anggota       RiwayatKelas[]
   pengampu      PengampuMataPelajaran[]
+  kehadiranHarian KehadiranHarianSantri[]
 
   @@unique([jenjangId, namaKelas, tahunAjaranId])
   @@index([waliKelasId])
@@ -250,6 +256,10 @@ model PengampuMataPelajaran {
   @@index([guruId])
   @@index([tahunAjaranId])
   jadwalPelajaran JadwalPelajaran[]
+  jurnalMengajar  JurnalMengajar[]
+  materiBelajar   MateriBelajar[]
+  tugas           Tugas[]
+  penilaianAkhir  PenilaianAkhir[]
 }
 
 enum Hari {
@@ -295,4 +305,149 @@ model TemplateKartu {
 
   @@unique([jenjangId, tipe])
   @@index([jenjangId])
+}
+
+// --- E-LEARNING MODELS ---
+
+enum StatusKehadiran {
+  HADIR
+  IZIN
+  SAKIT
+  ALPA
+}
+
+model KehadiranGuru {
+  id        Int      @id @default(autoincrement())
+  guruId    Int
+  guru      Guru     @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  tanggal   DateTime @db.Date
+  status    StatusKehadiran
+  keterangan String? @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([guruId, tanggal])
+  @@index([guruId])
+}
+
+model KehadiranHarianSantri {
+  id            Int         @id @default(autoincrement())
+  santriId      Int
+  santri        Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  kelasFormalId Int
+  kelasFormal   KelasFormal @relation(fields: [kelasFormalId], references: [id], onDelete: Cascade)
+  tanggal       DateTime    @db.Date
+  status        StatusKehadiran
+  keterangan    String?     @db.Text
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([santriId, tanggal])
+  @@index([kelasFormalId])
+  @@index([santriId])
+}
+
+model JurnalMengajar {
+  id            Int                   @id @default(autoincrement())
+  pengampuId    Int
+  pengampu      PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
+  tanggal       DateTime              @db.Date
+  materi        String                @db.Text
+  catatan       String?               @db.Text
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  absensiMapel  AbsensiMapel[]
+
+  @@index([pengampuId])
+}
+
+model AbsensiMapel {
+  id                Int             @id @default(autoincrement())
+  jurnalMengajarId  Int
+  jurnalMengajar    JurnalMengajar  @relation(fields: [jurnalMengajarId], references: [id], onDelete: Cascade)
+  santriId          Int
+  santri            Santri          @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  status            StatusKehadiran
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([jurnalMengajarId, santriId])
+  @@index([jurnalMengajarId])
+  @@index([santriId])
+}
+
+enum TipeMateri {
+  DOKUMEN
+  VIDEO
+  TEKS
+}
+
+model MateriBelajar {
+  id          Int                   @id @default(autoincrement())
+  pengampuId  Int
+  pengampu    PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
+  judul       String
+  deskripsi   String?               @db.Text
+  fileUrl     String?               @db.Text
+  tipe        TipeMateri            @default(TEKS)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([pengampuId])
+}
+
+model Tugas {
+  id            Int                   @id @default(autoincrement())
+  pengampuId    Int
+  pengampu      PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
+  judul         String
+  deskripsi     String?               @db.Text
+  fileUrl       String?               @db.Text
+  tenggatWaktu  DateTime?
+  statusPublish Boolean               @default(true)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  pengumpulan   PengumpulanTugas[]
+
+  @@index([pengampuId])
+}
+
+model PengumpulanTugas {
+  id            Int       @id @default(autoincrement())
+  tugasId       Int
+  tugas         Tugas     @relation(fields: [tugasId], references: [id], onDelete: Cascade)
+  santriId      Int
+  santri        Santri    @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  fileUrl       String?   @db.Text
+  catatanSantri String?   @db.Text
+  waktuKumpul   DateTime  @default(now())
+  nilai         Int?
+  keteranganGuru String?  @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([tugasId, santriId])
+  @@index([tugasId])
+  @@index([santriId])
+}
+
+model PenilaianAkhir {
+  id            Int                   @id @default(autoincrement())
+  pengampuId    Int
+  pengampu      PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
+  santriId      Int
+  santri        Santri                @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  nilaiTugasRata Float?
+  nilaiUTS       Float?
+  nilaiUAS       Float?
+  nilaiAkhir     Float?
+  grade          String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@unique([pengampuId, santriId])
+  @@index([pengampuId])
+  @@index([santriId])
 }
