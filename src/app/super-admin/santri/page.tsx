@@ -5,10 +5,23 @@ import { SantriClient } from "./santri-client"
 export default async function DataSantriPage() {
   await getLoggedInSuperAdmin()
 
+  const { getSelectedTahunAjaran } = await import("@/lib/ta-context")
+  const activeTa = await getSelectedTahunAjaran()
+
   const santris = await prisma.santri.findMany({
     include: {
       jenjangs: {
         include: { jenjang: true }
+      },
+      riwayatKelas: {
+        where: {
+          kelasFormal: {
+            tahunAjaranId: activeTa?.id || -1
+          }
+        },
+        include: {
+          kelasFormal: true
+        }
       }
     },
     orderBy: {
@@ -22,11 +35,17 @@ export default async function DataSantriPage() {
     const jenjangIds = s.jenjangs.map(j => j.jenjangId)
     const statusMukim = s.jenjangs.length > 0 ? s.jenjangs[0].statusMukim : false
     
+    // Class name in the active year
+    const kelasFormalName = s.riwayatKelas.length > 0 ? s.riwayatKelas[0].kelasFormal.namaKelas : null
+    const kelasFormalId = s.riwayatKelas.length > 0 ? s.riwayatKelas[0].kelasFormalId : null
+    
     return {
       ...s,
       jenjangNames,
       jenjangIds,
-      statusMukim
+      statusMukim,
+      kelasFormalName,
+      kelasFormalId
     }
   })
 
@@ -34,5 +53,14 @@ export default async function DataSantriPage() {
     orderBy: { id: "asc" }
   })
 
-  return <SantriClient initialData={mappedSantris} jenjangList={jenjangList} />
+  // Ambil semua kelas di TA yang aktif untuk filter dropdown
+  let kelasList: any[] = []
+  if (activeTa) {
+    kelasList = await prisma.kelasFormal.findMany({
+      where: { tahunAjaranId: activeTa.id },
+      orderBy: { namaKelas: 'asc' }
+    })
+  }
+
+  return <SantriClient initialData={mappedSantris as any} jenjangList={jenjangList} kelasList={kelasList} />
 }

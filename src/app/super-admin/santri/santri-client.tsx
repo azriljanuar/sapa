@@ -75,12 +75,18 @@ type SantriType = {
   noKipPip?: string | null
   namaAyah?: string | null
   namaIbu?: string | null
+  kelasFormalName?: string | null
+  kelasFormalId?: number | null
 }
 
-export function SantriClient({ initialData, jenjangList }: { initialData: SantriType[], jenjangList: any[] }) {
+export function SantriClient({ initialData, jenjangList, kelasList = [] }: { initialData: SantriType[], jenjangList: any[], kelasList: any[] }) {
   const [data, setData] = useState<SantriType[]>(initialData)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterMukim, setFilterMukim] = useState("all") // "all", "mukim", "tidak"
+  
+  // New filters
+  const [filterJenjang, setFilterJenjang] = useState<string>("all")
+  const [filterKelas, setFilterKelas] = useState<string>("all")
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
@@ -112,7 +118,7 @@ export function SantriClient({ initialData, jenjangList }: { initialData: Santri
     },
   })
 
-  // Filter data berdasarkan search dan mukim
+  // Filter data berdasarkan search, mukim, jenjang, dan kelas
   const filteredData = data.filter((item) => {
     const matchSearch = item.namaLengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         item.nisn.toLowerCase().includes(searchTerm.toLowerCase())
@@ -120,13 +126,28 @@ export function SantriClient({ initialData, jenjangList }: { initialData: Santri
     let matchMukim = true
     if (filterMukim === "mukim") matchMukim = item.statusMukim === true
     else if (filterMukim === "tidak") matchMukim = item.statusMukim === false
+    
+    let matchJenjang = true
+    if (filterJenjang !== "all") {
+      matchJenjang = item.jenjangIds?.includes(Number(filterJenjang)) || false
+    }
+    
+    let matchKelas = true
+    if (filterKelas !== "all") {
+      matchKelas = item.kelasFormalId === Number(filterKelas)
+    }
 
-    return matchSearch && matchMukim
+    return matchSearch && matchMukim && matchJenjang && matchKelas
   })
 
   // Pagination logic
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
   const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  
+  // Options untuk kelas filter, tergantung jenjang yang dipilih
+  const filteredKelasList = filterJenjang === "all" 
+    ? kelasList 
+    : kelasList.filter(k => k.jenjangId === Number(filterJenjang))
 
   const handleOpenDialog = (item?: SantriType) => {
     if (item) {
@@ -309,6 +330,37 @@ export function SantriClient({ initialData, jenjangList }: { initialData: Santri
             <option value="mukim">Mukim</option>
             <option value="tidak">Tidak Mukim</option>
           </select>
+          <select
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background max-w-[150px]"
+            value={filterJenjang}
+            onChange={(e) => {
+              setFilterJenjang(e.target.value)
+              setFilterKelas("all") // Reset kelas saat jenjang berubah
+              setCurrentPage(1)
+            }}
+          >
+            <option value="all">Semua Jenjang</option>
+            {jenjangList.map(j => (
+              <option key={j.id} value={j.id.toString()}>{j.nama}</option>
+            ))}
+          </select>
+
+          {/* Filter Kelas (disabled jika Semua Jenjang dipilih dan kita ingin force filter jenjang dulu, tapi biarkan saja aktif dengan opsi terfilter) */}
+          <select
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background max-w-[150px]"
+            value={filterKelas}
+            onChange={(e) => {
+              setFilterKelas(e.target.value)
+              setCurrentPage(1)
+            }}
+            disabled={filteredKelasList.length === 0}
+          >
+            <option value="all">Semua Kelas</option>
+            {filteredKelasList.map((k: any) => (
+              <option key={k.id} value={k.id.toString()}>{k.namaKelas}</option>
+            ))}
+          </select>
+
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -344,6 +396,7 @@ export function SantriClient({ initialData, jenjangList }: { initialData: Santri
               <TableHead>NISN</TableHead>
               <TableHead>Nama Lengkap</TableHead>
               <TableHead>Jenjang</TableHead>
+              <TableHead>Kelas</TableHead>
               <TableHead className="text-center">Status Mukim</TableHead>
               <TableHead className="w-[120px] text-right">Aksi</TableHead>
             </TableRow>
@@ -364,6 +417,7 @@ export function SantriClient({ initialData, jenjangList }: { initialData: Santri
                   <TableCell className="font-medium">{item.nisn}</TableCell>
                   <TableCell>{item.namaLengkap}</TableCell>
                   <TableCell className="text-xs text-slate-600">{item.jenjangNames || "-"}</TableCell>
+                  <TableCell className="text-xs font-semibold text-slate-700">{item.kelasFormalName || "-"}</TableCell>
                   <TableCell className="text-center">
                     {item.statusMukim ? (
                       <span className="inline-flex items-center gap-1 text-sm text-green-600 font-medium">
@@ -400,7 +454,7 @@ export function SantriClient({ initialData, jenjangList }: { initialData: Santri
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                <TableCell colSpan={7} className="h-24 text-center text-slate-500">
                   Tidak ada data.
                 </TableCell>
               </TableRow>
