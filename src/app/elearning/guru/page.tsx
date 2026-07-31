@@ -12,10 +12,11 @@ export default async function GuruDashboard() {
   const session = await getSession()
   if (!session) redirect("/login")
 
-  // Guru login: session.id = guru.id, session.email = guru.email
-  const activeTA = await prisma.tahunAjaran.findFirst({ 
-    orderBy: { nama: 'desc' }, 
-    include: { semester: true } 
+  const { getSelectedSemester } = await import("@/lib/ta-context")
+  const selectedSem = await getSelectedSemester()
+  const activeTA = selectedSem?.tahunAjaran || await prisma.tahunAjaran.findFirst({
+    where: { isActive: true },
+    include: { semester: true }
   })
 
   const pengampu = await prisma.pengampuMataPelajaran.findMany({
@@ -52,6 +53,14 @@ export default async function GuruDashboard() {
   // Ambil nama lengkap guru dari database
   const guru = await prisma.guru.findUnique({ where: { id: session.id } })
   const namaGuru = guru?.nama || session.email.split('@')[0]
+
+  const kelasWali = activeTA ? await prisma.kelasFormal.findFirst({
+    where: { 
+      waliKelasId: session.id,
+      tahunAjaranId: activeTA.id
+    },
+    include: { jenjang: true }
+  }) : null
 
   return (
     <div className="space-y-8">
@@ -112,6 +121,26 @@ export default async function GuruDashboard() {
           </div>
         ))}
       </div>
+
+      {kelasWali && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800">Wali Kelas {kelasWali.namaKelas}</h3>
+              <p className="text-sm text-slate-600">Jenjang {kelasWali.jenjang.singkatan} &middot; Pantau kehadiran harian siswa Anda di sini.</p>
+            </div>
+          </div>
+          <Link 
+            href="/elearning/guru/rekap-absensi"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors whitespace-nowrap"
+          >
+            Lihat Rekap Absensi
+          </Link>
+        </div>
+      )}
 
       {/* Class List */}
       <div>

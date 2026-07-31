@@ -13,8 +13,10 @@ export async function middleware(request: NextRequest) {
   // Rute yang dilindungi
   const isAdminJenjang = request.nextUrl.pathname.startsWith("/admin-jenjang")
   const isSuperAdmin = request.nextUrl.pathname.startsWith("/super-admin")
+  const isGuru = request.nextUrl.pathname.startsWith("/elearning/guru") || request.nextUrl.pathname.startsWith("/guru")
+  const isSantri = request.nextUrl.pathname.startsWith("/elearning/santri") || request.nextUrl.pathname.startsWith("/santri")
 
-  if (isAdminJenjang || isSuperAdmin) {
+  if (isAdminJenjang || isSuperAdmin || isGuru || isSantri) {
     if (!session) {
       return NextResponse.redirect(new URL("/login", request.url))
     }
@@ -32,6 +34,14 @@ export async function middleware(request: NextRequest) {
       if (isSuperAdmin && payload.role !== "SUPER_ADMIN") {
         return NextResponse.redirect(new URL("/login", request.url))
       }
+      
+      if (isGuru && payload.role !== "GURU") {
+        return NextResponse.redirect(new URL("/login", request.url))
+      }
+      
+      if (isSantri && payload.role !== "SANTRI") {
+        return NextResponse.redirect(new URL("/login", request.url))
+      }
     } catch (error) {
       // Jika token invalid/expired
       return NextResponse.redirect(new URL("/login", request.url))
@@ -41,10 +51,17 @@ export async function middleware(request: NextRequest) {
   // Jika user sudah login dan mengakses halaman login, redirect ke halaman utama (Landing Page / Portal)
   if (isAuthPage && session) {
     try {
-      await jwtVerify(session, encodedKey, {
+      const { payload } = await jwtVerify(session, encodedKey, {
         algorithms: ["HS256"],
       })
-      return NextResponse.redirect(new URL("/", request.url))
+      
+      const destination = payload.role === "SUPER_ADMIN" ? "/super-admin"
+                        : payload.role === "ADMIN_JENJANG" ? "/admin-jenjang"
+                        : payload.role === "GURU" ? "/elearning/guru"
+                        : payload.role === "SANTRI" ? "/elearning/santri"
+                        : "/"
+                        
+      return NextResponse.redirect(new URL(destination, request.url))
     } catch (error) {
       // Biarkan di halaman login jika token rusak
     }

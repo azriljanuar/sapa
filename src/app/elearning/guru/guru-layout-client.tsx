@@ -4,38 +4,48 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
-  Menu, Search, Bell, Home, Users, BookOpen, GraduationCap, 
-  LogOut, ChevronLeft, CalendarDays, IdCard, CheckSquare
+  Menu, Search, Bell, LayoutDashboard, Calendar, FileText, 
+  Users, User, LogOut, ChevronLeft, BookOpen, ChevronRight
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { TaSwitcher } from "@/components/ta-switcher"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export function SantriLayoutClient({ 
+export function GuruLayoutClient({ 
   children,
-  santri,
+  session,
+  allTa,
+  activeSemesterId,
+  isWaliKelas
 }: {
   children: React.ReactNode
-  santri: any
+  session: any
+  allTa: any[]
+  activeSemesterId: number | null
+  isWaliKelas: boolean
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
 
   const navItems = [
-    { name: "Overview", href: "/santri", icon: Home },
-    { name: "Kehadiran", href: "/santri/kehadiran", icon: CheckSquare },
-    { name: "Jadwal", href: "/santri/jadwal", icon: CalendarDays },
-    { name: "Rapor", href: "/santri/rapor", icon: BookOpen },
-    { name: "Profil & Kartu", href: "/santri#profil", icon: IdCard },
+    { name: "Dashboard", href: "/elearning/guru", icon: LayoutDashboard },
+    { name: "Jadwal Mengajar", href: "/elearning/guru/jadwal", icon: Calendar },
+    { name: "Absensi", href: "/elearning/guru/absensi", icon: FileText },
+    ...(isWaliKelas ? [{ name: "Rekap Absensi Kelas", href: "/elearning/guru/rekap-absensi", icon: Users }] : []),
+    { name: "Profil Saya", href: "/elearning/guru/profil", icon: User },
   ]
 
   const isActive = (href: string) => {
-    if (href === "/santri") {
+    if (href === "/elearning/guru") {
       return pathname === href
     }
     return pathname.startsWith(href)
   }
+
+  const userInitial = session.email ? session.email.charAt(0).toUpperCase() : "G"
+  const userName = session.email ? session.email.split('@')[0] : "Guru"
 
   return (
     <div className="flex min-h-dvh bg-slate-50 text-slate-900 font-sans">
@@ -50,19 +60,21 @@ export function SantriLayoutClient({
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col print:hidden",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-transparent">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-slate-900 shrink-0" />
+          <Link href="/" className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center shadow-sm shrink-0">
+              <BookOpen className="h-4 w-4 text-white" />
+            </div>
             <div className="flex flex-col text-slate-900">
-              <span className="text-2xl font-black leading-none tracking-tight">SAPA</span>
-              <span className="text-[0.5rem] font-medium leading-[1.1] mt-0.5 whitespace-normal break-words max-w-[65px]">
-                Sistem Akademik Pesantren Al-Ittihaad
+              <span className="text-xl font-black leading-none tracking-tight">SAPA</span>
+              <span className="text-[0.6rem] font-bold text-indigo-600 leading-[1.1] mt-0.5">
+                Portal Guru
               </span>
             </div>
-          </div>
+          </Link>
           <button className="lg:hidden text-slate-500" onClick={() => setIsSidebarOpen(false)}>
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -71,7 +83,7 @@ export function SantriLayoutClient({
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
           <div>
             <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-              Main Menu
+              E-Learning
             </p>
             <nav className="space-y-1">
               {navItems.map((item) => {
@@ -84,13 +96,13 @@ export function SantriLayoutClient({
                     className={cn(
                       "group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl relative transition-all",
                       active 
-                        ? "text-emerald-700 bg-emerald-50" 
+                        ? "text-indigo-700 bg-indigo-50" 
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     )}
                   >
                     <item.icon className={cn(
                       "mr-3 h-5 w-5 flex-shrink-0 transition-colors",
-                      active ? "text-emerald-700" : "text-slate-400 group-hover:text-slate-500"
+                      active ? "text-indigo-700" : "text-slate-400 group-hover:text-slate-500"
                     )} />
                     {item.name}
                   </Link>
@@ -98,19 +110,8 @@ export function SantriLayoutClient({
               })}
             </nav>
           </div>
+        </div>
 
-          <div>
-            <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-              Others
-            </p>
-            <nav className="space-y-1">
-              <Link
-                href="/santri#support"
-                className="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
-              >
-                <Users className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400 group-hover:text-slate-500" />
-                Support
-              </Link>
         <div className="p-4 border-t border-slate-100 mt-4">
           <form action={async () => {
             const { logoutAction } = await import("@/app/login/actions")
@@ -125,15 +126,12 @@ export function SantriLayoutClient({
             </button>
           </form>
         </div>
-            </nav>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
         {/* Top Header */}
-        <header className="h-16 shrink-0 bg-transparent flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10">
+        <header className="h-16 shrink-0 bg-transparent flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10 print:hidden">
           <div className="flex items-center gap-4 flex-1">
             <button 
               className="p-2 -ml-2 text-slate-500 hover:text-slate-600 lg:hidden rounded-full hover:bg-slate-50"
@@ -141,26 +139,29 @@ export function SantriLayoutClient({
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="hidden sm:flex max-w-lg w-full relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input 
-                type="text" 
-                placeholder="Search for subjects or grades" 
-                className="w-full pl-11 bg-white border-0 shadow-sm focus-visible:ring-1 focus-visible:ring-emerald-500 rounded-full h-11 text-sm text-slate-700"
-              />
+            
+            {/* Breadcrumb for Desktop */}
+            <div className="hidden lg:flex items-center gap-2.5 text-sm font-medium text-slate-500">
+              <Link href="/" className="hover:text-indigo-600 transition-colors">Home</Link>
+              <ChevronRight className="h-4 w-4 text-slate-300" />
+              <span className="text-slate-800">Guru</span>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
+            <div className="hidden sm:block">
+              {activeSemesterId && (
+                <TaSwitcher tahunAjarans={allTa} selectedSemesterId={activeSemesterId} />
+              )}
+            </div>
+            
             <button className="p-2 text-slate-600 hover:text-slate-900 relative rounded-full hover:bg-slate-200/50 transition-colors">
               <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
             </button>
             
             <div className="flex items-center gap-3">
-              <Avatar className="h-9 w-9 ring-2 ring-white shadow-sm">
-                <AvatarImage src={`https://api.dicebear.com/7.x/notionists/svg?seed=${santri?.namaLengkap || "Santri"}`} alt={santri?.namaLengkap || "Santri"} />
-                <AvatarFallback className="bg-emerald-100 text-emerald-700">{santri?.namaLengkap?.substring(0, 2).toUpperCase() || "SN"}</AvatarFallback>
+              <Avatar className="h-9 w-9 ring-2 ring-white shadow-sm bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                <AvatarFallback className="bg-transparent text-white font-bold">{userInitial}</AvatarFallback>
               </Avatar>
             </div>
           </div>

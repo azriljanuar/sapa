@@ -17,6 +17,8 @@ export async function updateProfilJenjang(formData: FormData) {
     const alamat = formData.get("alamat") as string
     const telepon = formData.get("telepon") as string
     const email = formData.get("email") as string
+    const waktuMulaiAbsen = formData.get("waktuMulaiAbsen") as string
+    const waktuAkhirAbsen = formData.get("waktuAkhirAbsen") as string
 
     await prisma.jenjangPendidikan.update({
       where: { id: admin.jenjangId },
@@ -26,7 +28,9 @@ export async function updateProfilJenjang(formData: FormData) {
         nipKepalaMadrasah,
         alamat,
         telepon,
-        email
+        email,
+        waktuMulaiAbsen: waktuMulaiAbsen || null,
+        waktuAkhirAbsen: waktuAkhirAbsen || null
       }
     })
 

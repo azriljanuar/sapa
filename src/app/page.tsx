@@ -44,7 +44,7 @@ export default async function Home() {
                      const { deleteSession } = await import("@/lib/auth")
                      await deleteSession()
                      const { redirect } = await import("next/navigation")
-                     redirect("/")
+                     redirect("/login")
                    }}>
                      Logout
                    </Button>

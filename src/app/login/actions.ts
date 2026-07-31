@@ -80,14 +80,24 @@ export async function loginAction(prevState: unknown, formData: FormData) {
     return { error: "Terjadi kesalahan" }
   }
 
-  // Redirect to unified portal (landing page)
+  // Get session to redirect based on role
+  const { getSession } = await import("@/lib/auth")
+  const session = await getSession()
+  if (session) {
+    if (session.role === "SUPER_ADMIN") redirect("/super-admin")
+    if (session.role === "ADMIN_JENJANG") redirect("/admin-jenjang")
+    if (session.role === "GURU") redirect("/elearning/guru")
+    if (session.role === "SANTRI") redirect("/elearning/santri")
+  }
+
+  // Fallback
   redirect("/")
 }
 
 export async function logoutAction() {
   const { deleteSession } = await import("@/lib/auth")
   await deleteSession()
-  redirect("/")
+  redirect("/login")
 }
 
 export async function searchSantriAction(query: string) {

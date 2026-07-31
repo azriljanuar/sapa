@@ -33,6 +33,12 @@ export default async function AlumniPage() {
     statusMukim: a.jenjangs[0]?.statusMukim || false,
     keteranganLulus: a.jenjangs[0]?.keteranganLulus || null,
     tahunLulusId: a.jenjangs[0]?.tahunLulusId || null,
+    statusLanjutan: a.jenjangs[0]?.statusLanjutan || null,
+    namaInstansi: a.jenjangs[0]?.namaInstansi || null,
+    programStudi: a.jenjangs[0]?.programStudi || null,
+    kotaDomisiliSekarang: a.jenjangs[0]?.kotaDomisiliSekarang || null,
+    kontakWA: a.jenjangs[0]?.kontakWA || null,
+    email: a.jenjangs[0]?.email || null,
   }))
 
   // Fetch daftar jenjang untuk pilihan "Lanjutkan ke Jenjang"

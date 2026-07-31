@@ -4,43 +4,53 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
-  Menu, Search, Bell, Home, Users, BookOpen, GraduationCap, 
-  LogOut, ChevronLeft, CalendarDays, IdCard
+  Menu, Search, Bell, LayoutDashboard, Calendar, FileText, 
+  User, LogOut, ChevronLeft, BookOpen, ChevronRight, GraduationCap
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { TaSwitcher } from "@/components/ta-switcher"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { TaSwitcher } from "@/components/ta-switcher"
 
-export function GuruLayoutClient({ 
+export function SantriLayoutClient({ 
   children,
-  guru,
-  tahunAjarans,
+  session,
+  santri,
+  allTa,
   activeSemesterId,
+  isAlumni
 }: {
   children: React.ReactNode
-  guru: any
-  tahunAjarans: any[]
+  session: any
+  santri: any
+  allTa: any[]
   activeSemesterId: number | null
+  isAlumni: boolean
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
 
   const navItems = [
-    { name: "Overview", href: "/guru", icon: Home },
-    { name: "Data Siswa", href: "/guru/siswa", icon: Users },
-    { name: "Jadwal Mengajar", href: "/guru/jadwal", icon: CalendarDays },
-    { name: "Penilaian", href: "/guru/nilai", icon: BookOpen },
-    { name: "Profil & Kartu", href: "/guru#profil", icon: IdCard },
+    { name: "Dashboard", href: "/elearning/santri", icon: LayoutDashboard },
+    { name: "Tugas Saya", href: "/elearning/santri/tugas", icon: FileText },
+    { name: "Jadwal Pelajaran", href: "/elearning/santri/jadwal", icon: Calendar },
+    { name: "Profil Saya", href: "/elearning/santri/profil", icon: User },
   ]
 
+  if (isAlumni) {
+    navItems.push({ name: "Portal Alumni", href: "/elearning/santri/alumni", icon: GraduationCap })
+  }
+
   const isActive = (href: string) => {
-    if (href === "/guru") {
+    if (href === "/elearning/santri") {
       return pathname === href
     }
     return pathname.startsWith(href)
   }
+
+  const userName = santri?.namaLengkap || session.email
+  const userInitial = userName.charAt(0).toUpperCase()
 
   return (
     <div className="flex min-h-dvh bg-slate-50 text-slate-900 font-sans">
@@ -55,19 +65,21 @@ export function GuruLayoutClient({
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col print:hidden",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-transparent">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-slate-900 shrink-0" />
+          <Link href="/" className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-sm shrink-0">
+              <BookOpen className="h-4 w-4 text-white" />
+            </div>
             <div className="flex flex-col text-slate-900">
-              <span className="text-2xl font-black leading-none tracking-tight">SAPA</span>
-              <span className="text-[0.5rem] font-medium leading-[1.1] mt-0.5 whitespace-normal break-words max-w-[65px]">
-                Sistem Akademik Pesantren Al-Ittihaad
+              <span className="text-xl font-black leading-none tracking-tight">SAPA</span>
+              <span className="text-[0.6rem] font-bold text-emerald-600 leading-[1.1] mt-0.5">
+                Portal Santri
               </span>
             </div>
-          </div>
+          </Link>
           <button className="lg:hidden text-slate-500" onClick={() => setIsSidebarOpen(false)}>
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -76,7 +88,7 @@ export function GuruLayoutClient({
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
           <div>
             <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-              Main Menu
+              E-Learning
             </p>
             <nav className="space-y-1">
               {navItems.map((item) => {
@@ -103,19 +115,8 @@ export function GuruLayoutClient({
               })}
             </nav>
           </div>
+        </div>
 
-          <div>
-            <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-              Others
-            </p>
-            <nav className="space-y-1">
-              <Link
-                href="/guru#support"
-                className="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
-              >
-                <Users className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400 group-hover:text-slate-500" />
-                Support
-              </Link>
         <div className="p-4 border-t border-slate-100 mt-4">
           <form action={async () => {
             const { logoutAction } = await import("@/app/login/actions")
@@ -130,15 +131,12 @@ export function GuruLayoutClient({
             </button>
           </form>
         </div>
-            </nav>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
         {/* Top Header */}
-        <header className="h-16 shrink-0 bg-transparent flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10">
+        <header className="h-16 shrink-0 bg-transparent flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10 print:hidden">
           <div className="flex items-center gap-4 flex-1">
             <button 
               className="p-2 -ml-2 text-slate-500 hover:text-slate-600 lg:hidden rounded-full hover:bg-slate-50"
@@ -146,30 +144,29 @@ export function GuruLayoutClient({
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="hidden sm:flex max-w-lg w-full relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input 
-                type="text" 
-                placeholder="Search for staffs, student or bills" 
-                className="w-full pl-11 bg-white border-0 shadow-sm focus-visible:ring-1 focus-visible:ring-emerald-500 rounded-full h-11 text-sm text-slate-700"
-              />
+            
+            {/* Breadcrumb for Desktop */}
+            <div className="hidden lg:flex items-center gap-2.5 text-sm font-medium text-slate-500">
+              <Link href="/" className="hover:text-emerald-600 transition-colors">Home</Link>
+              <ChevronRight className="h-4 w-4 text-slate-300" />
+              <span className="text-slate-800">Santri</span>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
-            {activeSemesterId && (
-              <TaSwitcher tahunAjarans={tahunAjarans} selectedSemesterId={activeSemesterId} />
-            )}
+            <div className="hidden sm:block">
+              {activeSemesterId && (
+                <TaSwitcher tahunAjarans={allTa} selectedSemesterId={activeSemesterId} />
+              )}
+            </div>
             
             <button className="p-2 text-slate-600 hover:text-slate-900 relative rounded-full hover:bg-slate-200/50 transition-colors">
               <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
             </button>
             
             <div className="flex items-center gap-3">
-              <Avatar className="h-9 w-9 ring-2 ring-white shadow-sm">
-                <AvatarImage src={`https://api.dicebear.com/7.x/notionists/svg?seed=${guru?.nama || "Guru"}`} alt={guru?.nama || "Guru"} />
-                <AvatarFallback className="bg-emerald-100 text-emerald-700">{guru?.nama?.substring(0, 2).toUpperCase() || "GU"}</AvatarFallback>
+              <Avatar className="h-9 w-9 ring-2 ring-white shadow-sm bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+                <AvatarFallback className="bg-transparent text-white font-bold">{userInitial}</AvatarFallback>
               </Avatar>
             </div>
           </div>

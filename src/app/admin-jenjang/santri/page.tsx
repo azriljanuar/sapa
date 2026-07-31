@@ -32,10 +32,13 @@ export default async function DataSantriPage() {
     },
   })
 
+  const tahunAjarans = await prisma.tahunAjaran.findMany({ orderBy: { nama: 'desc' } })
+
   const mappedSantris = santris.map(s => ({
     ...s,
-    statusMukim: s.jenjangs[0]?.statusMukim || false
+    statusMukim: s.jenjangs[0]?.statusMukim || false,
+    tahunMasukId: s.jenjangs[0]?.tahunMasukId || null
   }))
 
-  return <SantriClient initialData={mappedSantris} />
+  return <SantriClient initialData={mappedSantris} tahunAjarans={tahunAjarans} />
 }

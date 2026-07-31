@@ -108,3 +108,49 @@ export async function deleteTahunAjaran(id: number) {
   }
 }
 
+export async function snapshotNilaiSemester(semesterId: number) {
+  try {
+    const session = await getSession()
+    if (!session || session.role !== "SUPER_ADMIN") throw new Error("Unauthorized")
+
+    // Get all PenilaianAkhir for this semester's pengampu
+    const penilaians = await prisma.penilaianAkhir.findMany({
+      where: {
+        pengampu: {
+          kelasFormal: {
+            tahunAjaran: {
+              semester: {
+                some: { id: semesterId }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (penilaians.length === 0) {
+       return { success: true, message: "Tidak ada data nilai untuk semester ini" }
+    }
+
+    const dataToInsert = penilaians.map(p => ({
+      santriId: p.santriId,
+      semesterId: semesterId,
+      pengampuId: p.pengampuId,
+      nilaiAkhir: p.nilaiAkhir,
+      grade: p.grade,
+      isFinalized: true
+    }))
+
+    await prisma.$transaction(
+      dataToInsert.map(d => prisma.laporanSemester.upsert({
+        where: { santriId_pengampuId_semesterId: { santriId: d.santriId, pengampuId: d.pengampuId, semesterId: d.semesterId } },
+        update: { nilaiAkhir: d.nilaiAkhir, grade: d.grade, isFinalized: true },
+        create: d
+      }))
+    )
+
+    return { success: true, message: `Berhasil mengambil snapshot ${dataToInsert.length} data nilai.` }
+  } catch (error: any) {
+    return { error: error.message || "Gagal melakukan snapshot nilai" }
+  }
+}

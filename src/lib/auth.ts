@@ -60,8 +60,7 @@ export async function getLoggedInAdminJenjang() {
   const session = await getSession()
 
   if (!session || session.role !== "ADMIN_JENJANG") {
-    await deleteSession()
-    redirect("/login")
+    redirect("/logout")
   }
 
   const user = await prisma.user.findUnique({
@@ -70,8 +69,7 @@ export async function getLoggedInAdminJenjang() {
   })
 
   if (!user || user.role !== "ADMIN_JENJANG") {
-    await deleteSession()
-    redirect("/login")
+    redirect("/logout")
   }
 
   if (!user.jenjangId) {
@@ -92,8 +90,7 @@ export async function getLoggedInSuperAdmin() {
   const session = await getSession()
 
   if (!session || session.role !== "SUPER_ADMIN") {
-    await deleteSession()
-    redirect("/login")
+    redirect("/logout")
   }
 
   const user = await prisma.user.findUnique({
@@ -101,8 +98,7 @@ export async function getLoggedInSuperAdmin() {
   })
 
   if (!user || user.role !== "SUPER_ADMIN") {
-    await deleteSession()
-    redirect("/login")
+    redirect("/logout")
   }
 
   return {

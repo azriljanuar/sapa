@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/form"
 import { createSantri, updateSantri, deleteSantri, importSantriExcel } from "./actions"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const santriSchema = z.object({
   id: z.number().optional(),
@@ -53,6 +54,7 @@ const santriSchema = z.object({
   noKipPip: z.string().optional().nullable(),
   namaAyah: z.string().optional().nullable(),
   namaIbu: z.string().optional().nullable(),
+  tahunMasukId: z.coerce.number().optional().nullable(),
 })
 
 type SantriType = {
@@ -72,9 +74,10 @@ type SantriType = {
   noKipPip?: string | null
   namaAyah?: string | null
   namaIbu?: string | null
+  tahunMasukId?: number | null
 }
 
-export function SantriClient({ initialData }: { initialData: SantriType[] }) {
+export function SantriClient({ initialData, tahunAjarans }: { initialData: SantriType[], tahunAjarans: {id: number, nama: string}[] }) {
   const [data, setData] = useState<SantriType[]>(initialData)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterMukim, setFilterMukim] = useState("all") // "all", "mukim", "tidak"
@@ -146,6 +149,7 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
         noKipPip: item.noKipPip || "",
         namaAyah: item.namaAyah || "",
         namaIbu: item.namaIbu || "",
+        tahunMasukId: item.tahunMasukId || null,
       })
     } else {
       setEditingData(null)
@@ -165,6 +169,7 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
         noKipPip: "",
         namaAyah: "",
         namaIbu: "",
+        tahunMasukId: null,
       })
     }
     setIsDialogOpen(true)
@@ -227,6 +232,7 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
       if (values.noKipPip) formData.append("noKipPip", values.noKipPip)
       if (values.namaAyah) formData.append("namaAyah", values.namaAyah)
       if (values.namaIbu) formData.append("namaIbu", values.namaIbu)
+      if (values.tahunMasukId) formData.append("tahunMasukId", values.tahunMasukId.toString())
       
       let res
       if (editingData && values.id) {
@@ -607,6 +613,32 @@ export function SantriClient({ initialData }: { initialData: SantriType[] }) {
               </TabsContent>
 
               <TabsContent value="akademik" className="space-y-4 mt-0">
+                <FormField
+                  control={form.control}
+                  name="tahunMasukId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tahun Masuk (Tahun Ajaran)</FormLabel>
+                      <Select 
+                        onValueChange={(val) => field.onChange(val === "null" ? null : parseInt(val))} 
+                        value={field.value ? field.value.toString() : "null"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih Tahun Masuk (jika ada)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="null">Belum Diatur</SelectItem>
+                          {tahunAjarans.map(ta => (
+                            <SelectItem key={ta.id} value={ta.id.toString()}>{ta.nama}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                
                 <FormField
                   control={form.control}
                   name="noKipPip"

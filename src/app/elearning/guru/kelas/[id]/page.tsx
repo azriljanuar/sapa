@@ -2,8 +2,9 @@ import { getSession } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, BookOpen, FileText, CheckSquare, Plus, FileVideo, File } from "lucide-react"
+import { ArrowLeft, BookOpen, FileText, CheckSquare, Plus, FileVideo, File, BarChart3 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { JurnalDialog, MateriDialog, TugasDialog } from "./client-components"
 
 export default async function KelasDetailGuru({ params }: { params: { id: string } }) {
   const session = await getSession()
@@ -54,6 +55,7 @@ export default async function KelasDetailGuru({ params }: { params: { id: string
           <TabsTrigger value="jurnal" className="rounded-lg data-[state=active]:bg-indigo-600 data-[state=active]:text-white py-2.5 px-4"><CheckSquare className="w-4 h-4 mr-2" /> Jurnal & Absensi</TabsTrigger>
           <TabsTrigger value="materi" className="rounded-lg data-[state=active]:bg-indigo-600 data-[state=active]:text-white py-2.5 px-4"><BookOpen className="w-4 h-4 mr-2" /> Materi Belajar</TabsTrigger>
           <TabsTrigger value="tugas" className="rounded-lg data-[state=active]:bg-indigo-600 data-[state=active]:text-white py-2.5 px-4"><FileText className="w-4 h-4 mr-2" /> Penugasan</TabsTrigger>
+          <TabsTrigger value="penilaian" className="rounded-lg data-[state=active]:bg-indigo-600 data-[state=active]:text-white py-2.5 px-4"><BarChart3 className="w-4 h-4 mr-2" /> Penilaian</TabsTrigger>
         </TabsList>
 
         <TabsContent value="jurnal" className="space-y-6">
@@ -62,9 +64,7 @@ export default async function KelasDetailGuru({ params }: { params: { id: string
               <h3 className="font-bold text-lg text-slate-800">Jurnal Mengajar</h3>
               <p className="text-sm text-slate-500">Catat materi yang diajarkan dan absensi siswa per pertemuan.</p>
             </div>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center text-sm shadow-sm">
-              <Plus className="w-4 h-4 mr-1"/> Buat Jurnal Baru
-            </button>
+            <JurnalDialog pengampuId={pengampuId} anggota={pengampu.kelasFormal.anggota} />
           </div>
 
           {pengampu.jurnalMengajar.length === 0 ? (
@@ -101,12 +101,15 @@ export default async function KelasDetailGuru({ params }: { params: { id: string
               <h3 className="font-bold text-lg text-slate-800">Materi Belajar</h3>
               <p className="text-sm text-slate-500">Unggah modul, video, atau bahan bacaan untuk santri.</p>
             </div>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center text-sm shadow-sm">
-              <Plus className="w-4 h-4 mr-1"/> Tambah Materi
-            </button>
+            <MateriDialog pengampuId={pengampuId} />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          {pengampu.materiBelajar.length === 0 ? (
+            <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-500">
+              Belum ada materi belajar yang diunggah.
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
             {pengampu.materiBelajar.map(m => (
               <div key={m.id} className="bg-white rounded-xl border shadow-sm p-5 flex gap-4">
                 <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${
@@ -123,6 +126,7 @@ export default async function KelasDetailGuru({ params }: { params: { id: string
               </div>
             ))}
           </div>
+          )}
         </TabsContent>
 
         <TabsContent value="tugas" className="space-y-6">
@@ -131,12 +135,15 @@ export default async function KelasDetailGuru({ params }: { params: { id: string
               <h3 className="font-bold text-lg text-slate-800">Penugasan</h3>
               <p className="text-sm text-slate-500">Berikan tugas terstruktur dan pantau pengumpulan santri.</p>
             </div>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center text-sm shadow-sm">
-              <Plus className="w-4 h-4 mr-1"/> Buat Tugas
-            </button>
+            <TugasDialog pengampuId={pengampuId} />
           </div>
 
-          <div className="space-y-4">
+          {pengampu.tugas.length === 0 ? (
+            <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-500">
+              Belum ada tugas yang diberikan.
+            </div>
+          ) : (
+            <div className="space-y-4">
             {pengampu.tugas.map(t => (
               <div key={t.id} className="bg-white p-5 rounded-xl border shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <div>
@@ -150,11 +157,26 @@ export default async function KelasDetailGuru({ params }: { params: { id: string
                     </span>
                   </div>
                 </div>
-                <button className="text-indigo-600 text-sm font-semibold hover:underline">
+                <Link href={`/elearning/guru/kelas/${pengampuId}/tugas/${t.id}`} className="text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">
                   Lihat Pengumpulan
-                </button>
+                </Link>
               </div>
             ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="penilaian">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+            <BarChart3 className="h-12 w-12 text-indigo-300 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-slate-700 mb-2">Penilaian Santri</h3>
+            <p className="text-slate-500 text-sm mb-6">Input nilai UTS, UAS, dan rekap nilai akhir seluruh santri.</p>
+            <Link
+              href={`/elearning/guru/kelas/${pengampuId}/penilaian`}
+              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-md"
+            >
+              <BarChart3 className="h-4 w-4" /> Buka Halaman Penilaian
+            </Link>
           </div>
         </TabsContent>
       </Tabs>

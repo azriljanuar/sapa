@@ -29,6 +29,9 @@ const profilSchema = z.object({
   alamat: z.string().optional().nullable(),
   telepon: z.string().optional().nullable(),
   email: z.string().email("Format email tidak valid").optional().or(z.literal("")).nullable(),
+  templateSKL: z.string().optional().nullable(),
+  waktuMulaiAbsen: z.string().optional().nullable(),
+  waktuAkhirAbsen: z.string().optional().nullable(),
 })
 
 type ProfilType = z.infer<typeof profilSchema>
@@ -48,6 +51,9 @@ export function ProfilJenjangClient({ initialData }: { initialData: ProfilType }
       alamat: initialData.alamat || "",
       telepon: initialData.telepon || "",
       email: initialData.email || "",
+      templateSKL: initialData.templateSKL || "",
+      waktuMulaiAbsen: initialData.waktuMulaiAbsen || "",
+      waktuAkhirAbsen: initialData.waktuAkhirAbsen || "",
     },
   })
 
@@ -61,6 +67,9 @@ export function ProfilJenjangClient({ initialData }: { initialData: ProfilType }
       if (values.alamat) formData.append("alamat", values.alamat)
       if (values.telepon) formData.append("telepon", values.telepon)
       if (values.email) formData.append("email", values.email)
+      if (values.waktuMulaiAbsen) formData.append("waktuMulaiAbsen", values.waktuMulaiAbsen)
+      if (values.waktuAkhirAbsen) formData.append("waktuAkhirAbsen", values.waktuAkhirAbsen)
+      if (values.templateSKL) formData.append("templateSKL", values.templateSKL)
       
       const res = await updateProfilJenjang(formData)
       if (res.success) {
@@ -211,6 +220,67 @@ export function ProfilJenjangClient({ initialData }: { initialData: ProfilType }
                       <Textarea 
                         placeholder="Detail alamat gedung / sekolah..." 
                         className="min-h-[100px]"
+                        {...field} 
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="col-span-1 md:col-span-2 border-t border-slate-100 pt-4 mt-2">
+                <h3 className="text-lg font-medium mb-2 text-slate-800">Pengaturan Absensi Harian (QR Scan)</h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  Tentukan rentang waktu berlakunya absensi harian (contoh: 05:00 - 08:00). Biarkan kosong jika tidak ada batasan.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="waktuMulaiAbsen"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Waktu Mulai Absen</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="waktuAkhirAbsen"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Waktu Selesai Absen</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="col-span-1 md:col-span-2 border-t border-slate-100 pt-4 mt-2">
+                <h3 className="text-lg font-medium mb-2 text-slate-800">Template Surat Keterangan Lulus (SKL)</h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  Anda bisa menggunakan HTML. Variabel yang tersedia: <code>{`{{NAMA}}`}</code>, <code>{`{{NISN}}`}</code>, <code>{`{{TTL}}`}</code>, <code>{`{{JENJANG}}`}</code>, <code>{`{{TAHUN_LULUS}}`}</code>, <code>{`{{TAHUN_AJARAN}}`}</code>, <code>{`{{KEPALA_MADRASAH}}`}</code>, <code>{`{{NIP_KEPALA}}`}</code>
+                </p>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="templateSKL"
+                render={({ field }) => (
+                  <FormItem className="col-span-1 md:col-span-2">
+                    <FormLabel>Format HTML Template SKL</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Masukkan HTML Template SKL..." 
+                        className="min-h-[250px] font-mono text-sm"
                         {...field} 
                         value={field.value || ""}
                       />

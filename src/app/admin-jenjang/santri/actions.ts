@@ -65,6 +65,9 @@ export async function createSantri(formData: FormData) {
       namaIbu: validated.namaIbu || null,
     }
 
+    const { getSelectedTahunAjaran } = await import("@/lib/ta-context")
+    const activeTA = await getSelectedTahunAjaran()
+
     const existingSantri = await prisma.santri.findUnique({ where: { nisn: validated.nisn } })
     if (existingSantri) {
       await prisma.santri.update({
@@ -74,7 +77,12 @@ export async function createSantri(formData: FormData) {
       await prisma.santriJenjang.upsert({
         where: { santriId_jenjangId: { santriId: existingSantri.id, jenjangId: admin.jenjangId } },
         update: { statusMukim: validated.statusMukim },
-        create: { santriId: existingSantri.id, jenjangId: admin.jenjangId, statusMukim: validated.statusMukim }
+        create: { 
+          santriId: existingSantri.id, 
+          jenjangId: admin.jenjangId, 
+          statusMukim: validated.statusMukim,
+          tahunMasukId: activeTA?.id || null 
+        }
       })
     } else {
       await prisma.santri.create({
@@ -85,6 +93,7 @@ export async function createSantri(formData: FormData) {
             create: {
               jenjangId: admin.jenjangId,
               statusMukim: validated.statusMukim,
+              tahunMasukId: activeTA?.id || null
             }
           }
         },
@@ -121,6 +130,7 @@ export async function updateSantri(formData: FormData) {
       noKipPip: formData.get("noKipPip") as string,
       namaAyah: formData.get("namaAyah") as string,
       namaIbu: formData.get("namaIbu") as string,
+      tahunMasukId: formData.get("tahunMasukId") ? Number(formData.get("tahunMasukId")) : null,
     }
 
     const validated = santriSchema.parse(rawData)
@@ -162,7 +172,10 @@ export async function updateSantri(formData: FormData) {
 
     await prisma.santriJenjang.update({
       where: { santriId_jenjangId: { santriId: validated.id, jenjangId: admin.jenjangId } },
-      data: { statusMukim: validated.statusMukim }
+      data: { 
+        statusMukim: validated.statusMukim,
+        ...(validated.tahunMasukId !== undefined && { tahunMasukId: validated.tahunMasukId })
+      }
     })
 
     revalidatePath("/admin-jenjang/santri")
@@ -336,7 +349,12 @@ export async function importSantriExcel(formData: FormData) {
             await prisma.santriJenjang.upsert({
               where: { santriId_jenjangId: { santriId: santri.id, jenjangId: admin.jenjangId } },
               update: { statusMukim: false },
-              create: { santriId: santri.id, jenjangId: admin.jenjangId, statusMukim: false }
+              create: { 
+                santriId: santri.id, 
+                jenjangId: admin.jenjangId, 
+                statusMukim: false,
+                tahunMasukId: activeTA?.id || null
+              }
             })
           } else {
             santri = await prisma.santri.create({
@@ -346,7 +364,8 @@ export async function importSantriExcel(formData: FormData) {
                 jenjangs: {
                   create: {
                     jenjangId: admin.jenjangId,
-                    statusMukim: false
+                    statusMukim: false,
+                    tahunMasukId: activeTA?.id || null
                   }
                 }
               }

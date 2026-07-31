@@ -45,6 +45,11 @@ model JenjangPendidikan {
   telepon            String?
   email              String?
   logoUrl            String?
+  templateSKL        String?         @db.Text
+  
+  // Pengaturan Absensi QR
+  waktuMulaiAbsen    String?         // Format: HH:mm (misal: "05:00")
+  waktuAkhirAbsen    String?         // Format: HH:mm (misal: "08:00")
 
   users              User[]
   santriJenjang      SantriJenjang[]
@@ -62,6 +67,8 @@ model TahunAjaran {
   semester    Semester[]
   kelasFormal KelasFormal[]
   pengampu    PengampuMataPelajaran[]
+  santriMasuk SantriJenjang[]       @relation("TahunMasuk")
+  santriLulus SantriJenjang[]       @relation("TahunLulus")
 }
 
 model Semester {
@@ -73,6 +80,11 @@ model Semester {
 
   @@unique([tahunAjaranId, nama])
   jadwalPelajaran JadwalPelajaran[]
+  kehadiranGuru   KehadiranGuru[]
+  kehadiranSantri KehadiranHarianSantri[]
+  laporanSemester LaporanSemester[]
+  nilaiSumatif    NilaiSumatif[]
+  nilaiPAS        NilaiPAS[]
 }
 
 model Guru {
@@ -130,7 +142,17 @@ model Santri {
   kehadiranHarian  KehadiranHarianSantri[]
   absensiMapel     AbsensiMapel[]
   pengumpulanTugas PengumpulanTugas[]
-  penilaianAkhir   PenilaianAkhir[]
+  nilaiSumatif     NilaiSumatif[]
+  nilaiPAS         NilaiPAS[]
+  laporanSemester  LaporanSemester[]
+}
+
+enum StatusLanjutan {
+  KULIAH
+  KERJA
+  WIRAUSAHA
+  TIDAK_LANJUT
+  LAINNYA
 }
 
 model SantriJenjang {
@@ -140,8 +162,19 @@ model SantriJenjang {
   
   statusMukim      Boolean           @default(false)
   isAlumni         Boolean           @default(false)
+  tahunMasukId     Int?
+  tahunMasuk       TahunAjaran?      @relation("TahunMasuk", fields: [tahunMasukId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   tahunLulusId     Int?
+  tahunLulus       TahunAjaran?      @relation("TahunLulus", fields: [tahunLulusId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   keteranganLulus  String?           @db.Text
+  
+  // Data Profil Alumni
+  statusLanjutan       StatusLanjutan?
+  namaInstansi         String?         @db.Text
+  programStudi         String?
+  kotaDomisiliSekarang String?
+  kontakWA             String?
+  email                String?
 
   santri           Santri            @relation(fields: [santriId], references: [id], onDelete: Cascade)
   jenjang          JenjangPendidikan @relation(fields: [jenjangId], references: [id], onDelete: Restrict)
@@ -250,11 +283,14 @@ model PengampuMataPelajaran {
   guru            Guru          @relation(fields: [guruId], references: [id], onDelete: Cascade)
   tahunAjaranId   Int
   tahunAjaran     TahunAjaran   @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
+  kkm             Float?        // KKM per kelas per mapel, diedit admin jenjang
   jadwalPelajaran JadwalPelajaran[]
   jurnalMengajar  JurnalMengajar[]
   materiBelajar   MateriBelajar[]
   tugas           Tugas[]
-  penilaianAkhir  PenilaianAkhir[]
+  nilaiSumatif    NilaiSumatif[]
+  nilaiPAS        NilaiPAS[]
+  laporanSemester LaporanSemester[]
 
   @@unique([mataPelajaranId, kelasFormalId, tahunAjaranId])
   @@index([kelasFormalId])
@@ -318,10 +354,12 @@ enum StatusKehadiran {
 
 model KehadiranGuru {
   id        Int      @id @default(autoincrement())
-  guruId    Int
-  guru      Guru     @relation(fields: [guruId], references: [id], onDelete: Cascade)
-  tanggal   DateTime @db.Date
-  status    StatusKehadiran
+  guruId     Int
+  guru       Guru     @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  semesterId Int?
+  semester   Semester? @relation(fields: [semesterId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  tanggal    DateTime @db.Date
+  status     StatusKehadiran
   keterangan String? @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -336,6 +374,8 @@ model KehadiranHarianSantri {
   santri        Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
   kelasFormalId Int
   kelasFormal   KelasFormal @relation(fields: [kelasFormalId], references: [id], onDelete: Cascade)
+  semesterId    Int?
+  semester      Semester?   @relation(fields: [semesterId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   tanggal       DateTime    @db.Date
   status        StatusKehadiran
   keterangan    String?     @db.Text
@@ -354,6 +394,8 @@ model JurnalMengajar {
   tanggal       DateTime              @db.Date
   materi        String                @db.Text
   catatan       String?               @db.Text
+  sumatifKe     Int?                  // 1, 2, atau 3
+  pertemuanKe   Int?                  // urutan pertemuan dalam sumatif (1–15)
   createdAt     DateTime              @default(now())
   updatedAt     DateTime              @updatedAt
 
@@ -433,21 +475,62 @@ model PengumpulanTugas {
   @@index([santriId])
 }
 
-model PenilaianAkhir {
-  id            Int                   @id @default(autoincrement())
-  pengampuId    Int
-  pengampu      PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
-  santriId      Int
-  santri        Santri                @relation(fields: [santriId], references: [id], onDelete: Cascade)
-  nilaiTugasRata Float?
-  nilaiUTS       Float?
-  nilaiUAS       Float?
-  nilaiAkhir     Float?
-  grade          String?
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
+// NilaiSumatif — nilai per santri per sumatif (1/2/3) per mata pelajaran
+model NilaiSumatif {
+  id              Int                   @id @default(autoincrement())
+  pengampuId      Int
+  pengampu        PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
+  santriId        Int
+  santri          Santri                @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  semesterId      Int
+  semester        Semester              @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  sumatifKe       Int                   // 1, 2, atau 3
+  nilaiKurikuler  Float?                // input manual guru
+  nilaiTesSumatif Float?                // input manual guru
+  // nilaiKehadiran & nilaiRata dihitung on-the-fly dari AbsensiMapel
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
 
-  @@unique([pengampuId, santriId])
+  @@unique([pengampuId, santriId, sumatifKe, semesterId])
   @@index([pengampuId])
   @@index([santriId])
+  @@index([semesterId])
+}
+
+// NilaiPAS — Nilai Penilaian Akhir Semester per santri per mata pelajaran
+model NilaiPAS {
+  id         Int                   @id @default(autoincrement())
+  pengampuId Int
+  pengampu   PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
+  santriId   Int
+  santri     Santri                @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  semesterId Int
+  semester   Semester              @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  nilai      Float?
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+
+  @@unique([pengampuId, santriId, semesterId])
+  @@index([pengampuId])
+  @@index([santriId])
+  @@index([semesterId])
+}
+
+model LaporanSemester {
+  id          Int                   @id @default(autoincrement())
+  santriId    Int
+  santri      Santri                @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  semesterId  Int
+  semester    Semester              @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  pengampuId  Int
+  pengampu    PengampuMataPelajaran @relation(fields: [pengampuId], references: [id], onDelete: Cascade)
+  nilaiAkhir  Float?
+  grade       String?
+  isFinalized Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+
+  @@unique([santriId, pengampuId, semesterId])
+  @@index([santriId])
+  @@index([semesterId])
+  @@index([pengampuId])
 }

@@ -111,45 +111,80 @@ export function GuruProfilClient({ guru, templateKartu }: { guru: any, templateK
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-xl shadow-sm border flex flex-col md:flex-row items-center gap-6">
-        <div className="relative group">
-          <div className="w-32 h-32 rounded-full overflow-hidden bg-slate-100 border-4 border-white shadow-sm flex items-center justify-center">
-            {guru.fotoWajah ? (
-              <img src={guru.fotoWajah} alt="Foto Profil" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-slate-400 text-sm text-center">Belum ada foto</span>
-            )}
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      
+      {/* Left Column: Profil & Informasi Tugas */}
+      <div className="xl:col-span-1 space-y-6">
+        {/* Profile Card */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
+          <div className="relative group mb-4">
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-slate-100 border-4 border-white shadow-sm flex items-center justify-center">
+              {guru.fotoWajah ? (
+                <img src={guru.fotoWajah} alt="Foto Profil" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-slate-400 text-sm text-center">Belum ada foto</span>
+              )}
+            </div>
+            <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+              <Camera className="w-6 h-6 mr-1" />
+              <span className="text-xs font-medium">Ubah</span>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/png, image/jpeg" 
+                onChange={handlePhotoUpload}
+                disabled={isUploadingPhoto}
+              />
+            </label>
           </div>
-          <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-            <Camera className="w-6 h-6 mr-1" />
-            <span className="text-xs font-medium">Ubah</span>
-            <input 
-              type="file" 
-              className="hidden" 
-              accept="image/png, image/jpeg" 
-              onChange={handlePhotoUpload}
-              disabled={isUploadingPhoto}
-            />
-          </label>
-        </div>
-        <div className="text-center md:text-left flex-1">
           <h2 className="text-xl font-bold text-slate-800">{guru.nama}</h2>
           <p className="text-sm text-slate-500">{guru.email}</p>
-          {isUploadingPhoto && <p className="text-xs text-blue-600 mt-2 animate-pulse">Sedang mengupload...</p>}
+          {isUploadingPhoto && <p className="text-xs text-indigo-600 mt-2 animate-pulse">Sedang mengupload...</p>}
         </div>
-        <div className="w-full md:w-auto mt-4 md:mt-0">
+
+        {/* Informasi Tugas */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+          <h2 className="font-semibold text-lg text-slate-800 border-b border-slate-100 pb-2">Informasi Tugas</h2>
+          <div>
+            <p className="text-sm text-slate-500 font-medium mb-2">Mengajar di Jenjang:</p>
+            <div className="flex flex-wrap gap-2">
+              {guru.jenjangs.map((j: any) => (
+                <span key={j.id} className="bg-indigo-50 text-indigo-700 text-xs px-2.5 py-1 rounded-md font-bold">
+                  {j.nama}
+                </span>
+              ))}
+              {guru.jenjangs.length === 0 && <span className="text-sm text-slate-400">-</span>}
+            </div>
+          </div>
+          <div>
+            <p className="text-sm text-slate-500 font-medium mb-2 mt-4">Wali Kelas:</p>
+            <ul className="space-y-2">
+              {guru.waliKelas.map((w: any) => (
+                <li key={w.id} className="text-sm font-semibold text-slate-800 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  Kelas {w.namaKelas} <span className="text-slate-500 font-normal ml-1">({w.tahunAjaran.nama})</span>
+                </li>
+              ))}
+              {guru.waliKelas.length === 0 && <li className="text-sm text-slate-400">Tidak menjadi wali kelas</li>}
+            </ul>
+          </div>
+        </div>
+
+        {/* Kartu Identitas */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
+          <h2 className="font-semibold text-lg text-slate-800 w-full border-b border-slate-100 pb-2 mb-4">Kartu Identitas</h2>
           <IdCardPreview user={guru} tipe="GURU" template={templateKartu} />
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="font-semibold text-lg">Biodata Pribadi</h2>
-          <Button variant={isEditing ? "outline" : "default"} onClick={() => setIsEditing(!isEditing)}>
-            {isEditing ? "Batal Edit" : "Edit Profil"}
-          </Button>
-        </div>
+      {/* Right Column: Biodata */}
+      <div className="xl:col-span-2 space-y-6">
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="font-semibold text-lg text-slate-800">Biodata Pribadi</h2>
+            <Button variant={isEditing ? "outline" : "default"} onClick={() => setIsEditing(!isEditing)} className="rounded-xl">
+              {isEditing ? "Batal Edit" : "Edit Profil"}
+            </Button>
+          </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -400,6 +435,7 @@ export function GuruProfilClient({ guru, templateKartu }: { guru: any, templateK
           )}
         </form>
       </Form>
+    </div>
     </div>
     </div>
   )

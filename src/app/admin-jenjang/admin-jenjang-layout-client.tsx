@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
   Menu, Search, Bell, Home, Users, BookOpen, GraduationCap, 
-  Settings, LogOut, ChevronLeft, Building, Box, Library, CalendarDays, IdCard
+  Settings, LogOut, ChevronLeft, Building, Box, Library, CalendarDays, IdCard, ClipboardList, BarChart2
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -35,10 +35,13 @@ export function AdminJenjangLayoutClient({
     { name: "Mata Pelajaran", href: "/admin-jenjang/mata-pelajaran", icon: Library },
     { name: "Jadwal Pelajaran", href: "/admin-jenjang/jadwal-pelajaran", icon: CalendarDays },
     { name: "Kartu Identitas", href: "/admin-jenjang/kartu-identitas", icon: IdCard },
+    { name: "Rekap Kehadiran", href: "/admin-jenjang/rekap-kehadiran", icon: ClipboardList },
+    { name: "Penilaian", href: "/admin-jenjang/penilaian", icon: BarChart2 },
     { name: "Data Sarpras", href: "/admin-jenjang/sarpras", icon: Box },
     { name: "Data Santri", href: "/admin-jenjang/santri", icon: GraduationCap },
     { name: "Data Alumni", href: "/admin-jenjang/alumni", icon: GraduationCap },
   ]
+
 
   const isActive = (href: string) => {
     if (href === "/admin-jenjang") {
@@ -60,7 +63,7 @@ export function AdminJenjangLayoutClient({
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col print:hidden",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-transparent">
@@ -151,7 +154,7 @@ export function AdminJenjangLayoutClient({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
         {/* Top Header */}
-        <header className="h-16 shrink-0 bg-transparent flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10">
+        <header className="h-16 shrink-0 bg-transparent flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10 print:hidden">
           <div className="flex items-center gap-4 flex-1">
             <button 
               className="p-2 -ml-2 text-slate-500 hover:text-slate-600 lg:hidden rounded-full hover:bg-slate-50"

@@ -62,3 +62,43 @@ export async function updateKeteranganLulus(id: number, keterangan: string) {
     return { success: false, error: "Gagal memperbarui keterangan" }
   }
 }
+
+export async function updateProfilAlumni(santriId: number, data: {
+  statusLanjutan?: any,
+  namaInstansi?: string,
+  programStudi?: string,
+  kotaDomisiliSekarang?: string,
+  kontakWA?: string,
+  email?: string
+}) {
+  try {
+    const admin = await getLoggedInAdminJenjang()
+    if (!admin.jenjangId) throw new Error("Akses ditolak.")
+
+    const existing = await prisma.santriJenjang.findUnique({
+      where: { santriId_jenjangId: { santriId, jenjangId: admin.jenjangId } }
+    })
+    
+    if (!existing) {
+      throw new Error("Data alumni tidak ditemukan di jenjang ini.")
+    }
+
+    await prisma.santriJenjang.update({
+      where: { id: existing.id },
+      data: {
+        statusLanjutan: data.statusLanjutan || null,
+        namaInstansi: data.namaInstansi || null,
+        programStudi: data.programStudi || null,
+        kotaDomisiliSekarang: data.kotaDomisiliSekarang || null,
+        kontakWA: data.kontakWA || null,
+        email: data.email || null,
+      }
+    })
+
+    revalidatePath("/admin-jenjang/alumni")
+    return { success: true }
+  } catch (error) {
+    if (error instanceof Error) return { success: false, error: error.message }
+    return { success: false, error: "Gagal memperbarui profil alumni" }
+  }
+}
