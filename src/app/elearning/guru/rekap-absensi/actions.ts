@@ -12,8 +12,8 @@ export async function getRekapAbsensiWaliKelas() {
   const { getSelectedSemester } = await import("@/lib/ta-context")
   const selectedSem = await getSelectedSemester()
   
-  let activeTA = selectedSem?.tahunAjaran
-  let activeSemester = selectedSem
+  let activeTA: any = selectedSem?.tahunAjaran
+  let activeSemester: any = selectedSem
 
   if (!activeTA) {
     activeTA = await prisma.tahunAjaran.findFirst({

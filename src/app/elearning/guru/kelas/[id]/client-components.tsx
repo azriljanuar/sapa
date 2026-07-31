@@ -28,7 +28,7 @@ export function JurnalDialog({ pengampuId, anggota }: { pengampuId: number, angg
     e.preventDefault()
     setIsLoading(true)
     try {
-      const res = await createJurnalMengajar(pengampuId, new Date(tanggal), materi, catatan, absensi)
+      const res = await createJurnalMengajar(pengampuId, new Date(tanggal), materi, 1, 1, catatan, absensi)
       if (res.success) {
         setOpen(false)
         setMateri("")

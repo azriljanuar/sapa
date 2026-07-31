@@ -114,7 +114,7 @@ export async function snapshotNilaiSemester(semesterId: number) {
     if (!session || session.role !== "SUPER_ADMIN") throw new Error("Unauthorized")
 
     // Get all PenilaianAkhir for this semester's pengampu
-    const penilaians = await prisma.penilaianAkhir.findMany({
+    const penilaians = await (prisma as any).penilaianAkhir.findMany({
       where: {
         pengampu: {
           kelasFormal: {
@@ -132,7 +132,7 @@ export async function snapshotNilaiSemester(semesterId: number) {
        return { success: true, message: "Tidak ada data nilai untuk semester ini" }
     }
 
-    const dataToInsert = penilaians.map(p => ({
+    const dataToInsert = penilaians.map((p: any) => ({
       santriId: p.santriId,
       semesterId: semesterId,
       pengampuId: p.pengampuId,
@@ -142,7 +142,7 @@ export async function snapshotNilaiSemester(semesterId: number) {
     }))
 
     await prisma.$transaction(
-      dataToInsert.map(d => prisma.laporanSemester.upsert({
+      dataToInsert.map((d: any) => (prisma as any).laporanSemester.upsert({
         where: { santriId_pengampuId_semesterId: { santriId: d.santriId, pengampuId: d.pengampuId, semesterId: d.semesterId } },
         update: { nilaiAkhir: d.nilaiAkhir, grade: d.grade, isFinalized: true },
         create: d

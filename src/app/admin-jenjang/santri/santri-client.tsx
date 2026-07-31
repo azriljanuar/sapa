@@ -622,8 +622,8 @@ export function SantriClient({ initialData, tahunAjarans }: { initialData: Santr
                     <FormItem>
                       <FormLabel>Tahun Masuk (Tahun Ajaran)</FormLabel>
                       <Select 
-                        onValueChange={(val) => field.onChange(val === "null" ? null : parseInt(val))} 
-                        value={field.value ? field.value.toString() : "null"}
+                        onValueChange={(val) => field.onChange(val === "null" ? null : Number(val))} 
+                        value={field.value != null ? String(field.value) : "null"}
                       >
                         <FormControl>
                           <SelectTrigger>
