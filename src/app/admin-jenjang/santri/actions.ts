@@ -22,6 +22,7 @@ const santriSchema = z.object({
   noKipPip: z.string().optional().nullable(),
   namaAyah: z.string().optional().nullable(),
   namaIbu: z.string().optional().nullable(),
+  tahunMasukId: z.number().optional().nullable(),
 })
 
 export async function createSantri(formData: FormData) {

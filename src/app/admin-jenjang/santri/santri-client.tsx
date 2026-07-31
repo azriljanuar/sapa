@@ -93,7 +93,8 @@ export function SantriClient({ initialData, tahunAjarans }: { initialData: Santr
   const [importFile, setImportFile] = useState<File | null>(null)
 
   const form = useForm<z.infer<typeof santriSchema>>({
-    resolver: zodResolver(santriSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(santriSchema) as any,
     defaultValues: {
       nisn: "",
       namaLengkap: "",
@@ -110,6 +111,7 @@ export function SantriClient({ initialData, tahunAjarans }: { initialData: Santr
       noKipPip: "",
       namaAyah: "",
       namaIbu: "",
+      tahunMasukId: null,
     },
   })
 
