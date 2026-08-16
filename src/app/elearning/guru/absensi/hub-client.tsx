@@ -3,10 +3,16 @@
 import { useState, useTransition } from "react"
 import {
   CheckSquare, CheckCircle2, BookOpen, Users, BarChart3, ClipboardList,
-  Plus, ChevronDown, ChevronRight, Save, AlertCircle, Loader2, GraduationCap
+  Plus, ChevronDown, ChevronRight, Save, AlertCircle, Loader2, GraduationCap,
+  Pencil, Lock, LockOpen, Download, Upload, Printer
 } from "lucide-react"
-import { catatKehadiranGuru, createJurnalMengajar, simpanNilaiSumatif, simpanNilaiPAS } from "../actions"
+import { 
+  catatKehadiranGuru, createJurnalMengajar, 
+  simpanNilaiSumatif, simpanNilaiPAS, 
+  simpanSemuaNilaiSumatif, simpanSemuaNilaiPAS 
+} from "../actions"
 import { StatusKehadiran } from "@prisma/client"
+import * as XLSX from "xlsx"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Santri = { id: number; namaLengkap: string; nisn: string }
@@ -356,6 +362,9 @@ function TabNilaiSumatif({ pengampuList, santriPerKelas, semesterId }: {
   const [localNilai, setLocalNilai] = useState<Record<string, string>>({})
   const [savingKey, setSavingKey] = useState<string | null>(null)
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set())
+  const [editMode, setEditMode] = useState<Set<string>>(new Set())
+  const [isSavingAll, setIsSavingAll] = useState(false)
+  const [importDataPreview, setImportDataPreview] = useState<any[] | null>(null)
 
   const pengampu = pengampuList.find(p => p.id === selectedPengampuId)
   const santriList = pengampu ? (santriPerKelas[pengampu.kelasFormalId] || []) : []
@@ -389,24 +398,190 @@ function TabNilaiSumatif({ pengampuList, santriPerKelas, semesterId }: {
       isNaN(tes) ? null : tes
     )
     setSavingKey(null)
-    if (res.success) setSavedKeys(prev => new Set([...prev, saveKey]))
-    else alert("Gagal: " + res.error)
+    if (res.success) {
+      setSavedKeys(prev => new Set([...prev, saveKey]))
+      setEditMode(prev => {
+        const next = new Set(prev)
+        next.delete(saveKey)
+        return next
+      })
+    } else alert("Gagal: " + res.error)
+  }
+
+  const handleSimpanSemua = async () => {
+    if (!pengampu || !semesterId) return
+    setIsSavingAll(true)
+    const payload = santriList.map(s => {
+      const existing = getNilaiSumatif(s.id, activeSumatif)
+      const keyK = `${s.id}-${activeSumatif}-k`
+      const keyT = `${s.id}-${activeSumatif}-t`
+      const kurikuler = parseFloat(getLocalVal(keyK, existing?.nilaiKurikuler))
+      const tes = parseFloat(getLocalVal(keyT, existing?.nilaiTesSumatif))
+      return {
+        santriId: s.id,
+        nilaiKurikuler: isNaN(kurikuler) ? null : kurikuler,
+        nilaiTesSumatif: isNaN(tes) ? null : tes
+      }
+    })
+
+    const res = await simpanSemuaNilaiSumatif(pengampu.id, semesterId, activeSumatif, payload)
+    setIsSavingAll(false)
+    if (res.success) {
+      const keysToSave = santriList.map(s => `${s.id}-${activeSumatif}`)
+      setSavedKeys(prev => new Set([...prev, ...keysToSave]))
+      setEditMode(new Set())
+    } else {
+      alert("Gagal menyimpan: " + res.error)
+    }
+  }
+
+  const downloadTemplate = () => {
+    if (!pengampu) return
+    const data = santriList.map((s, i) => ({
+      "No": i + 1,
+      "Nama Santri": s.namaLengkap,
+      "NISN": s.nisn || "-",
+      "Nilai Kurikuler S1": getNilaiSumatif(s.id, 1)?.nilaiKurikuler ?? "",
+      "Nilai Tes S1": getNilaiSumatif(s.id, 1)?.nilaiTesSumatif ?? "",
+      "Nilai Kurikuler S2": getNilaiSumatif(s.id, 2)?.nilaiKurikuler ?? "",
+      "Nilai Tes S2": getNilaiSumatif(s.id, 2)?.nilaiTesSumatif ?? "",
+      "Nilai Kurikuler S3": getNilaiSumatif(s.id, 3)?.nilaiKurikuler ?? "",
+      "Nilai Tes S3": getNilaiSumatif(s.id, 3)?.nilaiTesSumatif ?? "",
+    }))
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.json_to_sheet(data)
+    ws['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }]
+    XLSX.utils.book_append_sheet(wb, ws, "Template Nilai Sumatif")
+    XLSX.writeFile(wb, `Template_Nilai_${pengampu.mataPelajaran.nama}_${pengampu.kelasFormal.namaKelas}.xlsx`)
+  }
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      const bstr = evt.target?.result
+      const wb = XLSX.read(bstr, { type: "binary" })
+      const ws = wb.Sheets[wb.SheetNames[0]]
+      const data = XLSX.utils.sheet_to_json(ws)
+      
+      const parsedData = data.map((row: any) => {
+        const santri = santriList.find(s => s.nisn === row["NISN"] || s.namaLengkap === row["Nama Santri"])
+        return {
+          santriId: santri?.id || null,
+          nama: row["Nama Santri"],
+          nisn: row["NISN"],
+          s1k: row["Nilai Kurikuler S1"], s1t: row["Nilai Tes S1"],
+          s2k: row["Nilai Kurikuler S2"], s2t: row["Nilai Tes S2"],
+          s3k: row["Nilai Kurikuler S3"], s3t: row["Nilai Tes S3"],
+          isError: !santri
+        }
+      })
+      setImportDataPreview(parsedData)
+    }
+    reader.readAsBinaryString(file)
+    e.target.value = "" // Reset input
+  }
+
+  const handleSimpanImport = async () => {
+    if (!pengampu || !semesterId || !importDataPreview) return
+    const validData = importDataPreview.filter(d => !d.isError && d.santriId)
+    setIsSavingAll(true)
+    try {
+      // Simpan untuk S1, S2, S3 secara berurutan
+      for (const s of [1, 2, 3]) {
+        const payload = validData.map(d => ({
+          santriId: d.santriId,
+          nilaiKurikuler: parseFloat(d[`s${s}k`]) || null,
+          nilaiTesSumatif: parseFloat(d[`s${s}t`]) || null,
+        }))
+        await simpanSemuaNilaiSumatif(pengampu.id, semesterId, s, payload)
+      }
+      setImportDataPreview(null)
+      // trigger refresh with window.location or handle state gracefully
+      window.location.reload()
+    } catch (e: any) {
+      alert("Gagal import: " + e.message)
+    } finally {
+      setIsSavingAll(false)
+    }
   }
 
   return (
     <div className="space-y-4">
       {/* Pilih Mapel */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-        <label className="text-sm font-semibold text-slate-600 block mb-2">Pilih Mata Pelajaran / Kelas</label>
-        <div className="flex flex-wrap gap-2">
-          {pengampuList.map(p => (
-            <button key={p.id} onClick={() => setSelectedPengampuId(p.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${selectedPengampuId === p.id ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"}`}>
-              {p.mataPelajaran.nama} – {p.kelasFormal.namaKelas}
-            </button>
-          ))}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <label className="text-sm font-semibold text-slate-600 block mb-2">Pilih Mata Pelajaran / Kelas</label>
+          <div className="flex flex-wrap gap-2">
+            {pengampuList.map(p => (
+              <button key={p.id} onClick={() => setSelectedPengampuId(p.id)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${selectedPengampuId === p.id ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"}`}>
+                {p.mataPelajaran.nama} – {p.kelasFormal.namaKelas}
+              </button>
+            ))}
+          </div>
         </div>
+        
+        {pengampu && santriList.length > 0 && (
+          <div className="flex gap-2">
+            <button onClick={downloadTemplate} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition shadow-sm">
+              <Download className="h-4 w-4 text-emerald-600" /> Template
+            </button>
+            <label className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition shadow-sm cursor-pointer">
+              <Upload className="h-4 w-4 text-blue-600" /> Import
+              <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleImportFile} />
+            </label>
+            <button onClick={handleSimpanSemua} disabled={isSavingAll} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition shadow-sm disabled:opacity-50">
+              {isSavingAll ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Simpan Semua
+            </button>
+          </div>
+        )}
       </div>
+
+      {importDataPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+            <h3 className="text-xl font-bold mb-4">Preview Import Data Sumatif</h3>
+            <div className="overflow-y-auto flex-1 mb-4 border rounded-xl">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 sticky top-0">
+                  <tr>
+                    <th className="px-3 py-2 border-b">Santri</th>
+                    <th className="px-3 py-2 border-b">NISN</th>
+                    <th className="px-3 py-2 border-b bg-indigo-50">S1-K</th>
+                    <th className="px-3 py-2 border-b bg-indigo-50">S1-T</th>
+                    <th className="px-3 py-2 border-b bg-blue-50">S2-K</th>
+                    <th className="px-3 py-2 border-b bg-blue-50">S2-T</th>
+                    <th className="px-3 py-2 border-b bg-emerald-50">S3-K</th>
+                    <th className="px-3 py-2 border-b bg-emerald-50">S3-T</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {importDataPreview.map((d, i) => (
+                    <tr key={i} className={d.isError ? "bg-red-50 text-red-700" : ""}>
+                      <td className="px-3 py-2">{d.nama} {d.isError && <AlertCircle className="inline h-4 w-4" />}</td>
+                      <td className="px-3 py-2">{d.nisn}</td>
+                      <td className="px-3 py-2 text-center">{d.s1k ?? "-"}</td>
+                      <td className="px-3 py-2 text-center">{d.s1t ?? "-"}</td>
+                      <td className="px-3 py-2 text-center">{d.s2k ?? "-"}</td>
+                      <td className="px-3 py-2 text-center">{d.s2t ?? "-"}</td>
+                      <td className="px-3 py-2 text-center">{d.s3k ?? "-"}</td>
+                      <td className="px-3 py-2 text-center">{d.s3t ?? "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <button onClick={() => setImportDataPreview(null)} className="px-5 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-xl">Batal</button>
+              <button onClick={handleSimpanImport} disabled={isSavingAll} className="px-5 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center gap-2">
+                {isSavingAll ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Konfirmasi & Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tab Sumatif */}
       <div className="flex gap-2">
@@ -435,7 +610,7 @@ function TabNilaiSumatif({ pengampuList, santriPerKelas, semesterId }: {
                   <th className="text-center px-3 py-3 text-slate-600 font-semibold">Kurikuler<br /><span className="text-xs font-normal text-slate-400">(input)</span></th>
                   <th className="text-center px-3 py-3 text-slate-600 font-semibold">Tes Sumatif<br /><span className="text-xs font-normal text-slate-400">(input)</span></th>
                   <th className="text-center px-3 py-3 text-slate-600 font-semibold">Rata-rata</th>
-                  <th className="text-center px-3 py-3 text-slate-600 font-semibold w-20">Simpan</th>
+                  <th className="text-center px-3 py-3 text-slate-600 font-semibold w-24">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -449,12 +624,15 @@ function TabNilaiSumatif({ pengampuList, santriPerKelas, semesterId }: {
                   const kurikulerNum = parseFloat(kurikulerStr)
                   const tesNum = parseFloat(tesStr)
                   const rata = hitungNilaiSumatifRata(keyadiranVal, isNaN(kurikulerNum) ? null : kurikulerNum, isNaN(tesNum) ? null : tesNum)
+                  
                   const saveKey = `${s.id}-${activeSumatif}`
-                  const isSaving = savingKey === saveKey
-                  const isSaved = savedKeys.has(saveKey)
+                  const isSaving = savingKey === saveKey || isSavingAll
+                  const isSaved = savedKeys.has(saveKey) || !!existing
+                  const isEditing = editMode.has(saveKey)
+                  const readOnly = isSaved && !isEditing
 
                   return (
-                    <tr key={s.id} className="hover:bg-slate-50/50 transition">
+                    <tr key={s.id} className={`transition ${readOnly ? "bg-slate-50/50" : "hover:bg-indigo-50/30"}`}>
                       <td className="px-4 py-2.5 text-slate-500">{i + 1}</td>
                       <td className="px-4 py-2.5 font-medium text-slate-800">{s.namaLengkap}</td>
                       <td className="px-3 py-2.5 text-center">
@@ -463,18 +641,26 @@ function TabNilaiSumatif({ pengampuList, santriPerKelas, semesterId }: {
                         </span>
                       </td>
                       <td className="px-3 py-2.5 text-center">
-                        <input type="number" min={0} max={100}
-                          value={kurikulerStr}
-                          onChange={e => setLocalNilai(prev => ({ ...prev, [keyK]: e.target.value }))}
-                          className="w-20 border border-slate-200 rounded-lg px-2 py-1 text-center focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                          placeholder="–" />
+                        {readOnly ? (
+                          <span className="font-semibold text-slate-600">{kurikulerStr || "–"}</span>
+                        ) : (
+                          <input type="number" min={0} max={100}
+                            value={kurikulerStr}
+                            onChange={e => setLocalNilai(prev => ({ ...prev, [keyK]: e.target.value }))}
+                            className="w-20 border border-indigo-200 rounded-lg px-2 py-1 text-center focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                            placeholder="–" />
+                        )}
                       </td>
                       <td className="px-3 py-2.5 text-center">
-                        <input type="number" min={0} max={100}
-                          value={tesStr}
-                          onChange={e => setLocalNilai(prev => ({ ...prev, [keyT]: e.target.value }))}
-                          className="w-20 border border-slate-200 rounded-lg px-2 py-1 text-center focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                          placeholder="–" />
+                        {readOnly ? (
+                          <span className="font-semibold text-slate-600">{tesStr || "–"}</span>
+                        ) : (
+                          <input type="number" min={0} max={100}
+                            value={tesStr}
+                            onChange={e => setLocalNilai(prev => ({ ...prev, [keyT]: e.target.value }))}
+                            className="w-20 border border-indigo-200 rounded-lg px-2 py-1 text-center focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                            placeholder="–" />
+                        )}
                       </td>
                       <td className="px-3 py-2.5 text-center">
                         <span className={`font-bold text-base ${rata === null ? "text-slate-300" : rata >= kkm ? "text-emerald-600" : "text-red-500"}`}>
@@ -482,10 +668,21 @@ function TabNilaiSumatif({ pengampuList, santriPerKelas, semesterId }: {
                         </span>
                       </td>
                       <td className="px-3 py-2.5 text-center">
-                        <button onClick={() => handleSave(s.id, activeSumatif)} disabled={isSaving}
-                          className={`p-1.5 rounded-lg transition ${isSaved ? "text-emerald-600 hover:bg-emerald-50" : "text-indigo-600 hover:bg-indigo-50"}`}>
-                          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : isSaved ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          {readOnly ? (
+                            <button onClick={() => setEditMode(prev => new Set([...prev, saveKey]))} className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Edit Nilai">
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          ) : (
+                            <button onClick={() => handleSave(s.id, activeSumatif)} disabled={isSaving}
+                              className="p-1.5 rounded-lg transition text-indigo-600 hover:bg-indigo-50 bg-indigo-50/50" title="Simpan">
+                              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                            </button>
+                          )}
+                          {readOnly && (
+                             <Lock className="h-4 w-4 text-slate-300 inline-block ml-1" />
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )
@@ -507,6 +704,8 @@ function TabNilaiAkhir({ pengampuList, santriPerKelas, semesterId }: {
   const [localPAS, setLocalPAS] = useState<Record<number, string>>({})
   const [savingId, setSavingId] = useState<number | null>(null)
   const [savedIds, setSavedIds] = useState<Set<number>>(new Set())
+  const [editMode, setEditMode] = useState<Set<number>>(new Set())
+  const [isSavingAll, setIsSavingAll] = useState(false)
 
   const pengampu = pengampuList.find(p => p.id === selectedPengampuId)
   const santriList = pengampu ? (santriPerKelas[pengampu.kelasFormalId] || []) : []
@@ -544,26 +743,83 @@ function TabNilaiAkhir({ pengampuList, santriPerKelas, semesterId }: {
   const handleSavePAS = async (santriId: number) => {
     if (!pengampu || !semesterId) return
     const nilaiStr = localPAS[santriId]
-    const nilai = nilaiStr !== undefined ? parseFloat(nilaiStr) : (pengampu.nilaiPAS.find(n => n.santriId === santriId)?.nilai ?? null)
+    const existing = pengampu.nilaiPAS.find(n => n.santriId === santriId)
+    const nilai = nilaiStr !== undefined ? parseFloat(nilaiStr) : (existing?.nilai ?? null)
     setSavingId(santriId)
     const res = await simpanNilaiPAS(pengampu.id, santriId, semesterId, isNaN(nilai as number) ? null : nilai)
     setSavingId(null)
-    if (res.success) setSavedIds(prev => new Set([...prev, santriId]))
-    else alert("Gagal: " + res.error)
+    if (res.success) {
+      setSavedIds(prev => new Set([...prev, santriId]))
+      setEditMode(prev => {
+        const next = new Set(prev)
+        next.delete(santriId)
+        return next
+      })
+    } else alert("Gagal: " + res.error)
+  }
+
+  const handleSimpanSemua = async () => {
+    if (!pengampu || !semesterId) return
+    setIsSavingAll(true)
+    const payload = santriList.map(s => {
+      const nilaiStr = localPAS[s.id]
+      const existing = pengampu.nilaiPAS.find(n => n.santriId === s.id)
+      const nilai = nilaiStr !== undefined ? parseFloat(nilaiStr) : (existing?.nilai ?? null)
+      return {
+        santriId: s.id,
+        nilai: isNaN(nilai as number) ? null : nilai
+      }
+    })
+
+    const res = await simpanSemuaNilaiPAS(pengampu.id, semesterId, payload)
+    setIsSavingAll(false)
+    if (res.success) {
+      const idsToSave = santriList.map(s => s.id)
+      setSavedIds(prev => new Set([...prev, ...idsToSave]))
+      setEditMode(new Set())
+    } else {
+      alert("Gagal menyimpan: " + res.error)
+    }
+  }
+
+  const handleEksporExcel = () => {
+    if (!pengampu || !semesterId) return
+    window.open(`/api/guru/ekspor-nilai?pengampuId=${pengampu.id}&semesterId=${semesterId}`, "_blank")
+  }
+
+  const handlePrintRekap = () => {
+    if (!pengampu || !semesterId) return
+    window.open(`/elearning/guru/absensi/rekap-print?pengampuId=${pengampu.id}&semesterId=${semesterId}`, "_blank")
   }
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-        <label className="text-sm font-semibold text-slate-600 block mb-2">Pilih Mata Pelajaran / Kelas</label>
-        <div className="flex flex-wrap gap-2">
-          {pengampuList.map(p => (
-            <button key={p.id} onClick={() => setSelectedPengampuId(p.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${selectedPengampuId === p.id ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"}`}>
-              {p.mataPelajaran.nama} – {p.kelasFormal.namaKelas}
-            </button>
-          ))}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <label className="text-sm font-semibold text-slate-600 block mb-2">Pilih Mata Pelajaran / Kelas</label>
+          <div className="flex flex-wrap gap-2">
+            {pengampuList.map(p => (
+              <button key={p.id} onClick={() => setSelectedPengampuId(p.id)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${selectedPengampuId === p.id ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"}`}>
+                {p.mataPelajaran.nama} – {p.kelasFormal.namaKelas}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {pengampu && santriList.length > 0 && (
+          <div className="flex gap-2">
+            <button onClick={handleEksporExcel} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition shadow-sm">
+              <Download className="h-4 w-4 text-emerald-600" /> Ekspor Excel
+            </button>
+            <button onClick={handlePrintRekap} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition shadow-sm">
+              <Printer className="h-4 w-4 text-blue-600" /> Print Rekap
+            </button>
+            <button onClick={handleSimpanSemua} disabled={isSavingAll} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition shadow-sm disabled:opacity-50">
+              {isSavingAll ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Simpan Semua
+            </button>
+          </div>
+        )}
       </div>
 
       {pengampu && santriList.length > 0 && (
@@ -583,7 +839,7 @@ function TabNilaiAkhir({ pengampuList, santriPerKelas, semesterId }: {
                   <th className="px-3 py-3 text-slate-600 font-semibold">PAS<br/><span className="text-xs font-normal">(input)</span></th>
                   <th className="px-3 py-3 text-slate-600 font-semibold bg-amber-50">Nilai<br/>Akhir</th>
                   <th className="px-3 py-3 text-slate-600 font-semibold">Status</th>
-                  <th className="px-3 py-3 text-slate-600 font-semibold w-16">Simpan</th>
+                  <th className="px-3 py-3 text-slate-600 font-semibold w-24">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -604,27 +860,36 @@ function TabNilaiAkhir({ pengampuList, santriPerKelas, semesterId }: {
                     return hitungNilaiSumatifRata(kh, ns?.nilaiKurikuler ?? null, ns?.nilaiTesSumatif ?? null)
                   })()
                   const rataSumatif = getRataSumatif(s.id)
+                  const existingPAS = pengampu.nilaiPAS.find(n => n.santriId === s.id)
+                  const pasStr = localPAS[s.id] ?? (existingPAS?.nilai?.toString() ?? "")
                   const pas = getPASNilai(s.id)
                   const nilaiAkhir = getNilaiAkhir(rataSumatif, pas)
                   const lulus = nilaiAkhir !== null && nilaiAkhir >= kkm
-                  const isSaving = savingId === s.id
-                  const isSaved = savedIds.has(s.id)
+                  
+                  const isSaving = savingId === s.id || isSavingAll
+                  const isSaved = savedIds.has(s.id) || !!existingPAS
+                  const isEditing = editMode.has(s.id)
+                  const readOnly = isSaved && !isEditing
 
                   const fmt = (v: number | null) => v !== null ? v.toFixed(1) : "–"
 
                   return (
-                    <tr key={s.id} className="hover:bg-slate-50/50 transition">
+                    <tr key={s.id} className={`transition ${readOnly ? "bg-slate-50/50" : "hover:bg-indigo-50/30"}`}>
                       <td className="px-4 py-2.5 font-medium text-slate-800">{s.namaLengkap}</td>
                       <td className="px-3 py-2.5 text-center text-slate-600">{fmt(s1)}</td>
                       <td className="px-3 py-2.5 text-center text-slate-600">{fmt(s2)}</td>
                       <td className="px-3 py-2.5 text-center text-slate-600">{fmt(s3)}</td>
                       <td className="px-3 py-2.5 text-center font-semibold text-slate-800">{fmt(rataSumatif)}</td>
                       <td className="px-3 py-2.5 text-center">
-                        <input type="number" min={0} max={100}
-                          value={localPAS[s.id] ?? (pengampu.nilaiPAS.find(n => n.santriId === s.id)?.nilai?.toString() ?? "")}
-                          onChange={e => setLocalPAS(prev => ({ ...prev, [s.id]: e.target.value }))}
-                          className="w-20 border border-slate-200 rounded-lg px-2 py-1 text-center focus:ring-2 focus:ring-indigo-500 outline-none"
-                          placeholder="–" />
+                        {readOnly ? (
+                          <span className="font-semibold text-slate-600">{pasStr || "–"}</span>
+                        ) : (
+                          <input type="number" min={0} max={100}
+                            value={pasStr}
+                            onChange={e => setLocalPAS(prev => ({ ...prev, [s.id]: e.target.value }))}
+                            className="w-20 border border-indigo-200 rounded-lg px-2 py-1 text-center focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            placeholder="–" />
+                        )}
                       </td>
                       <td className="px-3 py-2.5 text-center bg-amber-50">
                         <span className={`font-bold text-base ${nilaiAkhir === null ? "text-slate-300" : lulus ? "text-emerald-600" : "text-red-500"}`}>
@@ -639,10 +904,21 @@ function TabNilaiAkhir({ pengampuList, santriPerKelas, semesterId }: {
                         )}
                       </td>
                       <td className="px-3 py-2.5 text-center">
-                        <button onClick={() => handleSavePAS(s.id)} disabled={isSaving}
-                          className={`p-1.5 rounded-lg transition ${isSaved ? "text-emerald-600 hover:bg-emerald-50" : "text-indigo-600 hover:bg-indigo-50"}`}>
-                          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : isSaved ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          {readOnly ? (
+                            <button onClick={() => setEditMode(prev => new Set([...prev, s.id]))} className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition" title="Edit Nilai">
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          ) : (
+                            <button onClick={() => handleSavePAS(s.id)} disabled={isSaving}
+                              className="p-1.5 rounded-lg transition text-indigo-600 hover:bg-indigo-50 bg-indigo-50/50" title="Simpan">
+                              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                            </button>
+                          )}
+                          {readOnly && (
+                             <Lock className="h-4 w-4 text-slate-300 inline-block ml-1" />
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )

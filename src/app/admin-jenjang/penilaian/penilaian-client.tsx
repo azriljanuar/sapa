@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { BarChart2, Settings2, ChevronDown, Save, Loader2, CheckCircle2, AlertCircle, Users, TrendingUp } from "lucide-react"
+import { BarChart2, Settings2, Save, Loader2, CheckCircle2, AlertCircle, TrendingUp } from "lucide-react"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type AbsensiItem = { santriId: number; status: string }
@@ -19,6 +19,7 @@ type Pengampu = {
 }
 type Santri = { id: number; namaLengkap: string; nisn: string }
 type Kelas = { id: number; namaKelas: string; anggota: { santri: Santri }[] }
+
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function hitungNilaiKehadiran(jurnal: Jurnal[], santriId: number, sumatifKe: number): number | null {

@@ -32,7 +32,8 @@ export function SantriLayoutClient({
   const pathname = usePathname()
 
   const navItems = [
-    { name: "Dashboard", href: "/elearning/santri", icon: LayoutDashboard },
+    { name: "Beranda Portal", href: "/", icon: LayoutDashboard },
+    { name: "Ruang Belajar", href: "/elearning/santri", icon: BookOpen },
     { name: "Tugas Saya", href: "/elearning/santri/tugas", icon: FileText },
     { name: "Jadwal Pelajaran", href: "/elearning/santri/jadwal", icon: Calendar },
     { name: "Profil Saya", href: "/elearning/santri/profil", icon: User },
@@ -43,6 +44,9 @@ export function SantriLayoutClient({
   }
 
   const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/"
+    }
     if (href === "/elearning/santri") {
       return pathname === href
     }

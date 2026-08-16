@@ -143,6 +143,81 @@ export async function simpanNilaiPAS(
   }
 }
 
+export async function simpanSemuaNilaiSumatif(
+  pengampuId: number,
+  semesterId: number,
+  sumatifKe: number,
+  data: { santriId: number; nilaiKurikuler: number | null; nilaiTesSumatif: number | null }[]
+) {
+  const session = await getSession()
+  if (!session || session.role !== "GURU") throw new Error("Unauthorized")
+
+  try {
+    // Gunakan transaksi untuk memastikan semua berhasil atau semua gagal
+    const results = await prisma.$transaction(
+      data.map((item) =>
+        prisma.nilaiSumatif.upsert({
+          where: {
+            pengampuId_santriId_sumatifKe_semesterId: {
+              pengampuId,
+              santriId: item.santriId,
+              sumatifKe,
+              semesterId,
+            },
+          },
+          update: {
+            nilaiKurikuler: item.nilaiKurikuler,
+            nilaiTesSumatif: item.nilaiTesSumatif,
+          },
+          create: {
+            pengampuId,
+            santriId: item.santriId,
+            semesterId,
+            sumatifKe,
+            nilaiKurikuler: item.nilaiKurikuler,
+            nilaiTesSumatif: item.nilaiTesSumatif,
+          },
+        })
+      )
+    )
+    revalidatePath(`/elearning/guru/absensi`)
+    return { success: true, count: results.length }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export async function simpanSemuaNilaiPAS(
+  pengampuId: number,
+  semesterId: number,
+  data: { santriId: number; nilai: number | null }[]
+) {
+  const session = await getSession()
+  if (!session || session.role !== "GURU") throw new Error("Unauthorized")
+
+  try {
+    const results = await prisma.$transaction(
+      data.map((item) =>
+        prisma.nilaiPAS.upsert({
+          where: {
+            pengampuId_santriId_semesterId: {
+              pengampuId,
+              santriId: item.santriId,
+              semesterId,
+            },
+          },
+          update: { nilai: item.nilai },
+          create: { pengampuId, santriId: item.santriId, semesterId, nilai: item.nilai },
+        })
+      )
+    )
+    revalidatePath(`/elearning/guru/absensi`)
+    return { success: true, count: results.length }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
 
 
 // --- MATERI BELAJAR ---

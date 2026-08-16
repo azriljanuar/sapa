@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Calendar, ClipboardList, Loader2, CheckCircle2, XCircle, AlertCircle, Info } from "lucide-react"
+import { Calendar, ClipboardList, Loader2, CheckCircle2, XCircle, AlertCircle, Info, Printer } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -118,6 +118,17 @@ export default function RekapKehadiranClient({
         </div>
       ) : data ? (
         <div className="space-y-6">
+          {/* Print Button */}
+          <div className="flex justify-end">
+            <a
+              href={`/admin-jenjang/rekap-kehadiran/print?kelasId=${selectedKelasId}&tanggal=${selectedTanggal}`}
+              target="_blank"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm"
+            >
+              <Printer className="w-4 h-4" />
+              Print Rekap
+            </a>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Card className="bg-emerald-50 border-emerald-100 shadow-sm">
               <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">

@@ -1,24 +1,6 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 
-// Helper to check if current time is within range
-function isTimeWithinRange(start?: string | null, end?: string | null): boolean {
-  if (!start || !end) return true; // No limit configured
-
-  const now = new Date();
-  
-  // Create Date objects for today with the specified times
-  const [startHour, startMin] = start.split(":").map(Number);
-  const startTime = new Date(now);
-  startTime.setHours(startHour, startMin, 0, 0);
-
-  const [endHour, endMin] = end.split(":").map(Number);
-  const endTime = new Date(now);
-  endTime.setHours(endHour, endMin, 0, 0);
-
-  return now >= startTime && now <= endTime;
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -30,6 +12,7 @@ export async function POST(req: Request) {
 
     const todayStr = new Date().toISOString().split("T")[0]
     const today = new Date(todayStr)
+    const scanTimeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
 
     // Cari semester aktif (digunakan untuk catatan absensi)
     const activeSemester = await prisma.semester.findFirst({
@@ -38,31 +21,11 @@ export async function POST(req: Request) {
 
     if (type === "GURU") {
       const guru = await prisma.guru.findUnique({
-        where: { id: parseInt(id) },
-        include: { jenjangs: true }
+        where: { id: parseInt(id) }
       })
 
       if (!guru) {
         return NextResponse.json({ success: false, message: "Data Guru tidak ditemukan" }, { status: 404 })
-      }
-
-      // Cek validasi jam absensi jika dikonfigurasi di salah satu jenjang
-      let isAllowedByTime = false;
-      let configuredJenjangCount = 0;
-      
-      for (const jenjang of guru.jenjangs) {
-        if (jenjang.waktuMulaiAbsen && jenjang.waktuAkhirAbsen) {
-          configuredJenjangCount++;
-          if (isTimeWithinRange(jenjang.waktuMulaiAbsen, jenjang.waktuAkhirAbsen)) {
-            isAllowedByTime = true;
-            break;
-          }
-        }
-      }
-
-      // Jika ada jenjang yang mengatur waktu, tapi tidak ada satupun yang match waktu saat ini
-      if (configuredJenjangCount > 0 && !isAllowedByTime) {
-        return NextResponse.json({ success: false, message: "Di luar batas waktu absensi yang ditentukan" }, { status: 400 })
       }
 
       // Cek apakah sudah absen hari ini
@@ -71,7 +34,7 @@ export async function POST(req: Request) {
       })
 
       if (existing) {
-        return NextResponse.json({ success: false, message: "Anda sudah melakukan absensi hari ini" }, { status: 400 })
+        return NextResponse.json({ success: false, message: "Anda sudah melakukan absensi hari ini", nama: guru.nama, fotoWajah: guru.fotoWajah, isDuplicate: true }, { status: 400 })
       }
 
       // Catat kehadiran
@@ -81,13 +44,16 @@ export async function POST(req: Request) {
           tanggal: today,
           status: "HADIR",
           semesterId: activeSemester?.id || null,
-          keterangan: "Hadir via QR Code"
+          keterangan: `Hadir via QR Code — ${scanTimeStr} WIB`
         }
       })
 
       return NextResponse.json({ 
         success: true, 
         nama: guru.nama, 
+        kelas: "-",
+        jenjang: "GURU",
+        fotoWajah: guru.fotoWajah,
         message: "Absensi Berhasil Disimpan" 
       })
 
@@ -95,10 +61,10 @@ export async function POST(req: Request) {
       const santri = await prisma.santri.findUnique({
         where: { id: parseInt(id) },
         include: {
-          jenjangs: { include: { jenjang: true } },
           riwayatKelas: {
-            where: { kelasFormal: { tahunAjaran: { isActive: true } } },
-            include: { kelasFormal: true }
+            orderBy: { id: 'desc' },
+            take: 1,
+            include: { kelasFormal: { include: { jenjang: true } } }
           }
         }
       })
@@ -109,15 +75,7 @@ export async function POST(req: Request) {
 
       const activeKelas = santri.riwayatKelas[0]?.kelasFormal
       if (!activeKelas) {
-        return NextResponse.json({ success: false, message: "Santri tidak terdaftar di kelas aktif mana pun" }, { status: 400 })
-      }
-
-      // Cek validasi jam absensi
-      const jenjang = santri.jenjangs[0]?.jenjang
-      if (jenjang && jenjang.waktuMulaiAbsen && jenjang.waktuAkhirAbsen) {
-        if (!isTimeWithinRange(jenjang.waktuMulaiAbsen, jenjang.waktuAkhirAbsen)) {
-          return NextResponse.json({ success: false, message: `Di luar batas waktu absensi (${jenjang.waktuMulaiAbsen} - ${jenjang.waktuAkhirAbsen})` }, { status: 400 })
-        }
+        return NextResponse.json({ success: false, message: "Santri tidak terdaftar di kelas mana pun" }, { status: 400 })
       }
 
       // Cek apakah sudah absen hari ini
@@ -126,7 +84,7 @@ export async function POST(req: Request) {
       })
 
       if (existing) {
-        return NextResponse.json({ success: false, message: "Anda sudah melakukan absensi hari ini" }, { status: 400 })
+        return NextResponse.json({ success: false, message: "Anda sudah melakukan absensi hari ini", nama: santri.namaLengkap, fotoWajah: santri.fotoWajah, isDuplicate: true }, { status: 400 })
       }
 
       // Catat kehadiran
@@ -137,13 +95,16 @@ export async function POST(req: Request) {
           tanggal: today,
           status: "HADIR",
           semesterId: activeSemester?.id || null,
-          keterangan: "Hadir via QR Code"
+          keterangan: `Hadir via QR Code — ${scanTimeStr} WIB`
         }
       })
 
       return NextResponse.json({ 
         success: true, 
-        nama: santri.namaLengkap, 
+        nama: santri.namaLengkap,
+        kelas: activeKelas.namaKelas,
+        jenjang: activeKelas.jenjang.nama,
+        fotoWajah: santri.fotoWajah,
         message: "Absensi Berhasil Disimpan" 
       })
     }

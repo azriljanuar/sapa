@@ -44,7 +44,8 @@ model JenjangPendidikan {
   alamat             String?         @db.Text
   telepon            String?
   email              String?
-  logoUrl            String?
+  logoUrl            String?         @db.Text
+  kopSuratUrl        String?         @db.Text
   templateSKL        String?         @db.Text
   
   // Pengaturan Absensi QR

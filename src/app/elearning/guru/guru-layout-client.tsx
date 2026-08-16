@@ -30,7 +30,8 @@ export function GuruLayoutClient({
   const pathname = usePathname()
 
   const navItems = [
-    { name: "Dashboard", href: "/elearning/guru", icon: LayoutDashboard },
+    { name: "Beranda Portal", href: "/", icon: LayoutDashboard },
+    { name: "Ruang Kelas", href: "/elearning/guru", icon: BookOpen },
     { name: "Jadwal Mengajar", href: "/elearning/guru/jadwal", icon: Calendar },
     { name: "Absensi", href: "/elearning/guru/absensi", icon: FileText },
     ...(isWaliKelas ? [{ name: "Rekap Absensi Kelas", href: "/elearning/guru/rekap-absensi", icon: Users }] : []),
@@ -38,6 +39,9 @@ export function GuruLayoutClient({
   ]
 
   const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/"
+    }
     if (href === "/elearning/guru") {
       return pathname === href
     }

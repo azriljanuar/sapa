@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { updateProfilJenjang } from "./actions"
+import { AsetDokumen } from "./aset-dokumen"
 
 const profilSchema = z.object({
   id: z.number(),
@@ -263,6 +264,11 @@ export function ProfilJenjangClient({ initialData }: { initialData: ProfilType }
                   />
                 </div>
               </div>
+
+              <AsetDokumen 
+                initialLogoUrl={(initialData as any).logoUrl || null} 
+                initialKopSuratUrl={(initialData as any).kopSuratUrl || null} 
+              />
 
               <div className="col-span-1 md:col-span-2 border-t border-slate-100 pt-4 mt-2">
                 <h3 className="text-lg font-medium mb-2 text-slate-800">Template Surat Keterangan Lulus (SKL)</h3>

@@ -86,8 +86,8 @@ export async function loginAction(prevState: unknown, formData: FormData) {
   if (session) {
     if (session.role === "SUPER_ADMIN") redirect("/super-admin")
     if (session.role === "ADMIN_JENJANG") redirect("/admin-jenjang")
-    if (session.role === "GURU") redirect("/elearning/guru")
-    if (session.role === "SANTRI") redirect("/elearning/santri")
+    if (session.role === "GURU") redirect("/")
+    if (session.role === "SANTRI") redirect("/")
   }
 
   // Fallback

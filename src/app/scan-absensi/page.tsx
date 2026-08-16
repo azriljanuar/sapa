@@ -7,14 +7,9 @@ export const metadata = {
 }
 
 export default async function ScanAbsensiPage() {
-  const { getSelectedTahunAjaran } = await import("@/lib/ta-context")
-  const activeTA = await getSelectedTahunAjaran()
-
-
   const jenjangs = await prisma.jenjangPendidikan.findMany({
     include: {
       kelas: {
-        where: activeTA ? { tahunAjaranId: activeTA.id } : undefined,
         orderBy: { namaKelas: 'asc' }
       }
     },
