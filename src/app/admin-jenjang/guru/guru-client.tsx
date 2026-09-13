@@ -54,7 +54,7 @@ export function GuruClient({ initialData }: { initialData: GuruType[] }) {
         </div>
       </div>
 
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border bg-white overflow-x-auto -mx-4 sm:mx-0">
         <Table>
           <TableHeader>
             <TableRow>

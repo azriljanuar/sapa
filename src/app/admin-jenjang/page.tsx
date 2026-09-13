@@ -2,7 +2,7 @@ import { getLoggedInAdminJenjang } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import Image from "next/image"
 import Link from "next/link"
-import { Users, BookOpen, GraduationCap, ArrowRight } from "lucide-react"
+import { Users, BookOpen, GraduationCap, ArrowRight, Camera, ScanLine } from "lucide-react"
 
 export default async function AdminJenjangDashboard() {
   const admin = await getLoggedInAdminJenjang()
@@ -84,9 +84,36 @@ export default async function AdminJenjangDashboard() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link href="/scan-absensi" className="group flex items-center justify-between bg-indigo-600 hover:bg-indigo-700 text-white p-5 rounded-2xl shadow-sm transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <Camera className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Scan Absensi Guru</h3>
+                <p className="text-indigo-100 text-sm">Mode kiosk gerbang utama</p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+          </Link>
+          <Link href="/scan-santri" className="group flex items-center justify-between bg-emerald-600 hover:bg-emerald-700 text-white p-5 rounded-2xl shadow-sm transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <ScanLine className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Scan Kelas Santri</h3>
+                <p className="text-emerald-100 text-sm">Pilih kelas & scan barcode</p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+          </Link>
+        </div>
+
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-4">Quick Access</h2>
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-4">Data Pokok Pendidikan</h2>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

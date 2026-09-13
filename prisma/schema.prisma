@@ -45,6 +45,7 @@ model JenjangPendidikan {
   telepon            String?
   email              String?
   logoUrl            String?         @db.Text
+  iconUrl            String?         @db.Text
   kopSuratUrl        String?         @db.Text
   templateSKL        String?         @db.Text
   
@@ -155,6 +156,11 @@ enum StatusLanjutan {
   TIDAK_LANJUT
   LAINNYA
 }
+enum StatusKeluar {
+  PINDAH_SEKOLAH
+  MENGUNDURKAN_DIRI
+  DIKELUARKAN
+}
 
 model SantriJenjang {
   id               Int               @id @default(autoincrement())
@@ -163,6 +169,13 @@ model SantriJenjang {
   
   statusMukim      Boolean           @default(false)
   isAlumni         Boolean           @default(false)
+  
+  // Status Keluar (non-alumni)
+  statusKeluar      StatusKeluar?
+  namaSekolahTujuan String?         @db.Text
+  tanggalPindah     DateTime?
+  alasanPindah      String?         @db.Text
+
   tahunMasukId     Int?
   tahunMasuk       TahunAjaran?      @relation("TahunMasuk", fields: [tahunMasukId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   tahunLulusId     Int?

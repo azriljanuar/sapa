@@ -463,3 +463,87 @@ export async function deleteSantriBulk(ids: number[]) {
     return { success: false, error: "Gagal menghapus santri secara massal" }
   }
 }
+
+export async function prosesKeluarSantri(data: {
+  santriId: number;
+  statusKeluar: "PINDAH_SEKOLAH" | "MENGUNDURKAN_DIRI" | "DIKELUARKAN";
+  namaSekolahTujuan?: string;
+  tanggalPindah?: string;
+  alasanPindah?: string;
+}) {
+  try {
+    const admin = await getLoggedInAdminJenjang()
+    if (!admin.jenjangId) throw new Error("Akses ditolak")
+
+    // Get active TA
+    const activeTA = await prisma.tahunAjaran.findFirst({
+      where: { isActive: true }
+    })
+
+    // Update SantriJenjang
+    await prisma.santriJenjang.update({
+      where: { santriId_jenjangId: { santriId: data.santriId, jenjangId: admin.jenjangId } },
+      data: {
+        statusKeluar: data.statusKeluar,
+        namaSekolahTujuan: data.namaSekolahTujuan,
+        tanggalPindah: data.tanggalPindah ? new Date(data.tanggalPindah) : null,
+        alasanPindah: data.alasanPindah,
+        isAlumni: false // memastikan bukan alumni
+      }
+    })
+
+    // Optionally remove from current active class
+    if (activeTA) {
+      // Find classes in this jenjang and this TA
+      const activeClasses = await prisma.kelasFormal.findMany({
+        where: { jenjangId: admin.jenjangId, tahunAjaranId: activeTA.id },
+        select: { id: true }
+      })
+      const activeClassIds = activeClasses.map(c => c.id)
+
+      if (activeClassIds.length > 0) {
+        // Find if student is in any of these classes
+        const riwayat = await prisma.riwayatKelas.findFirst({
+          where: {
+            santriId: data.santriId,
+            kelasFormalId: { in: activeClassIds }
+          }
+        })
+
+        if (riwayat) {
+          // Delete riwayat for active class
+          await prisma.riwayatKelas.delete({
+            where: { id: riwayat.id }
+          })
+        }
+      }
+    }
+
+    revalidatePath("/admin-jenjang/santri")
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Gagal memproses pindah sekolah" }
+  }
+}
+
+export async function batalkanKeluarSantri(santriId: number) {
+  try {
+    const admin = await getLoggedInAdminJenjang()
+    if (!admin.jenjangId) throw new Error("Akses ditolak")
+
+    await prisma.santriJenjang.update({
+      where: { santriId_jenjangId: { santriId, jenjangId: admin.jenjangId } },
+      data: {
+        statusKeluar: null,
+        namaSekolahTujuan: null,
+        tanggalPindah: null,
+        alasanPindah: null,
+      }
+    })
+
+    revalidatePath("/admin-jenjang/santri")
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Gagal membatalkan pindah sekolah" }
+  }
+}

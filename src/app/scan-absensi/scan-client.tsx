@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { Html5QrcodeScanner } from "html5-qrcode"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { CheckCircle2, XCircle, Camera, Loader2, ArrowLeft, PenLine, Save, User, Clock, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -33,12 +32,21 @@ type HistoryItem = {
 export function ScanClient({ jenjangs = [] }: { jenjangs?: Jenjang[] }) {
   const [mode, setMode] = useState<'qr' | 'manual'>('qr')
   
-  // State for QR Mode
+  // State for QR Mode (for UI rendering only)
   const [scanResult, setScanResult] = useState<any>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [countdown, setCountdown] = useState<number>(0)
   const [scanHistory, setScanHistory] = useState<HistoryItem[]>([])
+  const [scannerReady, setScannerReady] = useState(false)
+
+  // ─── CRITICAL FIX ───────────────────────────────────────────────────────────
+  // Refs mirror the state values so the scanner callback can read them without
+  // being in the useEffect dependency array (which caused camera restarts).
+  const isProcessingRef = useRef(false)
+  const countdownRef = useRef(0)
+  // ────────────────────────────────────────────────────────────────────────────
+
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -53,82 +61,44 @@ export function ScanClient({ jenjangs = [] }: { jenjangs?: Jenjang[] }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   // TTS Helper
-  const speak = (text: string) => {
+  const speak = useCallback((text: string) => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel() // Stop any currently playing speech
+      window.speechSynthesis.cancel()
       const utterance = new SpeechSynthesisUtterance(text)
       utterance.lang = 'id-ID'
       utterance.rate = 1.0
       utterance.pitch = 1.0
       window.speechSynthesis.speak(utterance)
     }
-  }
+  }, [])
 
-  // QR Mode Effect
-  useEffect(() => {
-    if (typeof window === 'undefined' || mode !== 'qr') return
-
-    const scanner = new Html5QrcodeScanner(
-      "qr-reader",
-      { fps: 10, qrbox: { width: 300, height: 300 }, aspectRatio: 1.0 },
-      /* verbose= */ false
-    )
-
-    const onScanSuccess = async (decodedText: string) => {
-      if (isProcessing || countdown > 0) return
-      
-      try {
-        const data = JSON.parse(decodedText)
-        if (!data.type || !data.id) {
-          throw new Error("QR Code tidak valid atau format salah.")
+  const startResetTimer = useCallback(() => {
+    if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current)
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
+    
+    // Update both ref and state
+    countdownRef.current = 5
+    setCountdown(5)
+    
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown(prev => {
+        const next = prev - 1
+        countdownRef.current = next  // Keep ref in sync
+        if (next <= 0) {
+          if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
+          setScanResult(null)
+          setError(null)
+          countdownRef.current = 0
+          return 0
         }
-        processScan(data)
-      } catch (err: any) {
-        setError("QR Code tidak dikenali.")
-        speak("QR Code tidak dikenali")
-        startResetTimer()
-      }
-    }
+        return next
+      })
+    }, 1000)
+  }, [])
 
-    scanner.render(onScanSuccess, () => {})
-
-    return () => {
-      scanner.clear().catch(console.error)
-      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current)
-      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
-    }
-  }, [mode, isProcessing, countdown])
-
-  // Fetch Santri Effect (Manual Mode)
-  useEffect(() => {
-    if (mode === 'manual' && selectedKelasId) {
-      setLoadingSantri(true)
-      setSantris([])
-      setManualAbsenData({})
-      setManualMessage(null)
-      
-      fetch(`/api/absensi-manual?kelasId=${selectedKelasId}`)
-        .then(res => res.json())
-        .then(result => {
-          if (result.success) {
-            setSantris(result.data)
-            const initialData: Record<number, { status: string; keterangan: string }> = {}
-            result.data.forEach((s: Santri) => {
-              if (!s.kehadiranHariIni) {
-                initialData[s.id] = { status: "", keterangan: "" }
-              }
-            })
-            setManualAbsenData(initialData)
-          }
-        })
-        .finally(() => setLoadingSantri(false))
-    } else {
-      setSantris([])
-      setManualAbsenData({})
-    }
-  }, [selectedKelasId, mode])
-
-  const processScan = async (qrData: any) => {
+  const processScan = useCallback(async (qrData: any) => {
+    // Update both ref and state
+    isProcessingRef.current = true
     setIsProcessing(true)
     setError(null)
     setScanResult(null)
@@ -174,29 +144,129 @@ export function ScanClient({ jenjangs = [] }: { jenjangs?: Jenjang[] }) {
       setError("Kesalahan koneksi jaringan.")
       speak("Kesalahan koneksi")
     } finally {
+      // Update both ref and state
+      isProcessingRef.current = false
       setIsProcessing(false)
       startResetTimer()
     }
-  }
+  }, [speak, startResetTimer])
 
-  const startResetTimer = () => {
-    if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current)
-    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
-    
-    setCountdown(5)
-    
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
-          setScanResult(null)
-          setError(null)
-          return 0
+  const [cameraError, setCameraError] = useState<string | null>(null)
+  const initTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // ─── QR Scanner Effect ───────────────────────────────────────────────────────
+  // ONLY depends on `mode`. isProcessing & countdown are checked via REFS
+  // so the scanner is never torn down and restarted mid-session.
+  useEffect(() => {
+    if (typeof window === 'undefined' || mode !== 'qr') return
+
+    setScannerReady(false)
+    setCameraError(null)
+
+    // Guard early exit
+    if (typeof navigator !== 'undefined' && !navigator.mediaDevices?.getUserMedia) {
+      setCameraError("Kamera tidak tersedia. Pastikan Anda mengakses web via HTTPS atau localhost.")
+      setScannerReady(true)
+      return
+    }
+
+    // Dynamically import the heavy library
+    let scanner: any = null
+    let mounted = true
+
+    const qrboxSize = window.innerWidth < 640 ? 220 : 260
+
+    import("html5-qrcode").then(({ Html5QrcodeScanner }) => {
+      if (!mounted) return
+
+      scanner = new Html5QrcodeScanner(
+        "qr-reader",
+        { fps: 10, qrbox: { width: qrboxSize, height: qrboxSize }, aspectRatio: 1.0 },
+        /* verbose= */ false
+      )
+
+      const onScanSuccess = async (decodedText: string) => {
+        // Use REFS here — not state — to avoid stale closures
+        if (isProcessingRef.current || countdownRef.current > 0) return
+        
+        try {
+          const data = JSON.parse(decodedText)
+          if (!data.type || !data.id) throw new Error("QR Code tidak valid.")
+          processScan(data)
+        } catch {
+          setError("QR Code tidak dikenali.")
+          speak("QR Code tidak dikenali")
+          startResetTimer()
         }
-        return prev - 1
-      })
-    }, 1000)
-  }
+      }
+
+      const onScanError = (err: any) => {
+        if (typeof err === 'string' && (err.includes('NotAllowedError') || err.includes('NotFoundError'))) {
+          setCameraError("Akses kamera ditolak atau kamera tidak ditemukan.")
+          if (mounted) setScannerReady(true)
+        }
+      }
+
+      try {
+        scanner.render(onScanSuccess, onScanError)
+      } catch (e: any) {
+        setCameraError("Kamera tidak dapat diinisialisasi: " + (e?.message || ""))
+        if (mounted) setScannerReady(true)
+      }
+
+      // Give the scanner a moment to initialize the camera UI
+      setTimeout(() => {
+        if (mounted) setScannerReady(true)
+      }, 800)
+
+      initTimeoutRef.current = setTimeout(() => {
+        if (mounted && !scannerReady) {
+          setCameraError("Kamera tidak merespons. Coba buka halaman ini melalui HTTPS.")
+          setScannerReady(true)
+        }
+      }, 6000)
+    })
+
+    return () => {
+      mounted = false
+      if (scanner) {
+        scanner.clear().catch(() => {})
+      }
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current)
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current)
+      if (initTimeoutRef.current) clearTimeout(initTimeoutRef.current)
+    }
+  }, [mode]) // ← ONLY mode. This is the key fix.
+  // ────────────────────────────────────────────────────────────────────────────
+
+  // Fetch Santri Effect (Manual Mode)
+  useEffect(() => {
+    if (mode === 'manual' && selectedKelasId) {
+      setLoadingSantri(true)
+      setSantris([])
+      setManualAbsenData({})
+      setManualMessage(null)
+      
+      fetch(`/api/absensi-manual?kelasId=${selectedKelasId}`)
+        .then(res => res.json())
+        .then(result => {
+          if (result.success) {
+            setSantris(result.data)
+            const initialData: Record<number, { status: string; keterangan: string }> = {}
+            result.data.forEach((s: Santri) => {
+              if (!s.kehadiranHariIni) {
+                initialData[s.id] = { status: "", keterangan: "" }
+              }
+            })
+            setManualAbsenData(initialData)
+          }
+        })
+        .finally(() => setLoadingSantri(false))
+    } else {
+      setSantris([])
+      setManualAbsenData({})
+    }
+  }, [selectedKelasId, mode])
 
   const handleManualAbsenChange = (santriId: number, field: 'status' | 'keterangan', value: string) => {
     setManualAbsenData(prev => ({
@@ -234,7 +304,6 @@ export function ScanClient({ jenjangs = [] }: { jenjangs?: Jenjang[] }) {
       
       if (result.success) {
         setManualMessage({ type: 'success', text: 'Absensi manual berhasil disimpan!' })
-        // Refresh santri list
         const refreshRes = await fetch(`/api/absensi-manual?kelasId=${selectedKelasId}`)
         const refreshResult = await refreshRes.json()
         if (refreshResult.success) {
@@ -258,7 +327,6 @@ export function ScanClient({ jenjangs = [] }: { jenjangs?: Jenjang[] }) {
   const selectedJenjang = jenjangs.find(j => j.id.toString() === selectedJenjangId)
   const kelasList = selectedJenjang?.kelasFormal || []
 
-  // Derived state for Manual Mode
   const unselectedCount = Object.values(manualAbsenData).filter(d => d.status === "").length
   const totalSantriToAbsen = Object.keys(manualAbsenData).length
   const selectedCount = totalSantriToAbsen - unselectedCount
@@ -309,66 +377,95 @@ export function ScanClient({ jenjangs = [] }: { jenjangs?: Jenjang[] }) {
           <>
             {/* Kiri: Scanner Area */}
             <div className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center border-r border-slate-200">
+              {/* Scanner loading overlay */}
+              {/* Scanner loading overlay */}
+              {!scannerReady && (
+                <div className="flex flex-col items-center justify-center gap-4 py-16 text-indigo-500">
+                  <Loader2 className="w-14 h-14 animate-spin" />
+                  <p className="font-semibold text-lg text-slate-600">Menginisialisasi kamera...</p>
+                  <p className="text-sm text-slate-400">Harap izinkan akses kamera jika diminta</p>
+                </div>
+              )}
+
+              {scannerReady && cameraError && (
+                <div className="flex flex-col items-center justify-center text-center p-8 bg-amber-50 border border-amber-200 rounded-2xl max-w-md mx-auto mb-6 shadow-sm">
+                  <AlertTriangle className="w-16 h-16 text-amber-500 mb-4" />
+                  <h2 className="text-amber-900 text-xl font-bold mb-2">Kamera Tidak Tersedia</h2>
+                  <p className="text-amber-700 text-sm mb-6">{cameraError}</p>
+                  <p className="text-amber-800/80 text-xs mb-4">
+                    Browser mobile memerlukan <strong className="font-bold">HTTPS</strong> untuk mengakses kamera. 
+                    Gunakan jaringan dengan SSL jika mengakses dari perangkat mobile.
+                  </p>
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-2.5 rounded-xl transition-colors"
+                  >
+                    Coba Lagi
+                  </button>
+                </div>
+              )}
               <div 
                 id="qr-reader" 
                 className={`w-full max-w-lg overflow-hidden rounded-3xl shadow-lg border-4 transition-all duration-500 bg-black ${
                   scanResult?.success ? 'border-emerald-500 shadow-emerald-500/20' 
                   : error ? 'border-red-500 shadow-red-500/20' 
                   : 'border-slate-800'
-                }`}
+                } ${!scannerReady ? 'hidden' : ''}`}
               ></div>
               
-              <div className="mt-8 h-40 flex flex-col items-center justify-center w-full max-w-lg relative">
-                {isProcessing ? (
-                  <div className="flex flex-col items-center animate-pulse text-indigo-600">
-                    <Loader2 className="w-12 h-12 animate-spin mb-3" />
-                    <p className="font-semibold text-lg">Memproses QR Code...</p>
-                  </div>
-                ) : scanResult ? (
-                  <div className="w-full bg-emerald-100 border-2 border-emerald-400 rounded-2xl p-4 flex items-center gap-5 animate-in zoom-in duration-300 shadow-lg">
-                    {scanResult.fotoWajah ? (
-                      <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border-2 border-emerald-500 bg-white">
-                        <Image src={scanResult.fotoWajah} alt={scanResult.nama} width={80} height={80} className="w-full h-full object-cover" />
+              {scannerReady && (
+                <div className="mt-8 h-40 flex flex-col items-center justify-center w-full max-w-lg relative">
+                  {isProcessing ? (
+                    <div className="flex flex-col items-center animate-pulse text-indigo-600">
+                      <Loader2 className="w-12 h-12 animate-spin mb-3" />
+                      <p className="font-semibold text-lg">Memproses QR Code...</p>
+                    </div>
+                  ) : scanResult ? (
+                    <div className="w-full bg-emerald-100 border-2 border-emerald-400 rounded-2xl p-4 flex items-center gap-5 animate-in zoom-in duration-300 shadow-lg">
+                      {scanResult.fotoWajah ? (
+                        <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border-2 border-emerald-500 bg-white">
+                          <Image src={scanResult.fotoWajah} alt={scanResult.nama} width={80} height={80} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 rounded-xl shrink-0 bg-emerald-200 flex items-center justify-center border-2 border-emerald-500">
+                          <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-emerald-700 font-bold uppercase text-xs tracking-wider mb-1">Berhasil Disimpan</p>
+                        <h2 className="text-xl font-bold text-slate-800 truncate leading-tight">{scanResult.nama}</h2>
+                        <p className="text-slate-600 text-sm mt-1">{scanResult.kelas} • {scanResult.jenjang}</p>
                       </div>
-                    ) : (
-                      <div className="w-20 h-20 rounded-xl shrink-0 bg-emerald-200 flex items-center justify-center border-2 border-emerald-500">
-                        <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+                    </div>
+                  ) : error ? (
+                    <div className="w-full bg-red-100 border-2 border-red-400 rounded-2xl p-4 flex items-center gap-4 animate-in zoom-in duration-300 shadow-lg">
+                      <div className="w-16 h-16 rounded-xl shrink-0 bg-red-200 flex items-center justify-center border-2 border-red-500">
+                        <XCircle className="w-8 h-8 text-red-600" />
                       </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-emerald-700 font-bold uppercase text-xs tracking-wider mb-1">Berhasil Disimpan</p>
-                      <h2 className="text-xl font-bold text-slate-800 truncate leading-tight">{scanResult.nama}</h2>
-                      <p className="text-slate-600 text-sm mt-1">{scanResult.kelas} • {scanResult.jenjang}</p>
+                      <div>
+                        <h2 className="text-lg font-bold text-red-800">Gagal Absen</h2>
+                        <p className="text-red-700 font-medium">{error}</p>
+                      </div>
                     </div>
-                  </div>
-                ) : error ? (
-                  <div className="w-full bg-red-100 border-2 border-red-400 rounded-2xl p-4 flex items-center gap-4 animate-in zoom-in duration-300 shadow-lg">
-                    <div className="w-16 h-16 rounded-xl shrink-0 bg-red-200 flex items-center justify-center border-2 border-red-500">
-                      <XCircle className="w-8 h-8 text-red-600" />
+                  ) : (
+                    <div className="text-center">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 text-indigo-500 mb-3 shadow-inner">
+                        <Camera className="w-8 h-8" />
+                      </div>
+                      <p className="text-slate-500 font-medium text-lg">Siap untuk memindai QR Code.</p>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-red-800">Gagal Absen</h2>
-                      <p className="text-red-700 font-medium">{error}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 text-indigo-500 mb-3 shadow-inner">
-                      <Camera className="w-8 h-8" />
-                    </div>
-                    <p className="text-slate-500 font-medium text-lg">Siap untuk memindai QR Code.</p>
-                  </div>
-                )}
+                  )}
 
-                {/* Visual Countdown */}
-                {countdown > 0 && !isProcessing && (
-                  <div className="absolute -bottom-8 left-0 right-0 flex justify-center">
-                    <div className="bg-slate-800 text-white text-xs font-bold px-4 py-1.5 rounded-full flex items-center gap-2 animate-pulse shadow-md">
-                      <Loader2 className="w-3 h-3 animate-spin" /> Siap dalam {countdown} detik
+                  {/* Visual Countdown */}
+                  {countdown > 0 && !isProcessing && (
+                    <div className="absolute -bottom-8 left-0 right-0 flex justify-center">
+                      <div className="bg-slate-800 text-white text-xs font-bold px-4 py-1.5 rounded-full flex items-center gap-2 animate-pulse shadow-md">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Siap dalam {countdown} detik
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Kanan: Riwayat Sesi */}

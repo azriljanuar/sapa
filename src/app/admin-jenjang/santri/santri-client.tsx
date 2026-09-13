@@ -75,6 +75,10 @@ type SantriType = {
   namaAyah?: string | null
   namaIbu?: string | null
   tahunMasukId?: number | null
+  statusKeluar?: string | null
+  namaSekolahTujuan?: string | null
+  tanggalPindah?: string | null
+  alasanPindah?: string | null
 }
 
 export function SantriClient({ initialData, tahunAjarans }: { initialData: SantriType[], tahunAjarans: {id: number, nama: string}[] }) {
@@ -88,9 +92,14 @@ export function SantriClient({ initialData, tahunAjarans }: { initialData: Santr
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isPindahDialogOpen, setIsPindahDialogOpen] = useState(false)
   const [editingData, setEditingData] = useState<SantriType | null>(null)
+  const [pindahData, setPindahData] = useState<SantriType | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [importFile, setImportFile] = useState<File | null>(null)
+  
+  // Tab state
+  const [activeTab, setActiveTab] = useState("aktif")
 
   const form = useForm<z.infer<typeof santriSchema>>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,21 +124,24 @@ export function SantriClient({ initialData, tahunAjarans }: { initialData: Santr
     },
   })
 
-  // Filter data berdasarkan search dan mukim
-  const filteredData = data.filter((item) => {
+  // Filter data
+  const searchFilter = (item: SantriType) => {
     const matchSearch = item.namaLengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         item.nisn.toLowerCase().includes(searchTerm.toLowerCase())
-    
     let matchMukim = true
     if (filterMukim === "mukim") matchMukim = item.statusMukim === true
     else if (filterMukim === "tidak") matchMukim = item.statusMukim === false
-
     return matchSearch && matchMukim
-  })
+  }
+
+  const aktifData = data.filter(item => !item.statusKeluar).filter(searchFilter)
+  const pindahDataFiltered = data.filter(item => item.statusKeluar).filter(searchFilter)
+
+  const currentFilteredData = activeTab === "aktif" ? aktifData : pindahDataFiltered
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
-  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const totalPages = Math.ceil(currentFilteredData.length / itemsPerPage)
+  const paginatedData = currentFilteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const handleOpenDialog = (item?: SantriType) => {
     if (item) {
@@ -316,7 +328,7 @@ export function SantriClient({ initialData, tahunAjarans }: { initialData: Santr
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Data Santri</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Kelola data santri untuk jenjang ini. Menampilkan {filteredData.length} data.
+            Kelola data santri untuk jenjang ini. Menampilkan {currentFilteredData.length} data.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -364,84 +376,139 @@ export function SantriClient({ initialData, tahunAjarans }: { initialData: Santr
         </div>
       </div>
 
-      <div className="rounded-md border bg-white shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px] text-center">
-                <input 
-                  type="checkbox" 
-                  className="w-4 h-4 rounded border-gray-300"
-                  checked={paginatedData.length > 0 && tableSelectedIds.length === paginatedData.length}
-                  onChange={toggleAllTableSelection}
-                />
-              </TableHead>
-              <TableHead className="w-[80px]">No</TableHead>
-              <TableHead>NISN</TableHead>
-              <TableHead>Nama Lengkap</TableHead>
-              <TableHead className="text-center">Status Mukim</TableHead>
-              <TableHead className="w-[120px] text-right">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedData.length > 0 ? (
-              paginatedData.map((item, index) => (
-                <TableRow key={item.id} className={tableSelectedIds.includes(item.id) ? "bg-slate-50" : ""}>
-                  <TableCell className="text-center">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 rounded border-gray-300"
-                      checked={tableSelectedIds.includes(item.id)}
-                      onChange={() => toggleTableSelection(item.id)}
-                    />
-                  </TableCell>
-                  <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
-                  <TableCell className="font-medium">{item.nisn}</TableCell>
-                  <TableCell>{item.namaLengkap}</TableCell>
-                  <TableCell className="text-center">
-                    {item.statusMukim ? (
-                      <span className="inline-flex items-center gap-1 text-sm text-green-600 font-medium">
-                        <CheckCircle2 className="w-4 h-4" /> Mukim
-                      </span>
+      <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setCurrentPage(1); setTableSelectedIds([]); }}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="aktif">Santri Aktif ({aktifData.length})</TabsTrigger>
+          <TabsTrigger value="pindah">Pindah Sekolah ({pindahDataFiltered.length})</TabsTrigger>
+        </TabsList>
+
+        <div className="rounded-md border bg-white shadow-sm overflow-x-auto -mx-4 sm:mx-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px] text-center">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 rounded border-gray-300"
+                    checked={paginatedData.length > 0 && tableSelectedIds.length === paginatedData.length}
+                    onChange={toggleAllTableSelection}
+                  />
+                </TableHead>
+                <TableHead className="w-[80px]">No</TableHead>
+                <TableHead>NISN</TableHead>
+                <TableHead>Nama Lengkap</TableHead>
+                {activeTab === "aktif" ? (
+                  <TableHead className="text-center">Status Mukim</TableHead>
+                ) : (
+                  <TableHead>Sekolah Tujuan / Tgl</TableHead>
+                )}
+                <TableHead className="w-[180px] text-right">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedData.length > 0 ? (
+                paginatedData.map((item, index) => (
+                  <TableRow key={item.id} className={tableSelectedIds.includes(item.id) ? "bg-slate-50" : ""}>
+                    <TableCell className="text-center">
+                      <input 
+                        type="checkbox" 
+                        className="w-4 h-4 rounded border-gray-300"
+                        checked={tableSelectedIds.includes(item.id)}
+                        onChange={() => toggleTableSelection(item.id)}
+                      />
+                    </TableCell>
+                    <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                    <TableCell className="font-medium">{item.nisn}</TableCell>
+                    <TableCell>
+                      <div className="font-medium">{item.namaLengkap}</div>
+                      {activeTab === "pindah" && (
+                        <div className="text-xs text-amber-600 mt-1 font-semibold">{item.statusKeluar?.replace(/_/g, ' ')}</div>
+                      )}
+                    </TableCell>
+                    
+                    {activeTab === "aktif" ? (
+                      <TableCell className="text-center">
+                        {item.statusMukim ? (
+                          <span className="inline-flex items-center gap-1 text-sm text-green-600 font-medium">
+                            <CheckCircle2 className="w-4 h-4" /> Mukim
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                            <XCircle className="w-4 h-4" /> Tidak
+                          </span>
+                        )}
+                      </TableCell>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                        <XCircle className="w-4 h-4" /> Tidak
-                      </span>
+                      <TableCell>
+                        <div className="text-sm">{item.namaSekolahTujuan || "-"}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {item.tanggalPindah ? new Date(item.tanggalPindah).toLocaleDateString('id-ID') : "-"}
+                        </div>
+                      </TableCell>
                     )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleOpenDialog(item)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </div>
+
+                    <TableCell className="text-right">
+                      {activeTab === "aktif" ? (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-8 px-2"
+                            onClick={() => { setPindahData(item); setIsPindahDialogOpen(true); }}
+                            title="Proses Pindah Sekolah / Keluar"
+                          >
+                            Keluar
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleOpenDialog(item)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              if (!confirm("Batalkan status pindah dan kembalikan santri menjadi aktif?")) return
+                              const { batalkanKeluarSantri } = await import("./actions")
+                              const res = await batalkanKeluarSantri(item.id)
+                              if (res.success) {
+                                setData(data.map(d => d.id === item.id ? { ...d, statusKeluar: null, namaSekolahTujuan: null, tanggalPindah: null, alasanPindah: null } : d))
+                              } else alert(res.error)
+                            }}
+                          >
+                            Batalkan
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                    Tidak ada data.
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                  Tidak ada data.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </Tabs>
 
       {totalPages > 1 && (
         <div className="flex items-center justify-end space-x-2 py-4">
@@ -833,7 +900,91 @@ export function SantriClient({ initialData, tahunAjarans }: { initialData: Santr
             </div>
           </form>
         </DialogContent>
+    </Dialog>
+
+      <Dialog open={isPindahDialogOpen} onOpenChange={setIsPindahDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Proses Pindah Sekolah / Keluar</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={async (e) => {
+            e.preventDefault()
+            if (!pindahData) return
+            const form = e.target as HTMLFormElement
+            const statusKeluar = (form.elements.namedItem("statusKeluar") as HTMLSelectElement).value
+            const namaSekolahTujuan = (form.elements.namedItem("namaSekolahTujuan") as HTMLInputElement).value
+            const tanggalPindah = (form.elements.namedItem("tanggalPindah") as HTMLInputElement).value
+            const alasanPindah = (form.elements.namedItem("alasanPindah") as HTMLTextAreaElement).value
+            
+            setIsSubmitting(true)
+            try {
+              const { prosesKeluarSantri } = await import("./actions")
+              const res = await prosesKeluarSantri({
+                santriId: pindahData.id,
+                statusKeluar: statusKeluar as any,
+                namaSekolahTujuan,
+                tanggalPindah,
+                alasanPindah
+              })
+              if (res.success) {
+                setData(data.map(d => d.id === pindahData.id ? { 
+                  ...d, 
+                  statusKeluar, 
+                  namaSekolahTujuan, 
+                  tanggalPindah, 
+                  alasanPindah 
+                } : d))
+                setIsPindahDialogOpen(false)
+                setPindahData(null)
+              } else {
+                alert(res.error)
+              }
+            } catch(err) {
+              alert("Terjadi kesalahan")
+            } finally {
+              setIsSubmitting(false)
+            }
+          }} className="space-y-4 pt-2">
+            <div className="bg-amber-50 p-3 rounded-md border border-amber-100 text-sm text-amber-800 mb-4">
+              Anda akan memproses keluar santri <strong>{pindahData?.namaLengkap}</strong> ({pindahData?.nisn}).
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Status Keluar *</label>
+              <select name="statusKeluar" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                <option value="PINDAH_SEKOLAH">Pindah Sekolah</option>
+                <option value="MENGUNDURKAN_DIRI">Mengundurkan Diri</option>
+                <option value="DIKELUARKAN">Dikeluarkan</option>
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nama Sekolah Tujuan (Jika Pindah)</label>
+              <Input name="namaSekolahTujuan" placeholder="Misal: MTs Negeri 1 Jakarta" />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tanggal Efektif Keluar</label>
+              <Input type="date" name="tanggalPindah" defaultValue={new Date().toISOString().split('T')[0]} required />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Alasan / Keterangan Tambahan</label>
+              <Textarea name="alasanPindah" placeholder="Tuliskan keterangan detail jika diperlukan..." />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" type="button" onClick={() => setIsPindahDialogOpen(false)}>
+                Batal
+              </Button>
+              <Button type="submit" disabled={isSubmitting} variant="destructive">
+                {isSubmitting ? "Memproses..." : "Konfirmasi Keluar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
       </Dialog>
     </div>
   )
 }
+

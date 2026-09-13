@@ -69,15 +69,21 @@ export function GuruLayoutClient({
       )}>
         <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-transparent">
           <Link href="/" className="flex items-center gap-3">
-            <div className="h-8 w-8 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center shadow-sm shrink-0">
-              <BookOpen className="h-4 w-4 text-white" />
-            </div>
-            <div className="flex flex-col text-slate-900">
-              <span className="text-xl font-black leading-none tracking-tight">SAPA</span>
-              <span className="text-[0.6rem] font-bold text-indigo-600 leading-[1.1] mt-0.5">
-                Portal Guru
-              </span>
-            </div>
+            {session?.jenjangLogo ? (
+              <img src={session.jenjangLogo} alt="Logo" className="h-10 object-contain shrink-0" />
+            ) : (
+              <>
+                <div className="h-8 w-8 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center shadow-sm shrink-0">
+                  <BookOpen className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex flex-col text-slate-900">
+                  <span className="text-xl font-black leading-none tracking-tight">SAPA</span>
+                  <span className="text-[0.6rem] font-bold text-indigo-600 leading-[1.1] mt-0.5">
+                    {session?.jenjangSingkatan || "Portal Guru"}
+                  </span>
+                </div>
+              </>
+            )}
           </Link>
           <button className="lg:hidden text-slate-500" onClick={() => setIsSidebarOpen(false)}>
             <ChevronLeft className="h-5 w-5" />

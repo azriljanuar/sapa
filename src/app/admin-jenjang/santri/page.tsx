@@ -37,7 +37,11 @@ export default async function DataSantriPage() {
   const mappedSantris = santris.map(s => ({
     ...s,
     statusMukim: s.jenjangs[0]?.statusMukim || false,
-    tahunMasukId: s.jenjangs[0]?.tahunMasukId || null
+    tahunMasukId: s.jenjangs[0]?.tahunMasukId || null,
+    statusKeluar: s.jenjangs[0]?.statusKeluar || null,
+    namaSekolahTujuan: s.jenjangs[0]?.namaSekolahTujuan || null,
+    tanggalPindah: s.jenjangs[0]?.tanggalPindah ? s.jenjangs[0].tanggalPindah.toISOString() : null,
+    alasanPindah: s.jenjangs[0]?.alasanPindah || null,
   }))
 
   return <SantriClient initialData={mappedSantris} tahunAjarans={tahunAjarans} />

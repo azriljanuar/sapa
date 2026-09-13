@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = request.nextUrl.pathname.startsWith("/login")
   
   // Rute yang dilindungi
-  const isAdminJenjang = request.nextUrl.pathname.startsWith("/admin-jenjang")
+  const isAdminJenjang = request.nextUrl.pathname.startsWith("/admin-jenjang") || request.nextUrl.pathname.startsWith("/scan-absensi")
   const isSuperAdmin = request.nextUrl.pathname.startsWith("/super-admin")
   const isGuru = request.nextUrl.pathname.startsWith("/elearning/guru") || request.nextUrl.pathname.startsWith("/guru")
   const isSantri = request.nextUrl.pathname.startsWith("/elearning/santri") || request.nextUrl.pathname.startsWith("/santri")
@@ -57,8 +57,8 @@ export async function middleware(request: NextRequest) {
       
       const destination = payload.role === "SUPER_ADMIN" ? "/super-admin"
                         : payload.role === "ADMIN_JENJANG" ? "/admin-jenjang"
-                        : payload.role === "GURU" ? "/elearning/guru"
-                        : payload.role === "SANTRI" ? "/elearning/santri"
+                        : payload.role === "GURU" ? "/"
+                        : payload.role === "SANTRI" ? "/"
                         : "/"
                         
       return NextResponse.redirect(new URL(destination, request.url))
@@ -71,5 +71,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin-jenjang/:path*", "/super-admin/:path*", "/guru/:path*", "/santri/:path*", "/elearning/:path*", "/login"],
+  matcher: ["/admin-jenjang/:path*", "/super-admin/:path*", "/guru/:path*", "/santri/:path*", "/elearning/:path*", "/scan-absensi/:path*", "/login"],
 }

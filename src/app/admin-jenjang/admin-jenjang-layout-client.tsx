@@ -68,13 +68,19 @@ export function AdminJenjangLayoutClient({
       )}>
         <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-transparent">
           <div className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-slate-900 shrink-0" />
-            <div className="flex flex-col text-slate-900">
-              <span className="text-2xl font-black leading-none tracking-tight">SAPA</span>
-              <span className="text-[0.5rem] font-medium leading-[1.1] mt-0.5 whitespace-normal break-words max-w-[65px]">
-                Sistem Akademik Pesantren Al-Ittihaad
-              </span>
-            </div>
+            {admin?.jenjang?.logoUrl ? (
+              <img src={admin.jenjang.logoUrl} alt="Logo" className="h-10 object-contain shrink-0" />
+            ) : (
+              <>
+                <GraduationCap className="h-8 w-8 text-slate-900 shrink-0" />
+                <div className="flex flex-col text-slate-900">
+                  <span className="text-2xl font-black leading-none tracking-tight">SAPA</span>
+                  <span className="text-[0.5rem] font-medium leading-[1.1] mt-0.5 whitespace-normal break-words max-w-[65px]">
+                    {admin?.jenjang?.singkatan || "Sistem Akademik"}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
           <button className="lg:hidden text-slate-500" onClick={() => setIsSidebarOpen(false)}>
             <ChevronLeft className="h-5 w-5" />
@@ -125,7 +131,7 @@ export function AdminJenjangLayoutClient({
                 Profil Jenjang
               </Link>
               <Link
-                href="#"
+                href="/admin-jenjang/settings"
                 className="group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
               >
                 <Settings className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400 group-hover:text-slate-500" />

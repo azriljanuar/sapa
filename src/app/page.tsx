@@ -5,7 +5,7 @@ import Image from "next/image"
 import { 
   BookOpen, Database, ArrowRight, LayoutDashboard, 
   GraduationCap, Camera, FileText, Calendar, 
-  Users, User, CheckCircle2, AlertCircle, CheckSquare
+  Users, User, CheckCircle2, AlertCircle, CheckSquare, ScanLine
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -211,6 +211,11 @@ export default async function Home() {
                     <div className="h-12 w-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><Calendar className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Jadwal Mengajar</h3>
                     <p className="text-sm text-slate-500">Lihat jadwal harian</p>
+                  </Link>
+                  <Link href="/scan-santri" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-pink-300 hover:shadow-lg transition-all group">
+                    <div className="h-12 w-12 bg-pink-50 text-pink-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><ScanLine className="h-6 w-6" /></div>
+                    <h3 className="font-bold text-slate-900 mb-1">Scan Kelas</h3>
+                    <p className="text-sm text-slate-500">Absensi barcode santri</p>
                   </Link>
                   {roleData.isWaliKelas && (
                     <Link href="/elearning/guru/rekap-absensi" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg transition-all group">

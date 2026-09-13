@@ -77,6 +77,19 @@ export async function POST(req: Request) {
       if (!activeKelas) {
         return NextResponse.json({ success: false, message: "Santri tidak terdaftar di kelas mana pun" }, { status: 400 })
       }
+      
+      // Jika scan dilakukan dari kiosk per-kelas, validasi kesesuaian kelas
+      const expectedKelasId = body.kelasId
+      if (expectedKelasId && activeKelas.id !== expectedKelasId) {
+        return NextResponse.json({ 
+          success: false, 
+          message: `${santri.namaLengkap} bukan dari kelas ini`,
+          nama: santri.namaLengkap,
+          kelas: activeKelas.namaKelas,
+          fotoWajah: santri.fotoWajah,
+          isWrongClass: true
+        }, { status: 400 })
+      }
 
       // Cek apakah sudah absen hari ini
       const existing = await prisma.kehadiranHarianSantri.findUnique({
@@ -84,7 +97,7 @@ export async function POST(req: Request) {
       })
 
       if (existing) {
-        return NextResponse.json({ success: false, message: "Anda sudah melakukan absensi hari ini", nama: santri.namaLengkap, fotoWajah: santri.fotoWajah, isDuplicate: true }, { status: 400 })
+        return NextResponse.json({ success: false, message: "Anda sudah melakukan absensi hari ini", nama: santri.namaLengkap, kelas: activeKelas.namaKelas, fotoWajah: santri.fotoWajah, isDuplicate: true }, { status: 400 })
       }
 
       // Catat kehadiran
