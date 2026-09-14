@@ -116,7 +116,7 @@ export default function RekapKehadiranClient({
               >
                 <option value="">-- Pilih Kelas --</option>
                 {kelasList.map(k => (
-                  <option key={k.id} value={k.id}>{k.namaKelas} — TA {k.tahunAjaran?.nama}</option>
+                  <option key={k.id} value={k.id}>{k.namaKelas}</option>
                 ))}
               </select>
             </div>
