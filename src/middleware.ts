@@ -13,8 +13,8 @@ export async function middleware(request: NextRequest) {
   // Rute yang dilindungi
   const isAdminJenjang = request.nextUrl.pathname.startsWith("/admin-jenjang") || request.nextUrl.pathname.startsWith("/scan-absensi")
   const isSuperAdmin = request.nextUrl.pathname.startsWith("/super-admin")
-  const isGuru = request.nextUrl.pathname.startsWith("/elearning/guru") || request.nextUrl.pathname.startsWith("/guru")
-  const isSantri = request.nextUrl.pathname.startsWith("/elearning/santri") || request.nextUrl.pathname.startsWith("/santri")
+  const isGuru = request.nextUrl.pathname.startsWith("/guru")
+  const isSantri = request.nextUrl.pathname.startsWith("/santri")
 
   if (isAdminJenjang || isSuperAdmin || isGuru || isSantri) {
     if (!session) {

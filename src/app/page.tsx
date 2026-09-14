@@ -174,7 +174,7 @@ export default async function Home() {
                             <CheckCircle2 className="h-5 w-5 text-emerald-300" /> Absen Terisi — {roleData.kehadiran}
                           </div>
                         ) : (
-                          <Link href="/elearning/guru/absensi" className="bg-white text-indigo-700 hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-md">
+                          <Link href="#" className="bg-white text-indigo-700 hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-md">
                             <AlertCircle className="h-4 w-4 text-orange-500" /> Isi Absensi Hari Ini
                           </Link>
                         )}
@@ -197,17 +197,17 @@ export default async function Home() {
               {/* GRID AKSES CEPAT (GURU) */}
               {session.role === "GURU" && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <Link href="/elearning/guru" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><BookOpen className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Ruang Kelas</h3>
                     <p className="text-sm text-slate-500">Materi & Penilaian</p>
                   </Link>
-                  <Link href="/elearning/guru/absensi" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><FileText className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Hub Absensi</h3>
                     <p className="text-sm text-slate-500">Absen Kehadiran Anda</p>
                   </Link>
-                  <Link href="/elearning/guru/jadwal" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-purple-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-purple-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><Calendar className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Jadwal Mengajar</h3>
                     <p className="text-sm text-slate-500">Lihat jadwal harian</p>
@@ -218,13 +218,13 @@ export default async function Home() {
                     <p className="text-sm text-slate-500">Absensi barcode santri</p>
                   </Link>
                   {roleData.isWaliKelas && (
-                    <Link href="/elearning/guru/rekap-absensi" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg transition-all group">
+                    <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg transition-all group">
                       <div className="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><Users className="h-6 w-6" /></div>
                       <h3 className="font-bold text-slate-900 mb-1">Rekap Kelas</h3>
                       <p className="text-sm text-slate-500">Pantau absensi santri</p>
                     </Link>
                   )}
-                  <Link href="/elearning/guru/profil" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-orange-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-orange-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><User className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Profil Saya</h3>
                     <p className="text-sm text-slate-500">Pengaturan akun</p>
@@ -235,27 +235,27 @@ export default async function Home() {
               {/* GRID AKSES CEPAT (SANTRI) */}
               {session.role === "SANTRI" && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <Link href="/elearning/santri" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><LayoutDashboard className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Ruang Belajar</h3>
                     <p className="text-sm text-slate-500">Materi dari guru</p>
                   </Link>
-                  <Link href="/elearning/santri/tugas" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-purple-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-purple-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><FileText className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Tugas Saya</h3>
                     <p className="text-sm text-slate-500">Kumpulkan tugas online</p>
                   </Link>
-                  <Link href="/elearning/santri/jadwal" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><Calendar className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Jadwal Pelajaran</h3>
                     <p className="text-sm text-slate-500">Lihat jadwal harian</p>
                   </Link>
-                  <Link href="/elearning/santri/profil/kehadiran" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><CheckSquare className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Kehadiran</h3>
                     <p className="text-sm text-slate-500">Cek rekap absensi harian</p>
                   </Link>
-                  <Link href="/elearning/santri/profil" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-orange-300 hover:shadow-lg transition-all group">
+                  <Link href="#" className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-orange-300 hover:shadow-lg transition-all group">
                     <div className="h-12 w-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><User className="h-6 w-6" /></div>
                     <h3 className="font-bold text-slate-900 mb-1">Profil Saya</h3>
                     <p className="text-sm text-slate-500">Pengaturan akun</p>
@@ -280,7 +280,7 @@ export default async function Home() {
                     </Link>
 
                     {session.role === "ADMIN_JENJANG" && (
-                      <Link href="/elearning" className="group block h-full">
+                      <Link href="#" className="group block h-full">
                         <div className="h-full bg-white rounded-3xl p-8 border border-slate-200 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/5 hover:border-purple-200 hover:-translate-y-1 relative overflow-hidden">
                           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity"><GraduationCap className="w-48 h-48 -mr-12 -mt-12 text-purple-600" /></div>
                           <div className="h-16 w-16 bg-purple-50 text-purple-600 border border-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-inner relative z-10"><GraduationCap className="h-8 w-8" /></div>
