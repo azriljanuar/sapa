@@ -26,16 +26,19 @@ export default async function RekapKehadiranPage() {
   // Ambil daftar kelas untuk jenjang ini di TA aktif
   const kelasList = await prisma.kelasFormal.findMany({
     where: {
-      jenjangId: admin.jenjangId!,
-      tahunAjaranId: activeTA.id
+      jenjangId: admin.jenjangId!
     },
-    orderBy: { namaKelas: 'asc' },
-    select: { id: true, namaKelas: true }
+    orderBy: [
+      { tahunAjaran: { nama: 'desc' } },
+      { namaKelas: 'asc' }
+    ],
+    select: { id: true, namaKelas: true, tahunAjaran: { select: { nama: true } } }
   })
 
   return (
     <RekapKehadiranClient 
       kelasList={kelasList} 
+      jenjangId={admin.jenjangId!}
       jenjangNama={admin.jenjang?.nama || "Jenjang"}
       tahunAjaran={activeTA.nama}
     />
