@@ -11,15 +11,24 @@ export async function GET(request: Request) {
     const jenjangId = searchParams.get("jenjangId")
     const tahunAjaranId = searchParams.get("tahunAjaranId")
 
+    const semesterId = searchParams.get("semesterId")
+
     let whereClause: any = {}
     if (jenjangId) {
       whereClause.jenjangId = parseInt(jenjangId)
     }
-    if (tahunAjaranId) {
+    
+    if (semesterId) {
+      // Find the tahunAjaran associated with this semester
+      const semester = await prisma.semester.findUnique({ where: { id: parseInt(semesterId) } })
+      if (semester) {
+        whereClause.tahunAjaranId = semester.tahunAjaranId
+      }
+    } else if (tahunAjaranId) {
       whereClause.tahunAjaranId = parseInt(tahunAjaranId)
     } else {
       // By default only return classes from active academic year
-      const activeTA = await prisma.tahunAjaran.findFirst({ orderBy: { nama: 'desc' } })
+      const activeTA = await prisma.tahunAjaran.findFirst({ orderBy: { nama: 'desc' }, where: { isActive: true } })
       if (activeTA) {
         whereClause.tahunAjaranId = activeTA.id
       }

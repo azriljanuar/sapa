@@ -9,14 +9,31 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const jenjangId = searchParams.get("jenjangId")
+    const kelasId = searchParams.get("kelasId")
+    const isAlumniParam = searchParams.get("isAlumni")
 
-    let whereClause = {}
+    let whereClause: any = {}
+    
+    // Default filter out alumni unless explicitly asked
+    const isAlumniFilter = isAlumniParam === "true" ? true : isAlumniParam === "false" ? false : undefined;
+
     if (jenjangId) {
-      whereClause = {
-        jenjangs: {
-          some: {
-            jenjangId: parseInt(jenjangId)
-          }
+      whereClause.jenjangs = {
+        some: {
+          jenjangId: parseInt(jenjangId),
+          ...(isAlumniFilter !== undefined && { isAlumni: isAlumniFilter })
+        }
+      }
+    } else if (isAlumniFilter !== undefined) {
+      whereClause.jenjangs = {
+        some: { isAlumni: isAlumniFilter }
+      }
+    }
+
+    if (kelasId) {
+      whereClause.riwayatKelas = {
+        some: {
+          kelasFormalId: parseInt(kelasId)
         }
       }
     }
