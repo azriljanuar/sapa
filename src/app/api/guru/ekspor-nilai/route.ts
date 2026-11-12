@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 
   try {
     // 1. Ambil data pengampu, kelas, mata pelajaran
-    const pengampu = await prisma.pengampuMataPelajaran.findUnique({
+    const pengampu = await prisma.pengampuMataPelajaran.findFirst({
       where: { id: pengampuId, guruId: session.id },
       include: {
         mataPelajaran: true,
@@ -84,17 +84,17 @@ export async function GET(req: Request) {
 
       // Sumatif 1
       const ns1 = pengampu.nilaiSumatif.find(n => n.santriId === santri.id && n.sumatifKe === 1)
-      const kh1 = hitungNilaiKehadiran(santri.id, 1)
+      const kh1 = ns1?.nilaiKehadiran ?? hitungNilaiKehadiran(santri.id, 1)
       const r1 = hitungRataSumatifItem(kh1, ns1?.nilaiKurikuler ?? null, ns1?.nilaiTesSumatif ?? null)
 
       // Sumatif 2
       const ns2 = pengampu.nilaiSumatif.find(n => n.santriId === santri.id && n.sumatifKe === 2)
-      const kh2 = hitungNilaiKehadiran(santri.id, 2)
+      const kh2 = ns2?.nilaiKehadiran ?? hitungNilaiKehadiran(santri.id, 2)
       const r2 = hitungRataSumatifItem(kh2, ns2?.nilaiKurikuler ?? null, ns2?.nilaiTesSumatif ?? null)
 
       // Sumatif 3
       const ns3 = pengampu.nilaiSumatif.find(n => n.santriId === santri.id && n.sumatifKe === 3)
-      const kh3 = hitungNilaiKehadiran(santri.id, 3)
+      const kh3 = ns3?.nilaiKehadiran ?? hitungNilaiKehadiran(santri.id, 3)
       const r3 = hitungRataSumatifItem(kh3, ns3?.nilaiKurikuler ?? null, ns3?.nilaiTesSumatif ?? null)
 
       // Rata Sumatif

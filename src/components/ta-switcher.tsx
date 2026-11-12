@@ -64,12 +64,11 @@ export function TaSwitcher({
       onValueChange={handleChange}
       disabled={isPending}
     >
-      <SelectTrigger className="w-[220px] h-9 bg-white shadow-sm font-semibold border-slate-200">
+      <SelectTrigger className="w-[170px] sm:w-[220px] h-9 bg-card shadow-xs font-medium border-border text-foreground text-xs sm:text-sm">
         <SelectValue>
           {selectedOption ? (
             <span className="flex items-center gap-2">
-              <span className="text-emerald-700">{selectedOption.label}</span>
-
+              <span className="text-primary font-semibold">{selectedOption.label}</span>
             </span>
           ) : (
             "Pilih Semester"

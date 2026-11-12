@@ -37,9 +37,14 @@ export async function loginAction(prevState: unknown, formData: FormData) {
       })
     } 
     else {
-      // 2. Cek tabel Guru (Login pakai Email)
+      // 2. Cek tabel Guru (Login pakai Email atau NIP)
       const guru = await prisma.guru.findFirst({
-        where: { email: validated.username }
+        where: {
+          OR: [
+            { email: validated.username },
+            { nip: validated.username }
+          ]
+        }
       })
 
       if (guru) {
@@ -84,10 +89,11 @@ export async function loginAction(prevState: unknown, formData: FormData) {
   const { getSession } = await import("@/lib/auth")
   const session = await getSession()
   if (session) {
-    if (session.role === "SUPER_ADMIN") redirect("/super-admin")
-    if (session.role === "ADMIN_JENJANG") redirect("/admin-jenjang")
-    if (session.role === "GURU") redirect("/")
-    if (session.role === "SANTRI") redirect("/")
+    if (session.role === "SUPER_ADMIN" || session.role === "ADMIN_JENJANG") {
+      redirect("/admin")
+    }
+    if (session.role === "GURU") redirect("/guru")
+    if (session.role === "SANTRI") redirect("/santri")
   }
 
   // Fallback

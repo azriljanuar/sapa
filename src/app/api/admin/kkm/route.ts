@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth"
 export async function POST(req: Request) {
   try {
     const session = await getSession()
-    if (!session || session.role !== "ADMIN_JENJANG") {
+    if (!session || (session.role !== "ADMIN_JENJANG" && session.role !== "SUPER_ADMIN")) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
@@ -13,24 +13,6 @@ export async function POST(req: Request) {
     if (!pengampuId) {
       return NextResponse.json({ success: false, error: "pengampuId diperlukan" }, { status: 400 })
     }
-
-    const jenjangId = session.jenjangId
-    if (!jenjangId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
-    }
-
-    // Pastikan pengampu ada di jenjang admin ini
-    const pengampu = await prisma.pengampuMataPelajaran.findFirst({
-      where: {
-        id: pengampuId,
-        kelasFormal: { jenjangId }
-      }
-    })
-
-    if (!pengampu) {
-      return NextResponse.json({ success: false, error: "Data tidak ditemukan" }, { status: 404 })
-    }
-
 
     const updated = await prisma.pengampuMataPelajaran.update({
       where: { id: pengampuId },

@@ -1,83 +1,97 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
+import { processAndSaveWebP } from "@/lib/image-processor";
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN_JENJANG") {
+    if (!session || (session.role !== "ADMIN_JENJANG" && session.role !== "SUPER_ADMIN")) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!session.jenjangId) {
-      return NextResponse.json({ success: false, error: "Jenjang ID not found" }, { status: 400 });
-    }
+    const jenjangId = session.jenjangId || 2;
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-    const type = formData.get("type") as string | null; // "logoSekolah" or "kopSurat"
+    const rawType = formData.get("type") as string | null;
+    const type = rawType?.trim() || "landing"; // Fallback ke landing jika tidak disertakan
 
     if (!file) {
       return NextResponse.json({ success: false, error: "Tidak ada file yang diunggah" }, { status: 400 });
     }
 
-    if (type !== "logoSekolah" && type !== "kopSurat") {
-      return NextResponse.json({ success: false, error: "Tipe aset tidak valid" }, { status: 400 });
-    }
-
-    // Validate file type
-    const validMimeTypes = ["image/jpeg", "image/png"];
+    // Validasi tipe file gambar yang didukung
+    const validMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!validMimeTypes.includes(file.type)) {
-      return NextResponse.json({ success: false, error: "Format file harus JPG atau PNG" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Format file harus JPG, PNG, atau WebP" },
+        { status: 400 }
+      );
     }
 
-    // Process file
+    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generate unique filename
-    const ext = path.extname(file.name) || (file.type === "image/png" ? ".png" : ".jpg");
-    const uniqueId = crypto.randomBytes(8).toString("hex");
-    const fileName = `${type}_${session.jenjangId}_${uniqueId}${ext}`;
-    
-    // Save to public/uploads/jenjang/
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "jenjang");
-    
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (e) {
-      // Ignore directory exists error
+    // Tentukan subfolder upload
+    let subfolder = "general";
+    if (type === "logoSekolah" || type === "kopSurat") {
+      subfolder = "jenjang";
+    } else if (type === "hero" || type === "landing" || type === "profile") {
+      subfolder = "landing";
     }
 
-    const filePath = path.join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
+    const uploadDir = path.join(process.cwd(), "public", "uploads", subfolder);
+    const uniqueId = crypto.randomBytes(6).toString("hex");
+    const baseName = `${type}_${jenjangId}_${Date.now()}_${uniqueId}`;
 
-    const publicUrl = `/uploads/jenjang/${fileName}`;
+    // Otomatis kompresi dan konversi ke WebP
+    const { fileUrl } = await processAndSaveWebP({
+      input: buffer,
+      targetDir: uploadDir,
+      baseName,
+      maxWidth: type === "hero" ? 1920 : 1200,
+      quality: 82,
+    });
 
-    // Update database
-    const updateData: any = {};
-    if (type === "logoSekolah") {
-      updateData.logoUrl = publicUrl;
-    } else {
-      updateData.kopSuratUrl = publicUrl;
+    // Jika tipe adalah logoSekolah atau kopSurat, perbarui ke tabel IdentitasLembaga & Jenjang
+    if (type === "logoSekolah" || type === "kopSurat") {
+      const updateData: Record<string, string> = {};
+      if (type === "logoSekolah") {
+        updateData.logoUrl = fileUrl;
+      } else {
+        updateData.kopSuratUrl = fileUrl;
+      }
+
+      await prisma.identitasLembaga.upsert({
+        where: { id: 1 },
+        update: updateData,
+        create: { id: 1, ...updateData },
+      });
+
+      try {
+        await prisma.jenjangPendidikan.update({
+          where: { id: jenjangId },
+          data: updateData,
+        });
+      } catch (e) {
+        // Ignore if jenjang table is removed
+      }
     }
 
-    await prisma.jenjangPendidikan.update({
-      where: { id: session.jenjangId },
-      data: updateData
+    return NextResponse.json({
+      success: true,
+      message: "Berhasil mengunggah aset",
+      url: fileUrl,
     });
-
-    return NextResponse.json({ 
-      success: true, 
-      message: "Berhasil mengunggah aset", 
-      url: publicUrl 
-    });
-
   } catch (error: any) {
     console.error("Upload asset error:", error);
-    return NextResponse.json({ success: false, error: error.message || "Terjadi kesalahan server" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message || "Terjadi kesalahan server saat upload" },
+      { status: 500 }
+    );
   }
 }

@@ -3,7 +3,6 @@ generator client {
   engineType = "library"
 }
 
-
 datasource db {
   provider = "mysql"
 }
@@ -49,7 +48,7 @@ model JenjangPendidikan {
   kopSuratUrl        String?         @db.Text
   templateSKL        String?         @db.Text
   
-  // Pengaturan Absensi QR
+  // Pengaturan Absensi
   waktuMulaiAbsen    String?         // Format: HH:mm (misal: "05:00")
   waktuAkhirAbsen    String?         // Format: HH:mm (misal: "08:00")
 
@@ -60,6 +59,8 @@ model JenjangPendidikan {
   sarpras            SarprasJenjang[]
   mataPelajaran      MataPelajaran[]
   templateKartu      TemplateKartu[]
+  hariLibur          HariLibur[]
+  guruPiket          GuruPiket[]
 }
 
 model TahunAjaran {
@@ -71,6 +72,9 @@ model TahunAjaran {
   pengampu    PengampuMataPelajaran[]
   santriMasuk SantriJenjang[]       @relation("TahunMasuk")
   santriLulus SantriJenjang[]       @relation("TahunLulus")
+  santriMasukDirect Santri[]        @relation("SantriTahunMasuk")
+  santriLulusDirect Santri[]        @relation("SantriTahunLulus")
+  guruPiket         GuruPiket[]
 }
 
 model Semester {
@@ -79,6 +83,7 @@ model Semester {
   tahunAjaranId Int
   tahunAjaran   TahunAjaran  @relation(fields: [tahunAjaranId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   isActive      Boolean      @default(false)
+  nilaiDirilis  Boolean      @default(false) // Toggle global rilis nilai satu semester
 
   @@unique([tahunAjaranId, nama])
   jadwalPelajaran JadwalPelajaran[]
@@ -94,6 +99,7 @@ model Guru {
   nama               String
   nip                String?             @unique
   email              String              @unique
+  rfidCardId         String?             @unique // UID Kartu RFID Guru
   password           String              @default("$2b$10$qTWxb4MAxuVYju.SFeZrreZMKo/9OfBaxs4WpB7x.9geRPxTdNQtq") // default: password123
   
   niPPPK             String?
@@ -116,11 +122,20 @@ model Guru {
   waliKelas          KelasFormal[]
   pengampu           PengampuMataPelajaran[]
   kehadiran          KehadiranGuru[]
+  piket              GuruPiket[]
+}
+
+enum StatusSantri {
+  AKTIF
+  ALUMNI
+  MUTASI
+  KELUAR
 }
 
 model Santri {
   id               Int               @id @default(autoincrement())
   nisn             String            @unique
+  rfidCardId       String?           @unique // UID Kartu RFID Santri
   password         String            @default("$2b$10$qTWxb4MAxuVYju.SFeZrreZMKo/9OfBaxs4WpB7x.9geRPxTdNQtq") // default: password123
   
   namaLengkap      String
@@ -138,7 +153,31 @@ model Santri {
   fotoWajah        String?           @db.Text
 
   riwayatKesehatan String?           @db.Text
-  // jenjangId, statusMukim, isAlumni dipindah ke SantriJenjang
+
+  // Status & Keaktifan Langsung (Single-Jenjang)
+  status           StatusSantri      @default(AKTIF)
+  statusMukim      Boolean           @default(false)
+
+  // Data Mutasi / Keluar
+  statusKeluar     StatusKeluar?
+  namaSekolahTujuan String?          @db.Text
+  tanggalPindah    DateTime?
+  alasanPindah     String?           @db.Text
+
+  // Data Akademik & Alumni Langsung
+  tahunMasukId     Int?
+  tahunMasuk       TahunAjaran?      @relation("SantriTahunMasuk", fields: [tahunMasukId], references: [id], onDelete: SetNull)
+  tahunLulusId     Int?
+  tahunLulus       TahunAjaran?      @relation("SantriTahunLulus", fields: [tahunLulusId], references: [id], onDelete: SetNull)
+  keteranganLulus  String?           @db.Text
+  statusLanjutan   StatusLanjutan?
+  namaInstansi     String?           @db.Text
+  programStudi     String?
+  kotaDomisiliSekarang String?
+  kontakWA         String?
+  emailAlumni      String?
+
+  // Relasi lain
   jenjangs         SantriJenjang[]
   riwayatKelas     RiwayatKelas[]
   kehadiranHarian  KehadiranHarianSantri[]
@@ -156,6 +195,7 @@ enum StatusLanjutan {
   TIDAK_LANJUT
   LAINNYA
 }
+
 enum StatusKeluar {
   PINDAH_SEKOLAH
   MENGUNDURKAN_DIRI
@@ -215,12 +255,26 @@ model KelasFormal {
   @@index([tahunAjaranId])
 }
 
+enum StatusKenaikanKelas {
+  AKTIF
+  NAIK_KELAS
+  TINGGAL_KELAS
+  LULUS
+  PINDAH
+  DROPOUT
+}
+
 model RiwayatKelas {
-  id            Int         @id @default(autoincrement())
-  santriId      Int
-  santri        Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
-  kelasFormalId Int
-  kelasFormal   KelasFormal @relation(fields: [kelasFormalId], references: [id], onDelete: Cascade)
+  id             Int                 @id @default(autoincrement())
+  santriId       Int
+  santri         Santri              @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  kelasFormalId  Int
+  kelasFormal    KelasFormal         @relation(fields: [kelasFormalId], references: [id], onDelete: Cascade)
+
+  statusKenaikan StatusKenaikanKelas @default(AKTIF)
+  catatan        String?             @db.Text
+  tanggalSelesai DateTime?
+  createdAt      DateTime            @default(now())
 
   @@unique([santriId, kelasFormalId])
   @@index([santriId])
@@ -237,6 +291,43 @@ model ProfilPesantren {
   website       String?
   namaPimpinan  String?
   logoUrl       String?
+}
+
+// Konfigurasi Lembaga / Sekolah Tunggal (Dinamis / White-Label)
+model IdentitasLembaga {
+  id                 Int      @id @default(1)
+  namaLembaga        String   @default("Madrasah Aliyah Plus Al-Ittihaad")
+  singkatan          String   @default("MA")
+  tingkatJenjang     String   @default("MA") // MA, MTs, SMA, SMK, SMP
+  sebutanSantri      String   @default("Santri") // "Santri" atau "Siswa"
+  sebutanGuru        String   @default("Guru")   // "Guru" atau "Ustadz"
+  
+  nsm                String?
+  npsn               String?
+  akreditasi         String?  @default("A")
+  alamat             String?  @db.Text
+  kelurahan          String?
+  kecamatan          String?
+  kabupatenKota      String?
+  provinsi           String?
+  kodePos            String?
+  telepon            String?
+  email              String?
+  website            String?
+  
+  logoUrl            String?  @db.Text
+  iconUrl            String?  @db.Text
+  kopSuratUrl        String?  @db.Text
+  stempelUrl         String?  @db.Text
+  ttdKepalaUrl       String?  @db.Text
+  namaKepalaMadrasah String?
+  nipKepalaMadrasah  String?
+  templateSKL        String?  @db.Text
+
+  waktuMulaiAbsen    String?  // HH:mm
+  waktuAkhirAbsen    String?  // HH:mm
+
+  updatedAt          DateTime @updatedAt
 }
 
 model SarprasPesantren {
@@ -298,6 +389,8 @@ model PengampuMataPelajaran {
   tahunAjaranId   Int
   tahunAjaran     TahunAjaran   @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
   kkm             Float?        // KKM per kelas per mapel, diedit admin jenjang
+  nilaiDirilis    Boolean       @default(false) // Toggle visibilitas nilai per mapel oleh guru/admin
+  tanggalRilis    DateTime?     // Waktu rilis nilai
   jadwalPelajaran JadwalPelajaran[]
   jurnalMengajar  JurnalMengajar[]
   materiBelajar   MateriBelajar[]
@@ -338,6 +431,25 @@ model JadwalPelajaran {
   @@index([semesterId])
 }
 
+model GuruPiket {
+  id            Int               @id @default(autoincrement())
+  guruId        Int
+  guru          Guru              @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  jenjangId     Int
+  jenjang       JenjangPendidikan @relation(fields: [jenjangId], references: [id], onDelete: Cascade)
+  tahunAjaranId Int
+  tahunAjaran   TahunAjaran       @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
+  hari          Hari
+  keterangan    String?           @db.Text
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([guruId, tahunAjaranId, hari])
+  @@index([guruId])
+  @@index([jenjangId])
+  @@index([tahunAjaranId])
+}
+
 enum TipeKartu {
   GURU
   SANTRI
@@ -357,44 +469,56 @@ model TemplateKartu {
   @@index([jenjangId])
 }
 
-// --- E-LEARNING MODELS ---
+// --- PRESENSI & E-LEARNING MODELS ---
 
 enum StatusKehadiran {
   HADIR
   IZIN
   SAKIT
   ALPA
+  TERLAMBAT
+}
+
+enum MetodeAbsensi {
+  RFID
+  MANUAL
 }
 
 model KehadiranGuru {
-  id        Int      @id @default(autoincrement())
+  id         Int             @id @default(autoincrement())
   guruId     Int
-  guru       Guru     @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  guru       Guru            @relation(fields: [guruId], references: [id], onDelete: Cascade)
   semesterId Int?
-  semester   Semester? @relation(fields: [semesterId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  tanggal    DateTime @db.Date
+  semester   Semester?       @relation(fields: [semesterId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  tanggal    DateTime        @db.Date
+  jamMasuk   DateTime?
+  jamPulang  DateTime?
   status     StatusKehadiran
-  keterangan String? @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  metode     MetodeAbsensi   @default(RFID)
+  keterangan String?         @db.Text
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 
   @@unique([guruId, tanggal])
   @@index([guruId])
 }
 
 model KehadiranHarianSantri {
-  id            Int         @id @default(autoincrement())
+  id            Int             @id @default(autoincrement())
   santriId      Int
-  santri        Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  santri        Santri          @relation(fields: [santriId], references: [id], onDelete: Cascade)
   kelasFormalId Int
-  kelasFormal   KelasFormal @relation(fields: [kelasFormalId], references: [id], onDelete: Cascade)
+  kelasFormal   KelasFormal     @relation(fields: [kelasFormalId], references: [id], onDelete: Cascade)
   semesterId    Int?
-  semester      Semester?   @relation(fields: [semesterId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  tanggal       DateTime    @db.Date
+  semester      Semester?       @relation(fields: [semesterId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  tanggal       DateTime        @db.Date
+  jamMasuk      DateTime?
+  jamPulang     DateTime?
   status        StatusKehadiran
-  keterangan    String?     @db.Text
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  metode        MetodeAbsensi   @default(RFID)
+  keterangan    String?         @db.Text
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@unique([santriId, tanggal])
   @@index([kelasFormalId])
@@ -501,7 +625,11 @@ model NilaiSumatif {
   sumatifKe       Int                   // 1, 2, atau 3
   nilaiKurikuler  Float?                // input manual guru
   nilaiTesSumatif Float?                // input manual guru
-  // nilaiKehadiran & nilaiRata dihitung on-the-fly dari AbsensiMapel
+  nilaiKehadiran  Float?                // input manual / hasil konversi absensi guru
+  hadir           Int?                  // jumlah hadir manual (H)
+  sakit           Int?                  // jumlah sakit manual (S)
+  izin            Int?                  // jumlah izin manual (I)
+  alfa            Int?                  // jumlah alfa manual (A)
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
 
@@ -548,3 +676,80 @@ model LaporanSemester {
   @@index([semesterId])
   @@index([pengampuId])
 }
+
+model LandingPageContent {
+  id           Int      @id @default(1)
+  heroData     Json
+  statsData    Json
+  featuresData Json
+  profileData  Json
+  contactData  Json
+  footerData   Json
+  updatedAt    DateTime @updatedAt
+}
+
+// --- IOT RFID ATTENDANCE MODELS ---
+
+model PerangkatRfid {
+  id            Int       @id @default(autoincrement())
+  kodePerangkat String    @unique // contoh: "ESP32-GERBANG-UTAMA"
+  namaPerangkat String    // "Alat Gerbang Masuk Santri"
+  lokasi        String?   // "Pos Satpam Depan"
+  apiKey        String    @unique // Token rahasia yang disimpan di flash ESP32
+  aktif         Boolean   @default(true)
+  lastPing      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model PengaturanAbsensi {
+  id                 Int       @id @default(autoincrement())
+  jenjangId          Int?      @unique
+  jamMasukMulai      String    @default("06:00") // Format HH:mm
+  jamMasukBatas      String    @default("07:15") // Melebihi ini = TERLAMBAT
+  jamPulangMulai     String    @default("14:30") // Batas awal tap pulang
+  jamPulangSelesai   String    @default("17:30") // Batas akhir tap pulang
+  toleransiTerlambat Int       @default(15)      // Toleransi menit
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model LogTapRfid {
+  id            Int       @id @default(autoincrement())
+  rfidUid       String
+  pemilikTipe   String?   // "GURU", "SANTRI", atau "UNKNOWN"
+  pemilikId     Int?
+  namaPemilik   String?
+  waktuTap      DateTime  @default(now())
+  statusTap     String    // "BERHASIL_MASUK", "BERHASIL_PULANG", "KARTU_TIDAK_TERDAFTAR", "DOUBLE_TAP"
+  kodePerangkat String?
+
+  @@index([waktuTap])
+  @@index([rfidUid])
+}
+
+enum TipeLibur {
+  MINGGUAN
+  KONDISIONAL
+  SEMESTER
+}
+
+model HariLibur {
+  id           Int                @id @default(autoincrement())
+  tipe         TipeLibur
+  nama         String             // Nama / keterangan libur
+  hariMingguan Hari?              // Untuk tipe MINGGUAN (misal: MINGGU, JUMAT, SABTU)
+  tanggal      DateTime?          @db.Date // Untuk tipe KONDISIONAL (tanggal tertentu)
+  tanggalMulai DateTime?          @db.Date // Untuk tipe SEMESTER (rentang mulai)
+  tanggalAkhir DateTime?          @db.Date // Untuk tipe SEMESTER (rentang akhir)
+  keterangan   String?            @db.Text
+  jenjangId    Int?               // null = Berlaku untuk Semua Jenjang
+  jenjang      JenjangPendidikan? @relation(fields: [jenjangId], references: [id], onDelete: Cascade)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([tipe])
+  @@index([tanggal])
+  @@index([jenjangId])
+}
+

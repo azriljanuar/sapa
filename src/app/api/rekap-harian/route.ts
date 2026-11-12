@@ -1,34 +1,54 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
+import { isHariLibur } from "@/lib/holiday-utils"
 
-// GET /api/rekap-harian?kelasId=123&tanggal=2026-07-29
+// GET /api/rekap-harian?kelasId=123&tanggal=2026-07-29 atau ?kelasId=ALL&jenjangId=1&tanggal=2026-07-29
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const kelasId = searchParams.get("kelasId")
+    const jenjangId = searchParams.get("jenjangId")
     const tanggalParam = searchParams.get("tanggal")
 
-    if (!kelasId || !tanggalParam) {
-      return NextResponse.json({ success: false, message: "Kelas ID dan Tanggal diperlukan" }, { status: 400 })
+    if ((!kelasId && !jenjangId) || !tanggalParam) {
+      return NextResponse.json({ success: false, message: "Parameter tidak lengkap" }, { status: 400 })
     }
 
     const tanggal = new Date(tanggalParam)
+    let effectiveJenjangId = jenjangId ? parseInt(jenjangId) : null
+    let kelas = null
 
-    const kelas = await prisma.kelasFormal.findUnique({
-      where: { id: parseInt(kelasId) },
-      select: { id: true, namaKelas: true }
-    })
+    if (kelasId && kelasId !== "ALL") {
+      kelas = await prisma.kelasFormal.findUnique({
+        where: { id: parseInt(kelasId) },
+        select: { id: true, namaKelas: true, jenjangId: true }
+      })
 
-    if (!kelas) {
-      return NextResponse.json({ success: false, message: "Kelas tidak ditemukan" }, { status: 404 })
+      if (!kelas) {
+        return NextResponse.json({ success: false, message: "Kelas tidak ditemukan" }, { status: 404 })
+      }
+      effectiveJenjangId = kelas.jenjangId
+    }
+
+    const holiday = effectiveJenjangId ? await isHariLibur(tanggalParam, effectiveJenjangId) : { isLibur: false }
+
+    const whereClause: any = {}
+    if (kelasId && kelasId !== "ALL") {
+      whereClause.kelasFormalId = parseInt(kelasId)
+    } else if (effectiveJenjangId) {
+      whereClause.kelasFormal = { 
+        jenjangId: effectiveJenjangId,
+        tahunAjaran: { isActive: true }
+      }
     }
 
     // Ambil santri melalui RiwayatKelas
     const riwayatList = await prisma.riwayatKelas.findMany({
-      where: {
-        kelasFormalId: parseInt(kelasId),
-      },
+      where: whereClause,
       include: {
+        kelasFormal: {
+          select: { id: true, namaKelas: true }
+        },
         santri: {
           include: {
             kehadiranHarian: {
@@ -37,10 +57,13 @@ export async function GET(request: Request) {
           }
         }
       },
-      orderBy: { santri: { namaLengkap: 'asc' } }
+      orderBy: [
+        { kelasFormal: { namaKelas: 'asc' } },
+        { santri: { namaLengkap: 'asc' } }
+      ]
     })
 
-    const summary = { hadir: 0, sakit: 0, izin: 0, alpa: 0, belumAbsen: 0 }
+    const summary = { hadir: 0, terlambat: 0, sakit: 0, izin: 0, alpa: 0, belumAbsen: 0 }
     const totalSantri = riwayatList.length
 
     const data = riwayatList.map(r => {
@@ -49,6 +72,10 @@ export async function GET(request: Request) {
       const keterangan = kehadiran?.keterangan || null
 
       if (status === 'HADIR') summary.hadir++
+      else if (status === 'TERLAMBAT') {
+        summary.hadir++
+        summary.terlambat++
+      }
       else if (status === 'SAKIT') summary.sakit++
       else if (status === 'IZIN') summary.izin++
       else if (status === 'ALPA') summary.alpa++
@@ -58,8 +85,14 @@ export async function GET(request: Request) {
         id: r.santri.id,
         namaLengkap: r.santri.namaLengkap,
         nisn: r.santri.nisn,
+        rfidCardId: r.santri.rfidCardId,
+        kelasId: r.kelasFormal.id,
+        namaKelas: r.kelasFormal.namaKelas,
         status,
-        keterangan
+        keterangan,
+        jamMasuk: kehadiran?.jamMasuk || null,
+        jamPulang: kehadiran?.jamPulang || null,
+        metode: kehadiran?.metode || null,
       }
     })
 
@@ -69,6 +102,7 @@ export async function GET(request: Request) {
       tanggal: tanggalParam,
       totalSantri,
       summary,
+      holiday,
       data
     })
 

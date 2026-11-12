@@ -57,8 +57,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Data tidak valid" }, { status: 400 })
     }
 
-    const todayStr = new Date().toISOString().split("T")[0]
-    const today = new Date(todayStr)
+    const targetDateStr = body.tanggal || new Date().toISOString().split("T")[0]
+    const targetDate = new Date(targetDateStr)
 
     // Find active semester
     const activeTA = await prisma.tahunAjaran.findFirst({
@@ -74,18 +74,20 @@ export async function POST(request: Request) {
         where: {
           santriId_tanggal: {
             santriId: data.santriId,
-            tanggal: today
+            tanggal: targetDate
           }
         },
         update: {
           status: data.status,
+          metode: "MANUAL",
           keterangan: data.keterangan || null
         },
         create: {
           santriId: data.santriId,
           kelasFormalId: parseInt(kelasId),
-          tanggal: today,
+          tanggal: targetDate,
           status: data.status as any,
+          metode: "MANUAL",
           semesterId: activeSemester?.id || null,
           keterangan: data.keterangan || null
         }
