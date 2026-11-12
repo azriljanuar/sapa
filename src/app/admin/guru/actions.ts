@@ -9,7 +9,7 @@ import * as xlsx from "xlsx"
 
 const DEFAULT_PASSWORD_HASH = "$2b$10$qTWxb4MAxuVYju.SFeZrreZMKo/9OfBaxs4WpB7x.9geRPxTdNQtq" // "password123"
 
-export const guruFormSchema = z.object({
+const guruFormSchema = z.object({
   id: z.number().optional(),
   nama: z.string().min(2, "Nama minimal 2 karakter"),
   email: z.string().email("Format email tidak valid"),

@@ -52,7 +52,7 @@ const char* WIFI_PASSWORD = "januari2026";
 
 // Ganti IP di bawah ini dengan IP lokal / domain server SAPA yang aktif:
 // Contoh: "http://192.168.1.50:3000/api/absensi-rfid" atau "https://sapa.pesantren.id/api/absensi-rfid"
-const char* SERVER_URL    = "http://192.168.1.23:3000/api/absensi-rfid";
+const char* SERVER_URL    = "http://192.168.1.66:3000/api/absensi-rfid";
 
 // Secret Device Key (Harus cocok dengan database model PerangkatRfid di SAPA):
 const char* DEVICE_KEY    = "sapa_rfid_device_secret_2026";
