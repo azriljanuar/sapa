@@ -148,20 +148,33 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      // Jika belum ada absensi masuk hari ini
-      if (!kehadiran) {
-        // Untuk guru: selalu tercatat HADIR (tidak ada status terlambat)
-        await prisma.kehadiranGuru.create({
-          data: {
-            guruId: guru.id,
-            semesterId,
-            tanggal: todayDate,
-            jamMasuk: now,
-            status: "HADIR",
-            metode: "RFID",
-            keterangan: "Hadir (RFID)",
-          },
-        })
+      // Kasus 1: Belum ada absensi hari ini ATAU jamMasuk masih kosong (Tap Pertama: Masuk)
+      if (!kehadiran || !kehadiran.jamMasuk) {
+        if (!kehadiran) {
+          await prisma.kehadiranGuru.create({
+            data: {
+              guruId: guru.id,
+              semesterId,
+              tanggal: todayDate,
+              jamMasuk: now,
+              status: "HADIR",
+              metode: "RFID",
+              keterangan: "Hadir (RFID)",
+            },
+          })
+        } else {
+          await prisma.kehadiranGuru.update({
+            where: { id: kehadiran.id },
+            data: {
+              jamMasuk: now,
+              status: "HADIR",
+              metode: "RFID",
+              keterangan: kehadiran.keterangan
+                ? `${kehadiran.keterangan} | Masuk ${timeStr} (RFID)`
+                : "Hadir (RFID)",
+            },
+          })
+        }
 
         await prisma.logTapRfid.create({
           data: {
@@ -181,66 +194,69 @@ export async function POST(req: NextRequest) {
           nama: guru.nama,
           sub: "Guru",
           jam: timeStr,
-          pesan: "Hadir",
+          pesan: "Berhasil Masuk",
           beep: 1,
         })
       }
 
-      // Jika sudah ada absensi masuk, periksa untuk absensi pulang
-      if (kehadiran.jamPulang) {
-        return NextResponse.json({
-          success: true,
-          code: "ALREADY_CHECKED",
-          tipe: "GURU",
-          nama: guru.nama,
-          sub: "Guru",
-          jam: timeStr,
-          pesan: "Sudah Absen",
-          beep: 2,
-        })
-      }
-
-      // Jika waktu sekarang sudah masuk jam pulang
-      if (timeMinutes >= limitPulangMinutes) {
-        await prisma.kehadiranGuru.update({
-          where: { id: kehadiran.id },
-          data: { jamPulang: now },
-        })
-
+      // Kasus 3: Sudah ada jam masuk DAN sudah ada jam pulang (Tap Ketiga dan seterusnya)
+      // Abaikan pencatatan ulang dan jangan menimpa jam masuk maupun pulang
+      if (kehadiran.jamMasuk && kehadiran.jamPulang) {
         await prisma.logTapRfid.create({
           data: {
             rfidUid,
             pemilikTipe: "GURU",
             pemilikId: guru.id,
             namaPemilik: guru.nama,
-            statusTap: "BERHASIL_PULANG",
+            statusTap: "SUDAH_LENGKAP",
             kodePerangkat: device.kodePerangkat,
           },
-        })
+        }).catch(() => {})
 
         return NextResponse.json({
           success: true,
-          code: "PULANG_OK",
+          code: "ALREADY_COMPLETED",
           tipe: "GURU",
           nama: guru.nama,
           sub: "Guru",
           jam: timeStr,
-          pesan: "Absen Pulang OK",
-          beep: 1,
-        })
-      } else {
-        // Belum waktunya pulang dan sudah masuk
-        return NextResponse.json({
-          success: true,
-          code: "ALREADY_CHECKED",
-          tipe: "GURU",
-          nama: guru.nama,
-          sub: "Guru",
-          jam: timeStr,
-          pesan: "Sudah Masuk",
+          pesan: "Absensi Lengkap",
           beep: 2,
         })
       }
+
+      // Kasus 2: Sudah ada jam masuk dan jam pulang masih kosong (Tap Kedua: Pulang)
+      await prisma.kehadiranGuru.update({
+        where: { id: kehadiran.id },
+        data: {
+          jamPulang: now,
+          keterangan: kehadiran.keterangan
+            ? `${kehadiran.keterangan} | Pulang ${timeStr} (RFID)`
+            : `Hadir & Pulang ${timeStr} (RFID)`,
+        },
+      })
+
+      await prisma.logTapRfid.create({
+        data: {
+          rfidUid,
+          pemilikTipe: "GURU",
+          pemilikId: guru.id,
+          namaPemilik: guru.nama,
+          statusTap: "BERHASIL_PULANG",
+          kodePerangkat: device.kodePerangkat,
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        code: "PULANG_OK",
+        tipe: "GURU",
+        nama: guru.nama,
+        sub: "Guru",
+        jam: timeStr,
+        pesan: "Berhasil Pulang",
+        beep: 1,
+      })
     }
 
     // B. Cek Santri
@@ -288,28 +304,42 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      // Jika belum absen masuk hari ini
-      if (!kehadiran) {
+      // Kasus 1: Belum ada absensi hari ini ATAU jamMasuk masih kosong (Tap Pertama: Masuk)
+      if (!kehadiran || !kehadiran.jamMasuk) {
         const isLate = timeMinutes > limitMasukMinutes
         const lateMinutes = isLate ? timeMinutes - limitMasukMinutes : 0
         const status = isLate ? "TERLAMBAT" : "HADIR"
-        const pesan = isLate ? `Terlambat ${lateMinutes}m` : "Tepat Waktu"
+        const pesan = isLate ? `Terlambat ${lateMinutes}m` : "Berhasil Masuk"
         const beep = isLate ? 2 : 1
 
-        await prisma.kehadiranHarianSantri.create({
-          data: {
-            santriId: santri.id,
-            kelasFormalId,
-            semesterId,
-            tanggal: todayDate,
-            jamMasuk: now,
-            status,
-            metode: "RFID",
-            keterangan: isLate
-              ? `Terlambat ${lateMinutes} menit (RFID)`
-              : "Hadir tepat waktu (RFID)",
-          },
-        })
+        if (!kehadiran) {
+          await prisma.kehadiranHarianSantri.create({
+            data: {
+              santriId: santri.id,
+              kelasFormalId,
+              semesterId,
+              tanggal: todayDate,
+              jamMasuk: now,
+              status,
+              metode: "RFID",
+              keterangan: isLate
+                ? `Terlambat ${lateMinutes} menit (RFID)`
+                : "Hadir tepat waktu (RFID)",
+            },
+          })
+        } else {
+          await prisma.kehadiranHarianSantri.update({
+            where: { id: kehadiran.id },
+            data: {
+              jamMasuk: now,
+              status,
+              metode: "RFID",
+              keterangan: kehadiran.keterangan
+                ? `${kehadiran.keterangan} | Masuk ${timeStr} (${isLate ? `Terlambat ${lateMinutes}m` : "Tepat Waktu"})`
+                : (isLate ? `Terlambat ${lateMinutes} menit (RFID)` : "Hadir tepat waktu (RFID)"),
+            },
+          })
+        }
 
         await prisma.logTapRfid.create({
           data: {
@@ -334,60 +364,64 @@ export async function POST(req: NextRequest) {
         })
       }
 
-      // Jika sudah ada record masuk hari ini
-      if (kehadiran.jamPulang) {
-        return NextResponse.json({
-          success: true,
-          code: "ALREADY_CHECKED",
-          tipe: "SANTRI",
-          nama: santri.namaLengkap,
-          sub: namaKelas,
-          jam: timeStr,
-          pesan: "Sudah Absen",
-          beep: 2,
-        })
-      }
-
-      // Jika waktu sekarang sudah masuk jam pulang
-      if (timeMinutes >= limitPulangMinutes) {
-        await prisma.kehadiranHarianSantri.update({
-          where: { id: kehadiran.id },
-          data: { jamPulang: now },
-        })
-
+      // Kasus 3: Sudah ada jam masuk DAN sudah ada jam pulang (Tap Ketiga dan seterusnya)
+      // Abaikan pencatatan ulang dan jangan menimpa jam masuk maupun pulang
+      if (kehadiran.jamMasuk && kehadiran.jamPulang) {
         await prisma.logTapRfid.create({
           data: {
             rfidUid,
             pemilikTipe: "SANTRI",
             pemilikId: santri.id,
             namaPemilik: santri.namaLengkap,
-            statusTap: "BERHASIL_PULANG",
+            statusTap: "SUDAH_LENGKAP",
             kodePerangkat: device.kodePerangkat,
           },
-        })
+        }).catch(() => {})
 
         return NextResponse.json({
           success: true,
-          code: "PULANG_OK",
+          code: "ALREADY_COMPLETED",
           tipe: "SANTRI",
           nama: santri.namaLengkap,
           sub: namaKelas,
           jam: timeStr,
-          pesan: "Absen Pulang OK",
-          beep: 1,
-        })
-      } else {
-        return NextResponse.json({
-          success: true,
-          code: "ALREADY_CHECKED",
-          tipe: "SANTRI",
-          nama: santri.namaLengkap,
-          sub: namaKelas,
-          jam: timeStr,
-          pesan: "Sudah Masuk",
+          pesan: "Absensi Lengkap",
           beep: 2,
         })
       }
+
+      // Kasus 2: Sudah ada jam masuk dan jam pulang masih kosong (Tap Kedua: Pulang)
+      await prisma.kehadiranHarianSantri.update({
+        where: { id: kehadiran.id },
+        data: {
+          jamPulang: now,
+          keterangan: kehadiran.keterangan
+            ? `${kehadiran.keterangan} | Pulang ${timeStr} (RFID)`
+            : `Pulang ${timeStr} (RFID)`,
+        },
+      })
+
+      await prisma.logTapRfid.create({
+        data: {
+          rfidUid,
+          pemilikTipe: "SANTRI",
+          pemilikId: santri.id,
+          namaPemilik: santri.namaLengkap,
+          statusTap: "BERHASIL_PULANG",
+          kodePerangkat: device.kodePerangkat,
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        code: "PULANG_OK",
+        tipe: "SANTRI",
+        nama: santri.namaLengkap,
+        sub: namaKelas,
+        jam: timeStr,
+        pesan: "Berhasil Pulang",
+        beep: 1,
+      })
     }
 
     // 6. Kartu Tidak Dikenal / Belum Terdaftar
