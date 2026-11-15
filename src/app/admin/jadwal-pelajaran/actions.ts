@@ -36,6 +36,37 @@ export async function createJadwalAction(
   }
 }
 
+export async function updateJadwalAction(
+  jadwalId: number,
+  pengampuId: number,
+  hari: Hari,
+  jamMulai: string,
+  jamSelesai: string
+) {
+  try {
+    const admin = await getLoggedInAdminJenjang()
+    if (!admin) {
+      return { success: false, error: "Unauthorized" }
+    }
+
+    await prisma.jadwalPelajaran.update({
+      where: { id: jadwalId },
+      data: {
+        pengampuId,
+        hari,
+        jamMulai,
+        jamSelesai
+      }
+    })
+
+    revalidatePath("/admin/jadwal-pelajaran")
+    return { success: true }
+  } catch (error) {
+    console.error(error)
+    return { success: false, error: "Gagal memperbarui jadwal" }
+  }
+}
+
 export async function deleteJadwalAction(jadwalId: number) {
   try {
     const admin = await getLoggedInAdminJenjang()

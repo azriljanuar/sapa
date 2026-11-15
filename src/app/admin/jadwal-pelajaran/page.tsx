@@ -44,7 +44,7 @@ export default async function JadwalPelajaranPage() {
     },
     include: {
       mataPelajaran: {
-        select: { id: true, nama: true }
+        select: { id: true, nama: true, kode: true }
       },
       guru: {
         select: { id: true, nama: true }
@@ -67,9 +67,10 @@ export default async function JadwalPelajaranPage() {
       include: {
         pengampu: {
           select: {
+            id: true,
             kelasFormalId: true,
             guru: { select: { id: true, nama: true } },
-            mataPelajaran: { select: { id: true, nama: true } }
+            mataPelajaran: { select: { id: true, nama: true, kode: true } }
           }
         }
       }
