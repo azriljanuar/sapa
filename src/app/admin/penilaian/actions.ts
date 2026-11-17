@@ -1,12 +1,12 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { getLoggedInAdmin } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
 export async function toggleRilisNilaiPengampu(pengampuId: number, nilaiDirilis: boolean) {
   try {
-    await getLoggedInAdmin()
+    await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
 
     await prisma.pengampuMataPelajaran.update({
       where: { id: pengampuId },
@@ -17,6 +17,8 @@ export async function toggleRilisNilaiPengampu(pengampuId: number, nilaiDirilis:
     })
 
     revalidatePath("/admin/penilaian")
+    revalidatePath("/guru/kurikulum/penilaian")
+    revalidatePath("/guru/kepala-sekolah/penilaian")
     revalidatePath("/santri/nilai")
     return { success: true }
   } catch (e: any) {
@@ -27,7 +29,7 @@ export async function toggleRilisNilaiPengampu(pengampuId: number, nilaiDirilis:
 
 export async function toggleRilisSemuaNilaiSemester(semesterId: number, nilaiDirilis: boolean) {
   try {
-    await getLoggedInAdmin()
+    await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
 
     // 1. Update status global semester
     const sem = await prisma.semester.update({
@@ -48,6 +50,8 @@ export async function toggleRilisSemuaNilaiSemester(semesterId: number, nilaiDir
     })
 
     revalidatePath("/admin/penilaian")
+    revalidatePath("/guru/kurikulum/penilaian")
+    revalidatePath("/guru/kepala-sekolah/penilaian")
     revalidatePath("/santri/nilai")
     return { success: true }
   } catch (e: any) {

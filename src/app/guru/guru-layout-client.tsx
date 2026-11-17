@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation"
 import { 
   Menu, Home, LogOut, ChevronLeft, 
   GraduationCap, UserCheck, CalendarCheck, CalendarDays, ClipboardCheck, User, BarChart2,
-  Calendar, ClipboardList, IdCard, ShieldCheck
+  Calendar, ClipboardList, IdCard, ShieldCheck, Award, BookOpen, BookOpenCheck, Library,
+  CalendarRange, Users, LayoutDashboard
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -18,6 +19,9 @@ export function GuruLayoutClient({
   guru,
   isWaliKelas,
   isGuruPiket,
+  isKepalaSekolah,
+  isKurikulum,
+  isKesiswaan,
   allTa = [],
   activeSemesterId = null,
 }: {
@@ -25,6 +29,9 @@ export function GuruLayoutClient({
   guru: any
   isWaliKelas?: boolean
   isGuruPiket?: boolean
+  isKepalaSekolah?: boolean
+  isKurikulum?: boolean
+  isKesiswaan?: boolean
   allTa?: any[]
   activeSemesterId?: number | null
 }) {
@@ -46,6 +53,31 @@ export function GuruLayoutClient({
     { name: "Jadwal Pelajaran", href: "/guru/piket/jadwal", icon: Calendar },
     { name: "Rekap Kehadiran", href: "/guru/piket/rekap-kehadiran", icon: ClipboardList },
     { name: "Kartu Identitas", href: "/guru/piket/kartu-identitas", icon: IdCard },
+  ] : []
+
+  const kepalaNavItems = isKepalaSekolah ? [
+    { name: "Dashboard Eksekutif", href: "/guru/kepala-sekolah", icon: LayoutDashboard },
+    { name: "Rekap Presensi", href: "/guru/kepala-sekolah/rekap-kehadiran", icon: ClipboardList },
+    { name: "Supervisi Penilaian", href: "/guru/kepala-sekolah/penilaian", icon: BarChart2 },
+    { name: "Supervisi Jadwal KBM", href: "/guru/kepala-sekolah/jadwal-pelajaran", icon: CalendarDays },
+    { name: "Kalender Pendidikan", href: "/guru/kepala-sekolah/kalender-pendidikan", icon: CalendarRange },
+  ] : []
+
+  const kurikulumNavItems = isKurikulum ? [
+    { name: "Kalender Pendidikan", href: "/guru/kurikulum/kalender-pendidikan", icon: CalendarRange },
+    { name: "Kelas & Wali Kelas", href: "/guru/kurikulum/kelas-formal", icon: BookOpen },
+    { name: "Mata Pelajaran & Pengampu", href: "/guru/kurikulum/mata-pelajaran", icon: Library },
+    { name: "Jadwal Pelajaran KBM", href: "/guru/kurikulum/jadwal-pelajaran", icon: CalendarDays },
+    { name: "Monitoring Penilaian", href: "/guru/kurikulum/penilaian", icon: BarChart2 },
+  ] : []
+
+  const kesiswaanNavItems = isKesiswaan ? [
+    { name: "Data Santri", href: "/guru/kesiswaan/santri", icon: GraduationCap },
+    { name: "Rekap Kehadiran Santri", href: "/guru/kesiswaan/rekap-kehadiran", icon: ClipboardList },
+    { name: "Kenaikan Kelas & Kelulusan", href: "/guru/kesiswaan/kelas-formal", icon: BookOpen },
+    { name: "Data Alumni & SKL", href: "/guru/kesiswaan/alumni", icon: Users },
+    { name: "Kartu Santri RFID", href: "/guru/kesiswaan/kartu-identitas", icon: IdCard },
+    { name: "Monitoring Guru Piket", href: "/guru/kesiswaan/guru-piket", icon: UserCheck },
   ] : []
 
   const isActive = (href: string) => {
@@ -181,6 +213,111 @@ export function GuruLayoutClient({
               })}
             </div>
           )}
+
+          {/* Navigasi Khusus Kepala Sekolah */}
+          {isKepalaSekolah && (
+            <div className="pt-4 space-y-1">
+              <div className={cn("px-3 mb-2 text-[10px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center justify-between", isCollapsed && "sr-only")}>
+                <span>Kepala Madrasah</span>
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" title="Kepala Madrasah Aktif" />
+              </div>
+              {kepalaNavItems.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.href)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsSidebarOpen(false)}
+                    title={isCollapsed ? item.name : undefined}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group relative",
+                      active 
+                        ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold" 
+                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                      isCollapsed && "justify-center px-0 h-10 w-10 mx-auto"
+                    )}
+                  >
+                    <Icon className={cn(
+                      "w-4 h-4 shrink-0 transition-colors",
+                      active ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground group-hover:text-sidebar-foreground"
+                    )} />
+                    {!isCollapsed && <span className="truncate">{item.name}</span>}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Navigasi Khusus Bidang Kurikulum */}
+          {isKurikulum && (
+            <div className="pt-4 space-y-1">
+              <div className={cn("px-3 mb-2 text-[10px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider flex items-center justify-between", isCollapsed && "sr-only")}>
+                <span>Bidang Kurikulum</span>
+                <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" title="Waka Kurikulum Aktif" />
+              </div>
+              {kurikulumNavItems.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.href)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsSidebarOpen(false)}
+                    title={isCollapsed ? item.name : undefined}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group relative",
+                      active 
+                        ? "bg-purple-500/15 text-purple-700 dark:text-purple-300 font-semibold" 
+                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                      isCollapsed && "justify-center px-0 h-10 w-10 mx-auto"
+                    )}
+                  >
+                    <Icon className={cn(
+                      "w-4 h-4 shrink-0 transition-colors",
+                      active ? "text-purple-600 dark:text-purple-400" : "text-muted-foreground group-hover:text-sidebar-foreground"
+                    )} />
+                    {!isCollapsed && <span className="truncate">{item.name}</span>}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Navigasi Khusus Bidang Kesiswaan */}
+          {isKesiswaan && (
+            <div className="pt-4 space-y-1">
+              <div className={cn("px-3 mb-2 text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center justify-between", isCollapsed && "sr-only")}>
+                <span>Bidang Kesiswaan</span>
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" title="Waka Kesiswaan Aktif" />
+              </div>
+              {kesiswaanNavItems.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.href)
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsSidebarOpen(false)}
+                    title={isCollapsed ? item.name : undefined}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group relative",
+                      active 
+                        ? "bg-blue-500/15 text-blue-700 dark:text-blue-300 font-semibold" 
+                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                      isCollapsed && "justify-center px-0 h-10 w-10 mx-auto"
+                    )}
+                  >
+                    <Icon className={cn(
+                      "w-4 h-4 shrink-0 transition-colors",
+                      active ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground group-hover:text-sidebar-foreground"
+                    )} />
+                    {!isCollapsed && <span className="truncate">{item.name}</span>}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* User Card & Logout Footer */}
@@ -198,7 +335,17 @@ export function GuruLayoutClient({
                   {guru?.nama}
                 </span>
                 <span className="text-[10px] text-muted-foreground truncate">
-                  {guru?.nip || "Guru Pengajar"}
+                  {isKepalaSekolah
+                    ? "Kepala Madrasah"
+                    : isKurikulum
+                    ? "Bidang Kurikulum"
+                    : isKesiswaan
+                    ? "Bidang Kesiswaan"
+                    : isGuruPiket
+                    ? "Guru Piket"
+                    : isWaliKelas
+                    ? "Wali Kelas"
+                    : guru?.nip || "Guru Pengajar"}
                 </span>
               </div>
             )}

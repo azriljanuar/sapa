@@ -39,11 +39,28 @@ export default async function GuruLayout({ children }: { children: ReactNode }) 
 
   const isGuruPiket = piketAssignments.length > 0
 
+  // Cek tugas tambahan struktural (Kepala Sekolah, Kurikulum, Kesiswaan) pada Tahun Ajaran aktif
+  const tugasTambahan = activeTAId
+    ? await prisma.tugasTambahanGuru.findMany({
+        where: {
+          guruId: guru.id,
+          tahunAjaranId: activeTAId,
+        },
+      })
+    : []
+
+  const isKepalaSekolah = tugasTambahan.some((t) => t.peran === "KEPALA_SEKOLAH")
+  const isKurikulum = tugasTambahan.some((t) => t.peran === "KURIKULUM")
+  const isKesiswaan = tugasTambahan.some((t) => t.peran === "KESISWAAN")
+
   return (
     <GuruLayoutClient 
       guru={guru} 
       isWaliKelas={waliKelasCount > 0}
       isGuruPiket={isGuruPiket}
+      isKepalaSekolah={isKepalaSekolah}
+      isKurikulum={isKurikulum}
+      isKesiswaan={isKesiswaan}
       allTa={allTa as any}
       activeSemesterId={selectedSem?.id || null}
     >

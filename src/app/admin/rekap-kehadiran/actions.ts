@@ -1,17 +1,14 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { getSession } from "@/lib/auth"
+import { getSession, getLoggedInAdminOrStaff } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { Hari } from "@prisma/client"
 import { normalizeDate } from "@/lib/holiday-utils"
 
 export async function getPengaturanAbsensi() {
   try {
-    const session = await getSession()
-    if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "ADMIN_JENJANG")) {
-      throw new Error("Unauthorized")
-    }
+    await getLoggedInAdminOrStaff(["KEPALA_SEKOLAH", "KESISWAAN"])
 
     let config = await prisma.pengaturanAbsensi.findFirst()
     if (!config) {
@@ -49,10 +46,7 @@ export async function getPengaturanAbsensi() {
 
 export async function updatePengaturanAbsensi(formData: FormData) {
   try {
-    const session = await getSession()
-    if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "ADMIN_JENJANG")) {
-      return { success: false, message: "Tidak memiliki hak akses." }
-    }
+    await getLoggedInAdminOrStaff(["KEPALA_SEKOLAH", "KESISWAAN"])
 
     const jamMasukMulai = (formData.get("jamMasukMulai") as string) || "06:00"
     const jamMasukBatas = (formData.get("jamMasukBatas") as string) || "07:15"
@@ -116,10 +110,7 @@ export async function updatePengaturanAbsensi(formData: FormData) {
 
 export async function updateKehadiranGuruManual(formData: FormData) {
   try {
-    const session = await getSession()
-    if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "ADMIN_JENJANG")) {
-      return { success: false, message: "Tidak memiliki hak akses." }
-    }
+    await getLoggedInAdminOrStaff(["KEPALA_SEKOLAH", "KESISWAAN"])
 
     const guruId = parseInt(formData.get("guruId") as string)
     const tanggalStr = formData.get("tanggal") as string

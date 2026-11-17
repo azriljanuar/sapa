@@ -1,7 +1,7 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { getSession } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { Hari, KategoriKaldik, SistemHariSekolah } from "@prisma/client"
 import { serializeHariLiburRutin, normalizeDate } from "@/lib/kaldik-utils"
@@ -16,10 +16,7 @@ export async function updateSistemHariSekolah({
   hariLiburRutin: Hari[]
 }) {
   try {
-    const session = await getSession()
-    if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "ADMIN_JENJANG")) {
-      return { success: false, message: "Tidak memiliki hak akses." }
-    }
+    await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
 
     const serializedDays = serializeHariLiburRutin(hariLiburRutin)
 
@@ -54,10 +51,7 @@ export async function updateSistemHariSekolah({
 
 export async function upsertKaldikAgenda(formData: FormData) {
   try {
-    const session = await getSession()
-    if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "ADMIN_JENJANG")) {
-      return { success: false, message: "Tidak memiliki hak akses." }
-    }
+    await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
 
     const idStr = formData.get("id") as string
     const id = idStr ? parseInt(idStr) : undefined
@@ -135,10 +129,7 @@ export async function upsertKaldikAgenda(formData: FormData) {
 
 export async function deleteKaldikAgenda(id: number) {
   try {
-    const session = await getSession()
-    if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "ADMIN_JENJANG")) {
-      return { success: false, message: "Tidak memiliki hak akses." }
-    }
+    await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
 
     const item = await prisma.kaldikAgenda.delete({
       where: { id },
@@ -162,10 +153,7 @@ export async function deleteKaldikAgenda(id: number) {
 
 export async function applyTemplateKaldikKemenag(tahunAjaranId: number, semesterNama: "GANJIL" | "GENAP") {
   try {
-    const session = await getSession()
-    if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "ADMIN_JENJANG")) {
-      return { success: false, message: "Tidak memiliki hak akses." }
-    }
+    await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
 
     const ta = await prisma.tahunAjaran.findUnique({
       where: { id: tahunAjaranId },

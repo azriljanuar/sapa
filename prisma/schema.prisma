@@ -62,6 +62,7 @@ model JenjangPendidikan {
   hariLibur          HariLibur[]
   guruPiket          GuruPiket[]
   kaldikAgenda       KaldikAgenda[]
+  tugasTambahanGuru  TugasTambahanGuru[]
 }
 
 model TahunAjaran {
@@ -78,6 +79,7 @@ model TahunAjaran {
   guruPiket         GuruPiket[]
   kaldikPengaturan  KaldikPengaturan?
   kaldikAgenda      KaldikAgenda[]
+  tugasTambahanGuru TugasTambahanGuru[]
 }
 
 model Semester {
@@ -127,6 +129,7 @@ model Guru {
   pengampu           PengampuMataPelajaran[]
   kehadiran          KehadiranGuru[]
   piket              GuruPiket[]
+  tugasTambahan      TugasTambahanGuru[]
 }
 
 enum StatusSantri {
@@ -452,6 +455,33 @@ model GuruPiket {
   @@index([guruId])
   @@index([jenjangId])
   @@index([tahunAjaranId])
+}
+
+enum PeranStruktural {
+  KEPALA_SEKOLAH
+  KURIKULUM
+  KESISWAAN
+}
+
+model TugasTambahanGuru {
+  id            Int               @id @default(autoincrement())
+  guruId        Int
+  guru          Guru              @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  jenjangId     Int
+  jenjang       JenjangPendidikan @relation(fields: [jenjangId], references: [id], onDelete: Cascade)
+  tahunAjaranId Int
+  tahunAjaran   TahunAjaran       @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
+  peran         PeranStruktural
+  skNomor       String?           // Nomor SK Penugasan / Pengangkatan (Opsional)
+  keterangan    String?           @db.Text
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([jenjangId, tahunAjaranId, peran, guruId])
+  @@index([guruId])
+  @@index([jenjangId])
+  @@index([tahunAjaranId])
+  @@index([peran])
 }
 
 enum TipeKartu {

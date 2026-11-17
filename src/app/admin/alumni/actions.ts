@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 
 export async function transferAlumniToJenjang(santriIds: number[], targetJenjangId: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     // Ambil data alumni yang dipilih
@@ -31,6 +31,7 @@ export async function transferAlumniToJenjang(santriIds: number[], targetJenjang
     }
 
     revalidatePath("/admin/alumni")
+    revalidatePath("/guru/kesiswaan/alumni")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -40,7 +41,7 @@ export async function transferAlumniToJenjang(santriIds: number[], targetJenjang
 
 export async function updateKeteranganLulus(id: number, keterangan: string) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     const existing = await prisma.santriJenjang.findUnique({
@@ -56,6 +57,7 @@ export async function updateKeteranganLulus(id: number, keterangan: string) {
     })
 
     revalidatePath("/admin/alumni")
+    revalidatePath("/guru/kesiswaan/alumni")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -72,7 +74,7 @@ export async function updateProfilAlumni(santriId: number, data: {
   email?: string
 }) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     const existing = await prisma.santriJenjang.findUnique({
@@ -96,6 +98,7 @@ export async function updateProfilAlumni(santriId: number, data: {
     })
 
     revalidatePath("/admin/alumni")
+    revalidatePath("/guru/kesiswaan/alumni")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }

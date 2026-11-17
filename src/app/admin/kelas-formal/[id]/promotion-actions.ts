@@ -1,7 +1,7 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { StatusKenaikanKelas } from "@prisma/client"
 
@@ -12,7 +12,7 @@ export async function promoteSantriBulk(
   statusAksi: StatusKenaikanKelas = "NAIK_KELAS"
 ) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KURIKULUM"])
     if (!admin.jenjangId) throw new Error("Unauthorized")
 
     // Verifikasi kelas target ada dan milik jenjang ini

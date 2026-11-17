@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 
 const kelasSchema = z.object({
   id: z.number().optional(),
@@ -13,7 +13,7 @@ const kelasSchema = z.object({
 
 export async function createKelas(formData: FormData) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     const rawData = {
@@ -40,6 +40,7 @@ export async function createKelas(formData: FormData) {
     })
 
     revalidatePath("/admin/kelas-formal")
+    revalidatePath("/guru/kurikulum/kelas-formal")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -49,7 +50,7 @@ export async function createKelas(formData: FormData) {
 
 export async function updateKelas(formData: FormData) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     const rawData = {
@@ -74,6 +75,7 @@ export async function updateKelas(formData: FormData) {
     })
 
     revalidatePath("/admin/kelas-formal")
+    revalidatePath("/guru/kurikulum/kelas-formal")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -83,7 +85,7 @@ export async function updateKelas(formData: FormData) {
 
 export async function deleteKelas(id: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     const existing = await prisma.kelasFormal.findUnique({ where: { id } })
@@ -94,6 +96,7 @@ export async function deleteKelas(id: number) {
     await prisma.kelasFormal.delete({ where: { id } })
 
     revalidatePath("/admin/kelas-formal")
+    revalidatePath("/guru/kurikulum/kelas-formal")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }

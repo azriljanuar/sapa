@@ -252,3 +252,128 @@ export async function getLoggedInSantri() {
     activeKelas: activeKelas
   }
 }
+
+/**
+ * Helper untuk mengambil peran struktural / tugas tambahan aktif guru pada TA berjalan.
+ */
+export async function getGuruActiveStructuralRoles(guruId: number, tahunAjaranId?: number) {
+  const { getSelectedTahunAjaran } = await import("./ta-context")
+  const activeTA = tahunAjaranId ? { id: tahunAjaranId } : await getSelectedTahunAjaran()
+  if (!activeTA) return []
+
+  return prisma.tugasTambahanGuru.findMany({
+    where: {
+      guruId,
+      tahunAjaranId: activeTA.id,
+    },
+    select: { id: true, peran: true, skNomor: true, jenjangId: true, keterangan: true },
+  })
+}
+
+/**
+ * Route guard untuk peran Kepala Sekolah / Kepala Madrasah
+ */
+export async function getLoggedInKepalaSekolah() {
+  const guru = await getLoggedInGuru()
+  const roles = await getGuruActiveStructuralRoles(guru.id)
+  const kepalaAssignment = roles.find((r) => r.peran === "KEPALA_SEKOLAH")
+
+  if (!kepalaAssignment) {
+    redirect("/guru")
+  }
+
+  const jenjangId = kepalaAssignment.jenjangId || guru.jenjangs[0]?.id
+
+  return {
+    ...guru,
+    isKepalaSekolah: true,
+    jenjangId,
+    kepalaAssignment,
+    structuralRoles: roles,
+  }
+}
+
+/**
+ * Route guard untuk peran Waka / Bidang Kurikulum
+ */
+export async function getLoggedInKurikulum() {
+  const guru = await getLoggedInGuru()
+  const roles = await getGuruActiveStructuralRoles(guru.id)
+  const kurikulumAssignment = roles.find((r) => r.peran === "KURIKULUM")
+
+  if (!kurikulumAssignment) {
+    redirect("/guru")
+  }
+
+  const jenjangId = kurikulumAssignment.jenjangId || guru.jenjangs[0]?.id
+
+  return {
+    ...guru,
+    isKurikulum: true,
+    jenjangId,
+    kurikulumAssignment,
+    structuralRoles: roles,
+  }
+}
+
+/**
+ * Route guard untuk peran Waka / Bidang Kesiswaan
+ */
+export async function getLoggedInKesiswaan() {
+  const guru = await getLoggedInGuru()
+  const roles = await getGuruActiveStructuralRoles(guru.id)
+  const kesiswaanAssignment = roles.find((r) => r.peran === "KESISWAAN")
+
+  if (!kesiswaanAssignment) {
+    redirect("/guru")
+  }
+
+  const jenjangId = kesiswaanAssignment.jenjangId || guru.jenjangs[0]?.id
+
+  return {
+    ...guru,
+    isKesiswaan: true,
+    jenjangId,
+    kesiswaanAssignment,
+    structuralRoles: roles,
+  }
+}
+
+/**
+ * Helper otorisasi serbaguna: mengembalikan konteks jenjang baik untuk Admin Jenjang/Super Admin
+ * maupun Guru yang memegang peran struktural terkait. Kompatibel 100% dengan getLoggedInAdminJenjang().
+ */
+export async function getLoggedInAdminOrStaff(allowedRoles: ("KEPALA_SEKOLAH" | "KURIKULUM" | "KESISWAAN")[]) {
+  const session = await getSession()
+  if (!session) redirect("/login")
+
+  if (session.role === "SUPER_ADMIN" || session.role === "ADMIN_JENJANG") {
+    return getLoggedInAdminJenjang()
+  }
+
+  if (session.role === "GURU") {
+    const guru = await getLoggedInGuru()
+    const roles = await getGuruActiveStructuralRoles(guru.id)
+    const matching = roles.find((r) => allowedRoles.includes(r.peran))
+
+    if (!matching) {
+      throw new Error("Akses ditolak: Anda tidak memiliki wewenang struktural untuk tindakan ini.")
+    }
+
+    const jenjangId = matching.jenjangId || guru.jenjangs[0]?.id
+    const jenjang = await prisma.jenjangPendidikan.findUnique({ where: { id: jenjangId } })
+
+    return {
+      id: guru.id,
+      nama: guru.nama,
+      email: guru.email,
+      role: "GURU" as const,
+      jenjangId,
+      jenjang,
+      isStaff: true,
+      activeRole: matching.peran,
+    }
+  }
+
+  redirect("/logout")
+}

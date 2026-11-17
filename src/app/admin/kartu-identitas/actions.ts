@@ -1,7 +1,7 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 import { TipeKartu } from "@prisma/client"
 import fs from "fs/promises"
 import path from "path"
@@ -12,7 +12,7 @@ export async function uploadTemplateAction(
   tipe: TipeKartu,
   side: "FRONT" | "BACK"
 ) {
-  const admin = await getLoggedInAdminJenjang()
+  const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
   if (!admin || !admin.jenjangId) {
     throw new Error("Unauthorized")
   }
@@ -64,7 +64,7 @@ export async function uploadTemplateAction(
 }
 
 export async function getTemplateAction(tipe: TipeKartu) {
-  const admin = await getLoggedInAdminJenjang()
+  const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
   if (!admin || !admin.jenjangId) return null
 
   return prisma.templateKartu.findUnique({
@@ -78,7 +78,7 @@ export async function getTemplateAction(tipe: TipeKartu) {
 }
 
 export async function getGuruListAction() {
-  const admin = await getLoggedInAdminJenjang()
+  const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
   if (!admin || !admin.jenjangId) return []
 
   return prisma.guru.findMany({
@@ -97,7 +97,7 @@ export async function getGuruListAction() {
 }
 
 export async function getSantriListAction() {
-  const admin = await getLoggedInAdminJenjang()
+  const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
   if (!admin || !admin.jenjangId) return []
 
   return prisma.santriJenjang.findMany({

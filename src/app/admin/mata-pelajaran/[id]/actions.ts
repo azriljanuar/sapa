@@ -1,7 +1,7 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 
 export async function assignPengampuAction(
   mataPelajaranId: number, 
@@ -10,7 +10,7 @@ export async function assignPengampuAction(
   tahunAjaranId: number
 ) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM"])
     if (!admin) {
       return { success: false, error: "Unauthorized" }
     }
@@ -60,7 +60,7 @@ export async function assignPengampuAction(
 
 export async function removePengampuAction(pengampuId: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM"])
     if (!admin) {
       return { success: false, error: "Unauthorized" }
     }

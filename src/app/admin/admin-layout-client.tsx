@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { 
   Menu, Search, Bell, Home, Users, BookOpen, GraduationCap, 
   Settings, LogOut, ChevronLeft, Building, Box, Library, CalendarDays, CalendarRange,
-  IdCard, ClipboardList, BarChart2, Shield, LayoutTemplate, LayoutDashboard, UserCheck
+  IdCard, ClipboardList, BarChart2, Shield, LayoutTemplate, LayoutDashboard, UserCheck, Award
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -49,6 +49,7 @@ export function AdminLayoutClient({
         { name: "Data Alumni", href: "/admin/alumni", icon: GraduationCap },
         { name: `Data ${sebutanGuru}`, href: "/admin/guru", icon: Users },
         { name: "Guru Piket", href: "/admin/guru-piket", icon: UserCheck },
+        { name: "Tugas Tambahan", href: "/admin/tugas-tambahan", icon: Award },
         { name: "Kelas Formal", href: "/admin/kelas-formal", icon: BookOpen },
         { name: "Mata Pelajaran", href: "/admin/mata-pelajaran", icon: Library },
         { name: "Jadwal Pelajaran", href: "/admin/jadwal-pelajaran", icon: CalendarDays },

@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 
 export async function addSantriToKelas(kelasId: number, santriIds: number[]) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KURIKULUM"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     // Verifikasi kelas milik jenjang ini
@@ -36,6 +36,7 @@ export async function addSantriToKelas(kelasId: number, santriIds: number[]) {
     }
 
     revalidatePath(`/admin/kelas-formal/${kelasId}`)
+    revalidatePath(`/guru/kesiswaan/kelas-formal/${kelasId}`)
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -45,7 +46,7 @@ export async function addSantriToKelas(kelasId: number, santriIds: number[]) {
 
 export async function removeSantriFromKelas(kelasId: number, santriId: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KURIKULUM"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     // Verifikasi kelas milik jenjang ini
@@ -62,6 +63,7 @@ export async function removeSantriFromKelas(kelasId: number, santriId: number) {
     })
 
     revalidatePath(`/admin/kelas-formal/${kelasId}`)
+    revalidatePath(`/guru/kesiswaan/kelas-formal/${kelasId}`)
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -71,7 +73,7 @@ export async function removeSantriFromKelas(kelasId: number, santriId: number) {
 
 export async function removeSantriFromKelasBulk(kelasId: number, santriIds: number[]) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KURIKULUM"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     // Verifikasi kelas milik jenjang ini
@@ -88,6 +90,7 @@ export async function removeSantriFromKelasBulk(kelasId: number, santriIds: numb
     })
 
     revalidatePath(`/admin/kelas-formal/${kelasId}`)
+    revalidatePath(`/guru/kesiswaan/kelas-formal/${kelasId}`)
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -97,7 +100,7 @@ export async function removeSantriFromKelasBulk(kelasId: number, santriIds: numb
 
 export async function luluskanSantriBulk(kelasId: number, santriIds: number[], tahunLulusId: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KURIKULUM"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     // Verifikasi kelas milik jenjang ini

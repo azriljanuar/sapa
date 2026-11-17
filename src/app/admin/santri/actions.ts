@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 
 const santriSchema = z.object({
   id: z.number().optional(),
@@ -27,7 +27,7 @@ const santriSchema = z.object({
 
 export async function createSantri(formData: FormData) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak. Admin tidak memiliki jenjang.")
 
     const rawData = {
@@ -102,6 +102,7 @@ export async function createSantri(formData: FormData) {
     }
 
     revalidatePath("/admin/santri")
+    revalidatePath("/guru/kesiswaan/santri")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -111,7 +112,7 @@ export async function createSantri(formData: FormData) {
 
 export async function updateSantri(formData: FormData) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak. Admin tidak memiliki jenjang.")
 
     const rawData = {
@@ -180,6 +181,7 @@ export async function updateSantri(formData: FormData) {
     })
 
     revalidatePath("/admin/santri")
+    revalidatePath("/guru/kesiswaan/santri")
     return { success: true }
   } catch (error) {
     if (error instanceof Error) return { success: false, error: error.message }
@@ -189,7 +191,7 @@ export async function updateSantri(formData: FormData) {
 
 export async function deleteSantri(id: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak. Admin tidak memiliki jenjang.")
 
     const existing = await prisma.santri.findUnique({ 
@@ -219,6 +221,7 @@ export async function deleteSantri(id: number) {
     }
 
     revalidatePath("/admin/santri")
+    revalidatePath("/guru/kesiswaan/santri")
     revalidatePath("/admin/kelas-formal")
     revalidatePath("/admin/kelas-formal/[id]", "page")
     return { success: true }
@@ -230,7 +233,7 @@ export async function deleteSantri(id: number) {
 
 export async function importSantriExcel(formData: FormData) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak.")
 
     const file = formData.get("file") as File
@@ -439,6 +442,7 @@ export async function importSantriExcel(formData: FormData) {
     }
 
     revalidatePath("/admin/santri")
+    revalidatePath("/guru/kesiswaan/santri")
     revalidatePath("/admin/kelas-formal")
     return { success: true, count }
   } catch (error: any) {
@@ -448,7 +452,7 @@ export async function importSantriExcel(formData: FormData) {
 
 export async function deleteSantriBulk(ids: number[]) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak. Admin tidak memiliki jenjang.")
 
     const existingSantris = await prisma.santri.findMany({
@@ -477,6 +481,7 @@ export async function deleteSantriBulk(ids: number[]) {
     })
 
     revalidatePath("/admin/santri")
+    revalidatePath("/guru/kesiswaan/santri")
     revalidatePath("/admin/kelas-formal")
     revalidatePath("/admin/kelas-formal/[id]", "page")
     return { success: true }
@@ -494,7 +499,7 @@ export async function prosesKeluarSantri(data: {
   alasanPindah?: string;
 }) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak")
 
     // Update status keluar di SantriJenjang
@@ -520,6 +525,7 @@ export async function prosesKeluarSantri(data: {
     })
 
     revalidatePath("/admin/santri")
+    revalidatePath("/guru/kesiswaan/santri")
     revalidatePath("/admin/kelas-formal")
     revalidatePath("/admin/kelas-formal/[id]", "page")
     return { success: true }
@@ -530,7 +536,7 @@ export async function prosesKeluarSantri(data: {
 
 export async function batalkanKeluarSantri(santriId: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak")
 
     await prisma.santriJenjang.update({
@@ -544,6 +550,7 @@ export async function batalkanKeluarSantri(santriId: number) {
     })
 
     revalidatePath("/admin/santri")
+    revalidatePath("/guru/kesiswaan/santri")
     revalidatePath("/admin/kelas-formal")
     revalidatePath("/admin/kelas-formal/[id]", "page")
     return { success: true }
@@ -554,7 +561,7 @@ export async function batalkanKeluarSantri(santriId: number) {
 
 export async function resetPasswordSantri(santriId: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN"])
     if (!admin.jenjangId) throw new Error("Akses ditolak")
 
     // Hash standar untuk "password123"
@@ -566,6 +573,7 @@ export async function resetPasswordSantri(santriId: number) {
     })
 
     revalidatePath("/admin/santri")
+    revalidatePath("/guru/kesiswaan/santri")
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message || "Gagal mereset password santri" }

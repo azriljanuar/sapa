@@ -1,7 +1,7 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 import { Hari } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
@@ -13,7 +13,7 @@ export async function createJadwalAction(
   jamSelesai: string
 ) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
     if (!admin) {
       return { success: false, error: "Unauthorized" }
     }
@@ -29,6 +29,8 @@ export async function createJadwalAction(
     })
 
     revalidatePath("/admin/jadwal-pelajaran")
+    revalidatePath("/guru/kurikulum/jadwal-pelajaran")
+    revalidatePath("/guru/kepala-sekolah/jadwal-pelajaran")
     return { success: true }
   } catch (error) {
     console.error(error)
@@ -44,7 +46,7 @@ export async function updateJadwalAction(
   jamSelesai: string
 ) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
     if (!admin) {
       return { success: false, error: "Unauthorized" }
     }
@@ -60,6 +62,8 @@ export async function updateJadwalAction(
     })
 
     revalidatePath("/admin/jadwal-pelajaran")
+    revalidatePath("/guru/kurikulum/jadwal-pelajaran")
+    revalidatePath("/guru/kepala-sekolah/jadwal-pelajaran")
     return { success: true }
   } catch (error) {
     console.error(error)
@@ -69,7 +73,7 @@ export async function updateJadwalAction(
 
 export async function deleteJadwalAction(jadwalId: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM", "KEPALA_SEKOLAH"])
     if (!admin) {
       return { success: false, error: "Unauthorized" }
     }
@@ -79,6 +83,8 @@ export async function deleteJadwalAction(jadwalId: number) {
     })
 
     revalidatePath("/admin/jadwal-pelajaran")
+    revalidatePath("/guru/kurikulum/jadwal-pelajaran")
+    revalidatePath("/guru/kepala-sekolah/jadwal-pelajaran")
     return { success: true }
   } catch (error) {
     console.error(error)

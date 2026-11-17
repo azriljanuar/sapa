@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 import { getSelectedTahunAjaran } from "@/lib/ta-context"
 import { Hari } from "@prisma/client"
 
 export async function getGuruPiketList() {
-  const admin = await getLoggedInAdminJenjang()
+  const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KEPALA_SEKOLAH"])
   if (!admin.jenjangId) return []
 
   const activeTA = await getSelectedTahunAjaran()
@@ -73,7 +73,7 @@ export async function getGuruPiketList() {
 }
 
 export async function getAvailableGurus() {
-  const admin = await getLoggedInAdminJenjang()
+  const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KEPALA_SEKOLAH"])
   if (!admin.jenjangId) return []
 
   return prisma.guru.findMany({
@@ -96,7 +96,7 @@ export async function saveGuruPiketAssignment(data: {
   keterangan?: string
 }) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KEPALA_SEKOLAH"])
     if (!admin.jenjangId) throw new Error("Akses ditolak")
 
     const activeTA = await getSelectedTahunAjaran()
@@ -130,6 +130,7 @@ export async function saveGuruPiketAssignment(data: {
     })
 
     revalidatePath("/admin/guru-piket")
+    revalidatePath("/guru/kesiswaan/guru-piket")
     revalidatePath("/guru")
     return { success: true }
   } catch (error: any) {
@@ -139,7 +140,7 @@ export async function saveGuruPiketAssignment(data: {
 
 export async function removeGuruPiketAssignment(guruId: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KESISWAAN", "KEPALA_SEKOLAH"])
     if (!admin.jenjangId) throw new Error("Akses ditolak")
 
     const activeTA = await getSelectedTahunAjaran()
@@ -153,6 +154,7 @@ export async function removeGuruPiketAssignment(guruId: number) {
     })
 
     revalidatePath("/admin/guru-piket")
+    revalidatePath("/guru/kesiswaan/guru-piket")
     revalidatePath("/guru")
     return { success: true }
   } catch (error: any) {

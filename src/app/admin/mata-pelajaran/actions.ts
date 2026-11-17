@@ -1,12 +1,12 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { getLoggedInAdminJenjang } from "@/lib/auth"
+import { getLoggedInAdminOrStaff } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
 export async function createMataPelajaran(formData: FormData) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM"])
 
     const nama = formData.get("nama") as string
     const kode = formData.get("kode") as string
@@ -26,6 +26,7 @@ export async function createMataPelajaran(formData: FormData) {
     })
 
     revalidatePath("/admin/mata-pelajaran")
+    revalidatePath("/guru/kurikulum/mata-pelajaran")
     return { success: true }
   } catch (error) {
     console.error(error)
@@ -35,7 +36,7 @@ export async function createMataPelajaran(formData: FormData) {
 
 export async function updateMataPelajaran(id: number, formData: FormData) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM"])
 
     const nama = formData.get("nama") as string
     const kode = formData.get("kode") as string
@@ -64,6 +65,7 @@ export async function updateMataPelajaran(id: number, formData: FormData) {
     })
 
     revalidatePath("/admin/mata-pelajaran")
+    revalidatePath("/guru/kurikulum/mata-pelajaran")
     return { success: true }
   } catch (error) {
     console.error(error)
@@ -73,7 +75,7 @@ export async function updateMataPelajaran(id: number, formData: FormData) {
 
 export async function deleteMataPelajaran(id: number) {
   try {
-    const admin = await getLoggedInAdminJenjang()
+    const admin = await getLoggedInAdminOrStaff(["KURIKULUM"])
 
     // Verifikasi kepemilikan
     const existing = await prisma.mataPelajaran.findFirst({
@@ -89,6 +91,7 @@ export async function deleteMataPelajaran(id: number) {
     })
 
     revalidatePath("/admin/mata-pelajaran")
+    revalidatePath("/guru/kurikulum/mata-pelajaran")
     return { success: true }
   } catch (error) {
     console.error(error)
