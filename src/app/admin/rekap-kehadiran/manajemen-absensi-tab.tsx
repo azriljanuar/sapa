@@ -1,14 +1,15 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Clock, Settings, Save, Loader2, CheckCircle2, AlertCircle, Info, Edit, UserCheck } from "lucide-react"
+import Link from "next/link"
+import { Clock, Settings, Save, Loader2, CheckCircle2, AlertCircle, Info, Edit, UserCheck, CalendarRange, ArrowRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import { Hari } from "@prisma/client"
 import { updatePengaturanAbsensi, updateKehadiranGuruManual } from "./actions"
-import { ManajemenHariLibur } from "./manajemen-hari-libur"
 import {
   Dialog,
   DialogContent,
@@ -319,14 +320,33 @@ export function ManajemenAbsensiTab({
         </CardContent>
       </Card>
 
-      {/* Bagian Manajemen Hari Libur (Mingguan, Kondisional, Semester) */}
-      <ManajemenHariLibur
-        initialMingguan={initialHariLibur.mingguan}
-        initialKondisional={initialHariLibur.kondisional}
-        initialSemester={initialHariLibur.semester}
-        jenjangId={jenjangId}
-        onRefresh={onRefreshHariLibur}
-      />
+      {/* Banner Pintasan Konsolidasi Kalender Pendidikan (Kaldik) */}
+      <Card className="border-primary/20 bg-primary/5 shadow-none overflow-hidden">
+        <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0 mt-0.5">
+              <CalendarRange className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                <span>Pengelolaan Hari Libur & Kalender Akademik Terintegrasi</span>
+                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 text-[10px]">
+                  Standar Kemenag
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                Pengaturan sistem hari sekolah (6 hari / 5 hari / pesantren libur Jumat), libur rutin mingguan, libur nasional, libur Ramadhan, dan libur semester kini dikelola terpusat pada modul <strong>Kalender Pendidikan (Kaldik)</strong> standar Ditjen Pendis Kemenag RI.
+              </p>
+            </div>
+          </div>
+          <Link href="/admin/kalender-pendidikan" className="shrink-0 self-end sm:self-auto">
+            <Button size="sm" className="gap-2 text-xs font-semibold shadow-xs">
+              <span>Buka Kalender Pendidikan</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Bagian Koreksi Manual Kehadiran Guru */}
       {guruList && guruList.length > 0 && (

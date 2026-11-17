@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
   Menu, Search, Bell, Home, Users, BookOpen, GraduationCap, 
-  Settings, LogOut, ChevronLeft, Building, Box, Library, CalendarDays, 
+  Settings, LogOut, ChevronLeft, Building, Box, Library, CalendarDays, CalendarRange,
   IdCard, ClipboardList, BarChart2, Shield, LayoutTemplate, LayoutDashboard, UserCheck
 } from "lucide-react"
 
@@ -52,6 +52,7 @@ export function AdminLayoutClient({
         { name: "Kelas Formal", href: "/admin/kelas-formal", icon: BookOpen },
         { name: "Mata Pelajaran", href: "/admin/mata-pelajaran", icon: Library },
         { name: "Jadwal Pelajaran", href: "/admin/jadwal-pelajaran", icon: CalendarDays },
+        { name: "Kalender Pendidikan", href: "/admin/kalender-pendidikan", icon: CalendarRange },
         { name: "Penilaian", href: "/admin/penilaian", icon: BarChart2 },
         { name: "Rekap Kehadiran", href: "/admin/rekap-kehadiran", icon: ClipboardList },
         { name: "Kartu Identitas", href: "/admin/kartu-identitas", icon: IdCard },

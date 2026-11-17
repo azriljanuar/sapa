@@ -61,6 +61,7 @@ model JenjangPendidikan {
   templateKartu      TemplateKartu[]
   hariLibur          HariLibur[]
   guruPiket          GuruPiket[]
+  kaldikAgenda       KaldikAgenda[]
 }
 
 model TahunAjaran {
@@ -75,6 +76,8 @@ model TahunAjaran {
   santriMasukDirect Santri[]        @relation("SantriTahunMasuk")
   santriLulusDirect Santri[]        @relation("SantriTahunLulus")
   guruPiket         GuruPiket[]
+  kaldikPengaturan  KaldikPengaturan?
+  kaldikAgenda      KaldikAgenda[]
 }
 
 model Semester {
@@ -92,6 +95,7 @@ model Semester {
   laporanSemester LaporanSemester[]
   nilaiSumatif    NilaiSumatif[]
   nilaiPAS        NilaiPAS[]
+  kaldikAgenda    KaldikAgenda[]
 }
 
 model Guru {
@@ -750,6 +754,64 @@ model HariLibur {
 
   @@index([tipe])
   @@index([tanggal])
+  @@index([jenjangId])
+}
+
+// ── KALENDER PENDIDIKAN (KALDIK) STANDAR KEMENAG RI ─────────────────────────
+
+enum KategoriKaldik {
+  HEB             // Hari Efektif Belajar (KBM reguler dengan catatan khusus)
+  HEF             // Hari Efektif Fakultatif (Pondok Ramadhan, Hari Santri, HAB Kemenag, Outing)
+  NON_EFEKTIF     // Kegiatan Khusus (Matsama, ASTS, ASAS, ASAT, Asesmen Madrasah, Class Meeting, P5-PPRA, Rapor)
+  LIBUR_NASIONAL  // Libur Resmi Nasional & Hari Besar Keagamaan
+  LIBUR_SEMESTER  // Libur Akhir Semester Ganjil / Genap (Kenaikan Kelas)
+  LIBUR_RAMADHAN  // Libur Awal Ramadhan & Idulfitri
+  LIBUR_KHUSUS    // Libur Kebijakan Khusus Pesantren / Lembaga
+}
+
+enum SistemHariSekolah {
+  ENAM_HARI         // 6 Hari: Senin-Sabtu (Libur: Ahad)
+  LIMA_HARI         // 5 Hari: Senin-Jumat (Libur: Sabtu & Ahad)
+  PESANTREN_JUMAT   // Libur Rutin Hari Jumat (Khas Pesantren)
+  CUSTOM            // Kombinasi Hari Libur Rutin Khusus
+}
+
+model KaldikPengaturan {
+  id                Int               @id @default(autoincrement())
+  tahunAjaranId     Int               @unique
+  tahunAjaran       TahunAjaran       @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
+  sistemHariSekolah SistemHariSekolah @default(ENAM_HARI)
+  hariLiburRutin    String            @default("MINGGU") // Format comma-separated misal: "MINGGU" atau "SABTU,MINGGU" atau "JUMAT"
+  keterangan        String?           @db.Text
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([tahunAjaranId])
+}
+
+model KaldikAgenda {
+  id               Int                @id @default(autoincrement())
+  tahunAjaranId    Int
+  tahunAjaran      TahunAjaran        @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
+  semesterId       Int?
+  semester         Semester?          @relation(fields: [semesterId], references: [id], onDelete: SetNull)
+  kategori         KategoriKaldik
+  nama             String             // Contoh: "Matsama TP 2026/2027", "Asesmen Sumatif Akhir Semester (ASAS)"
+  kodeSingkatan    String?            // Contoh: "MATSAMA", "ASTS", "ASAS", "HAB", "LHR", "LS1", "LS2"
+  tanggalMulai     DateTime           @db.Date
+  tanggalAkhir     DateTime           @db.Date
+  warnaHex         String             @default("#3b82f6") // Visual kalender badge (Tailwind/Hex)
+  allowAbsensiRfid Boolean            @default(false)     // True jika RFID tetap aktif (misal Ujian / Libur Semester)
+  keterangan       String?            @db.Text
+  jenjangId        Int?               // null = Berlaku seluruh jenjang, atau spesifik
+  jenjang          JenjangPendidikan? @relation(fields: [jenjangId], references: [id], onDelete: Cascade)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([tahunAjaranId])
+  @@index([semesterId])
+  @@index([kategori])
+  @@index([tanggalMulai, tanggalAkhir])
   @@index([jenjangId])
 }
 
