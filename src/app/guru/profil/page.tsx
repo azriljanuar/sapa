@@ -229,7 +229,7 @@ export default async function GuruProfilPage() {
         {/* Kolom 3: Kontak & Komunikasi */}
         <div className="bg-card rounded-2xl p-6 border border-border shadow-2xs space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-border">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">
               <Phone className="w-4 h-4" />
             </div>
             <div>

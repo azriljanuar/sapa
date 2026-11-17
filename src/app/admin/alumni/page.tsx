@@ -8,7 +8,7 @@ export default async function AlumniPage() {
   const admin = await getLoggedInAdminJenjang()
 
   if (!admin.jenjangId) {
-    return <div className="p-6 text-center text-red-500">Akses ditolak</div>
+    return <div className="p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 text-sm font-medium text-center">Akses ditolak</div>
   }
 
   const alumniListRaw = await prisma.santri.findMany({

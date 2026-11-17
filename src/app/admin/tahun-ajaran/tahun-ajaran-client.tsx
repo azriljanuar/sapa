@@ -125,19 +125,19 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Manajemen Tahun Ajaran</h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Tahun Ajaran</h2>
+          <p className="text-sm text-muted-foreground mt-1">
             Kelola data tahun ajaran, semester aktif, serta otomatisasi struktur kelas, guru mapel, dan jadwal pelajaran.
           </p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)} className="bg-primary text-white">
+        <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Tambah Tahun Ajaran
         </Button>
       </div>
 
-      <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50/50">
+          <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead className="w-[80px]">ID</TableHead>
               <TableHead>Tahun Ajaran</TableHead>
@@ -149,12 +149,12 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
             {data.length > 0 ? (
               data.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell className="font-medium text-slate-500">{item.id}</TableCell>
+                  <TableCell className="font-medium text-muted-foreground">{item.id}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900">{item.nama}</span>
+                      <span className="font-bold text-foreground">{item.nama}</span>
                       {item.isActive && (
-                        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                        <Badge className="bg-primary/10 text-primary border-primary/20">
                           Aktif
                         </Badge>
                       )}
@@ -177,7 +177,7 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2 text-xs gap-1"
+                        className="text-primary hover:text-primary hover:bg-primary/10 h-8 px-2 text-xs gap-1"
                         onClick={() => handleOpenCopyDialog(item)}
                         title="Salin kelas, wali kelas, pengampu, dan jadwal dari TA lain"
                       >
@@ -200,7 +200,7 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-slate-500">
+                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
                   Belum ada data Tahun Ajaran.
                 </TableCell>
               </TableRow>
@@ -232,18 +232,18 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
             </div>
 
             {/* Opsi Duplikasi Struktur Otomatis */}
-            <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 space-y-3">
+            <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-3">
               <div className="flex items-start gap-2">
                 <input
                   type="checkbox"
                   id="copyStructure"
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-primary"
+                  className="mt-1 h-4 w-4 rounded border-input text-primary"
                   checked={copyStructure}
                   onChange={e => setCopyStructure(e.target.checked)}
                 />
-                <label htmlFor="copyStructure" className="text-xs font-semibold text-slate-800 cursor-pointer">
+                <label htmlFor="copyStructure" className="text-xs font-semibold text-foreground cursor-pointer">
                   Salin Otomatis Struktur Akademik dari TA Sebelumnya
-                  <p className="text-[11px] font-normal text-slate-500 mt-0.5">
+                  <p className="text-[11px] font-normal text-muted-foreground mt-0.5">
                     Menduplikasi seluruh daftar kelas, wali kelas, penugasan guru mapel, dan jadwal pelajaran agar tidak kosong.
                   </p>
                 </label>
@@ -251,9 +251,9 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
 
               {copyStructure && data.length > 0 && (
                 <div className="space-y-1.5 pl-6">
-                  <label className="text-xs font-medium text-slate-700">Tahun Ajaran Sumber:</label>
+                  <label className="text-xs font-medium text-foreground">Tahun Ajaran Sumber:</label>
                   <select
-                    className="w-full h-9 rounded-md border border-input bg-white px-3 py-1.5 text-xs text-foreground"
+                    className="w-full h-9 rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground"
                     value={selectedSourceTaId ?? ""}
                     onChange={e => setSelectedSourceTaId(Number(e.target.value))}
                   >
@@ -280,19 +280,19 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
-              <Copy className="h-5 w-5 text-blue-600" />
+              <Copy className="h-5 w-5 text-primary" />
               Salin Struktur Akademik
             </DialogTitle>
             <DialogDescription>
-              Salin dan sinkronkan data kelas, wali kelas, pengampu mapel, serta jadwal pelajaran ke Tahun Ajaran <strong className="text-slate-900">{targetTaForCopy?.nama}</strong>.
+              Salin dan sinkronkan data kelas, wali kelas, pengampu mapel, serta jadwal pelajaran ke Tahun Ajaran <strong className="text-foreground">{targetTaForCopy?.nama}</strong>.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Pilih Tahun Ajaran Sumber (Referensi):</label>
+              <label className="text-sm font-medium text-foreground">Pilih Tahun Ajaran Sumber (Referensi):</label>
               <select
-                className="w-full h-10 rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground"
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
                 value={sourceTaForCopy ?? ""}
                 onChange={e => setSourceTaForCopy(Number(e.target.value))}
               >
@@ -306,25 +306,24 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
               </select>
             </div>
 
-            <div className="rounded-lg border border-blue-100 bg-blue-50/60 p-3 text-xs text-blue-900 space-y-1.5">
-              <div className="font-semibold text-blue-800">✨ Data yang akan disinkronkan:</div>
-              <ul className="list-disc list-inside text-slate-700 space-y-0.5">
+            <div className="rounded-lg border border-primary/20 bg-primary/10 p-3 text-xs text-foreground space-y-1.5">
+              <div className="font-semibold text-primary">✨ Data yang akan disinkronkan:</div>
+              <ul className="list-disc list-inside text-muted-foreground space-y-0.5">
                 <li>Daftar rombel <strong>Kelas Formal</strong> & <strong>Wali Kelas</strong> masing-masing.</li>
                 <li>Penugasan <strong>Pengampu Mata Pelajaran</strong> (guru pengajar & KKM per kelas).</li>
                 <li>Seluruh <strong>Jadwal Pelajaran</strong> untuk Semester Ganjil & Genap.</li>
               </ul>
-              <p className="text-[11px] text-slate-500 pt-1 border-t border-blue-100">
+              <p className="text-[11px] text-muted-foreground pt-1 border-t border-primary/20">
                 Data nilai, absensi harian, dan riwayat santri yang sudah ada tidak akan terhapus.
               </p>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
               <Button variant="outline" type="button" onClick={() => setIsCopyDialogOpen(false)}>
                 Batal
               </Button>
               <Button 
                 type="button" 
-                className="bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={isSubmitting || !sourceTaForCopy}
                 onClick={handleExecuteCopy}
               >

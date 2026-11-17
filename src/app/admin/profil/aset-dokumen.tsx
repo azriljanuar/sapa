@@ -51,23 +51,23 @@ export function AsetDokumen({ initialLogoUrl, initialKopSuratUrl }: AsetDokumenP
   }
 
   return (
-    <div className="col-span-1 md:col-span-2 border-t border-slate-100 pt-4 mt-2">
-      <h3 className="text-lg font-medium mb-2 text-slate-800">Aset Dokumen</h3>
-      <p className="text-sm text-slate-500 mb-4">
+    <div className="col-span-1 md:col-span-2 border-t border-border pt-4 mt-2">
+      <h3 className="text-lg font-medium mb-2 text-foreground">Aset Dokumen</h3>
+      <p className="text-sm text-muted-foreground mb-4">
         Aset ini digunakan untuk halaman cover dan dokumen tertulis (Buku Penilaian, Jurnal Mengajar, Daftar Hadir).
       </p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
         {/* Upload Logo */}
-        <div className="border rounded-lg p-6 flex flex-col items-center text-center space-y-4">
-          <h4 className="font-medium text-slate-700">Logo Sekolah (Bulat)</h4>
-          <p className="text-xs text-slate-500">Rekomendasi format PNG transparan</p>
+        <div className="border border-border rounded-lg p-6 flex flex-col items-center text-center space-y-4">
+          <h4 className="font-medium text-foreground">Logo Sekolah (Bulat)</h4>
+          <p className="text-xs text-muted-foreground">Rekomendasi format PNG transparan</p>
           
-          <div className="w-32 h-32 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50 relative group">
+          <div className="w-32 h-32 rounded-full border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/50 relative group">
             {logoUrl ? (
               <Image src={logoUrl} alt="Logo Sekolah" fill className="object-contain p-2" />
             ) : (
-              <ImageIcon className="w-8 h-8 text-slate-400" />
+              <ImageIcon className="w-8 h-8 text-muted-foreground" />
             )}
             
             <label className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
@@ -82,19 +82,19 @@ export function AsetDokumen({ initialLogoUrl, initialKopSuratUrl }: AsetDokumenP
               />
             </label>
           </div>
-          {isUploadingLogo && <p className="text-sm text-blue-600 animate-pulse">Mengunggah...</p>}
+          {isUploadingLogo && <p className="text-sm text-primary animate-pulse">Mengunggah...</p>}
         </div>
 
         {/* Upload Kop Surat */}
-        <div className="border rounded-lg p-6 flex flex-col items-center text-center space-y-4">
-          <h4 className="font-medium text-slate-700">Kop Surat (Landscape)</h4>
-          <p className="text-xs text-slate-500">Gambar PNG/JPG dengan proporsi memanjang</p>
+        <div className="border border-border rounded-lg p-6 flex flex-col items-center text-center space-y-4">
+          <h4 className="font-medium text-foreground">Kop Surat (Landscape)</h4>
+          <p className="text-xs text-muted-foreground">Gambar PNG/JPG dengan proporsi memanjang</p>
           
-          <div className="w-full h-32 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50 relative group">
+          <div className="w-full h-32 rounded-lg border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/50 relative group">
             {kopSuratUrl ? (
               <Image src={kopSuratUrl} alt="Kop Surat" fill className="object-contain" />
             ) : (
-              <div className="flex flex-col items-center text-slate-400">
+              <div className="flex flex-col items-center text-muted-foreground">
                 <ImageIcon className="w-8 h-8 mb-2" />
                 <span className="text-sm">Belum ada kop surat</span>
               </div>
@@ -112,7 +112,7 @@ export function AsetDokumen({ initialLogoUrl, initialKopSuratUrl }: AsetDokumenP
               />
             </label>
           </div>
-          {isUploadingKop && <p className="text-sm text-blue-600 animate-pulse">Mengunggah...</p>}
+          {isUploadingKop && <p className="text-sm text-primary animate-pulse">Mengunggah...</p>}
         </div>
       </div>
     </div>

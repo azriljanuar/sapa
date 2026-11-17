@@ -106,8 +106,8 @@ export function SettingsClient({ user, jenjang }: { user: any, jenjang: any }) {
 
   return (
     <div className="space-y-6 max-w-4xl pb-10">
-      <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
-        <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
+      <div className="flex items-center gap-3 border-b border-border pb-4">
+        <div className="p-2 bg-muted text-foreground rounded-lg">
           <Settings className="h-6 w-6" />
         </div>
         <div>
@@ -125,23 +125,23 @@ export function SettingsClient({ user, jenjang }: { user: any, jenjang: any }) {
         </TabsList>
         
         <TabsContent value="branding" className="mt-6 space-y-8">
-          <div className="bg-white border rounded-xl p-6 shadow-sm">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-indigo-500" />
+              <ImageIcon className="w-5 h-5 text-primary" />
               Logo Utama ({jenjang.singkatan})
             </h3>
-            <p className="text-sm text-slate-500 mb-6 max-w-xl">
+            <p className="text-sm text-muted-foreground mb-6 max-w-xl">
               Logo ini akan muncul di sidebar aplikasi untuk seluruh user (Admin, Guru, Santri) yang berada di jenjang {jenjang.nama}. Gunakan format PNG transparan untuk hasil terbaik.
             </p>
             
             <div className="flex items-start gap-8">
-              <div className="w-32 h-32 bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-32 h-32 bg-muted/50 rounded-2xl border-2 border-dashed border-border flex items-center justify-center overflow-hidden shrink-0">
                 {logoUploading ? (
-                  <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                 ) : logoPreview ? (
                   <Image src={logoPreview} alt="Logo Utama" width={128} height={128} className="w-full h-full object-contain p-2" />
                 ) : (
-                  <ImageIcon className="w-10 h-10 text-slate-300" />
+                  <ImageIcon className="w-10 h-10 text-muted-foreground" />
                 )}
               </div>
               
@@ -153,49 +153,49 @@ export function SettingsClient({ user, jenjang }: { user: any, jenjang: any }) {
                     Upload Logo Baru
                   </label>
                 </div>
-                <p className="text-xs text-slate-400">Direkomendasikan: Rasio 1:1, max 2MB.</p>
+                <p className="text-xs text-muted-foreground">Direkomendasikan: Rasio 1:1, max 2MB.</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white border rounded-xl p-6 shadow-sm">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-pink-500" />
+              <ImageIcon className="w-5 h-5 text-primary" />
               Icon Website (Favicon)
             </h3>
-            <p className="text-sm text-slate-500 mb-6 max-w-xl">
+            <p className="text-sm text-muted-foreground mb-6 max-w-xl">
               Icon kecil yang muncul di tab browser.
             </p>
             
             <div className="flex items-start gap-8">
-              <div className="w-16 h-16 bg-slate-100 rounded-xl border border-slate-300 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+              <div className="w-16 h-16 bg-muted/50 rounded-xl border border-border flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                 {iconUploading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 ) : iconPreview ? (
                   <Image src={iconPreview} alt="Favicon" width={64} height={64} className="w-full h-full object-cover" />
                 ) : (
-                  <ImageIcon className="w-6 h-6 text-slate-300" />
+                  <ImageIcon className="w-6 h-6 text-muted-foreground" />
                 )}
               </div>
               
               <div className="space-y-3">
                 <div className="relative">
                   <input type="file" id="icon-upload" className="hidden" accept="image/png, image/x-icon, image/jpeg, image/webp" onChange={(e) => handleUpload(e, "icon")} disabled={iconUploading} />
-                  <label htmlFor="icon-upload" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white border border-input hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 cursor-pointer shadow-sm gap-2">
+                  <label htmlFor="icon-upload" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background border border-input hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 cursor-pointer shadow-sm gap-2">
                     {iconUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                     Upload Icon Baru
                   </label>
                 </div>
-                <p className="text-xs text-slate-400">Direkomendasikan: Persegi presisi (mis. 512x512px).</p>
+                <p className="text-xs text-muted-foreground">Direkomendasikan: Persegi presisi (mis. 512x512px).</p>
               </div>
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="account" className="mt-6 space-y-8">
-          <div className="bg-white border rounded-xl p-6 shadow-sm max-w-2xl">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm max-w-2xl">
             <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-              <User className="w-5 h-5 text-blue-500" />
+              <User className="w-5 h-5 text-primary" />
               Informasi Profil
             </h3>
             <Form {...profileForm}>
@@ -234,12 +234,12 @@ export function SettingsClient({ user, jenjang }: { user: any, jenjang: any }) {
             </Form>
           </div>
 
-          <div className="bg-white border border-red-100 rounded-xl p-6 shadow-sm max-w-2xl relative overflow-hidden">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm max-w-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5">
               <KeyRound className="w-32 h-32" />
             </div>
-            <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-800">
-              <KeyRound className="w-5 h-5 text-amber-500" />
+            <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-foreground">
+              <KeyRound className="w-5 h-5 text-primary" />
               Keamanan Password
             </h3>
             <Form {...passwordForm}>

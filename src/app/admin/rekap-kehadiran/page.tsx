@@ -13,7 +13,11 @@ export default async function RekapKehadiranPage() {
   const activeTA = await getSelectedTahunAjaran()
 
   if (!activeTA) {
-    return <div className="p-8 text-center text-slate-500">Tahun ajaran belum diatur.</div>
+    return (
+      <div className="p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 text-sm font-medium">
+        Tahun ajaran belum diatur.
+      </div>
+    )
   }
 
   // Ambil daftar kelas untuk jenjang ini sesuai TA yang dipilih

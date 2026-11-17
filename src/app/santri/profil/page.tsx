@@ -231,7 +231,7 @@ export default async function SantriProfilPage() {
         {/* Kolom 3: Data Orang Tua / Wali */}
         <div className="bg-card rounded-2xl p-6 border border-border shadow-2xs space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-border">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
@@ -333,7 +333,7 @@ export default async function SantriProfilPage() {
 
                   <div className="flex items-center gap-2 self-start sm:self-center">
                     {isAktif && (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Kelas Aktif
                       </span>
                     )}

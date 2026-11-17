@@ -104,16 +104,16 @@ export function MataPelajaranClient({ initialData }: { initialData: MataPelajara
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-slate-800">Daftar Mata Pelajaran</h2>
-        <Button onClick={openAddDialog} className="bg-blue-600 hover:bg-blue-700">
+        <h2 className="text-xl font-semibold text-foreground">Daftar Mata Pelajaran</h2>
+        <Button onClick={openAddDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Tambah Data
         </Button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50">
+          <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead className="w-[80px]">ID</TableHead>
               <TableHead>Kode</TableHead>
@@ -126,20 +126,20 @@ export function MataPelajaranClient({ initialData }: { initialData: MataPelajara
             {data.length > 0 ? (
               data.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell className="font-medium text-slate-500">{item.id}</TableCell>
+                  <TableCell className="font-medium text-muted-foreground">{item.id}</TableCell>
                   <TableCell>
                     {item.kode ? (
-                      <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs font-mono">{item.kode}</span>
+                      <span className="bg-muted text-muted-foreground px-2 py-1 rounded-md text-xs font-mono">{item.kode}</span>
                     ) : "-"}
                   </TableCell>
-                  <TableCell className="font-semibold text-slate-900">{item.nama}</TableCell>
+                  <TableCell className="font-semibold text-foreground">{item.nama}</TableCell>
                   <TableCell>{item.kkm || "-"}</TableCell>
                   <TableCell className="text-right space-x-2 whitespace-nowrap">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => window.location.href = `/admin/mata-pelajaran/${item.id}`}
-                      className="text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                      className="text-primary border-primary/20 hover:bg-primary/10 hover:text-primary"
                     >
                       Atur Kelas & Guru
                     </Button>
@@ -147,7 +147,7 @@ export function MataPelajaranClient({ initialData }: { initialData: MataPelajara
                       variant="ghost"
                       size="icon"
                       onClick={() => openEditDialog(item)}
-                      className="text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+                      className="text-muted-foreground hover:text-primary hover:bg-muted"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -155,7 +155,7 @@ export function MataPelajaranClient({ initialData }: { initialData: MataPelajara
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(item.id)}
-                      className="text-slate-500 hover:text-red-600 hover:bg-red-50"
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -164,7 +164,7 @@ export function MataPelajaranClient({ initialData }: { initialData: MataPelajara
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-slate-500">
+                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                   Belum ada data mata pelajaran.
                 </TableCell>
               </TableRow>
@@ -221,7 +221,7 @@ export function MataPelajaranClient({ initialData }: { initialData: MataPelajara
               >
                 Batal
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>

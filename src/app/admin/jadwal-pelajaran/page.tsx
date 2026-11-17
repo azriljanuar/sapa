@@ -12,11 +12,9 @@ export default async function JadwalPelajaranPage() {
 
   if (!activeTa) {
     return (
-      <div className="p-6">
-        <div className="p-6 bg-red-50 text-red-600 rounded-lg">
+      <div className="p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 text-sm font-medium">
           Belum ada Tahun Ajaran. Silakan hubungi Super Admin.
         </div>
-      </div>
     )
   }
 

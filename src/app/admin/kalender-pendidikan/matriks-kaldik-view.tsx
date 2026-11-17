@@ -34,17 +34,17 @@ export function MatriksKaldikView({ summary }: MatriksKaldikViewProps) {
     <div className="space-y-6">
       {/* Kartu Ringkasan MEB & HEB Standar Kemenag */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="bg-emerald-500/10 border-emerald-500/20 shadow-none">
+        <Card className="bg-primary/10 border-primary/20 shadow-none">
           <CardHeader className="pb-1">
-            <CardDescription className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+            <CardDescription className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center justify-between">
               <span>Hari Efektif Belajar</span>
-              <BookOpen className="w-4 h-4 text-emerald-600" />
+              <BookOpen className="w-4 h-4 text-primary" />
             </CardDescription>
-            <CardTitle className="text-2xl sm:text-3xl font-extrabold text-emerald-950 dark:text-emerald-100">
-              {totalHeb} <span className="text-sm font-medium text-emerald-800 dark:text-emerald-400">Hari</span>
+            <CardTitle className="text-2xl sm:text-3xl font-extrabold text-foreground">
+              {totalHeb} <span className="text-sm font-medium text-muted-foreground">Hari</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 text-xs text-emerald-800 dark:text-emerald-400">
+          <CardContent className="pt-0 text-xs text-muted-foreground">
             Rata-rata: {rataRataHebPerBulan} hari / bulan
           </CardContent>
         </Card>
@@ -122,8 +122,8 @@ export function MatriksKaldikView({ summary }: MatriksKaldikViewProps) {
                 <th className="py-2.5 px-2.5 border-r border-border text-center text-destructive" title="Libur Rutin Mingguan">Libur Rutin</th>
                 <th className="py-2.5 px-2.5 border-r border-border text-center text-amber-700 dark:text-amber-400" title="Libur Nasional, Ramadhan, Semester">Libur Resmi</th>
                 <th className="py-2.5 px-2.5 border-r border-border text-center text-indigo-700 dark:text-indigo-400" title="Matsama, Asesmen, Rapor">Non-Efektif</th>
-                <th className="py-2.5 px-2.5 border-r border-border text-center text-emerald-800 dark:text-emerald-400" title="Hari Efektif Fakultatif">HEF</th>
-                <th className="py-2.5 px-3 border-r border-border text-center font-bold bg-emerald-500/10 text-emerald-950 dark:text-emerald-100" title="Hari Efektif Belajar">HEB</th>
+                <th className="py-2.5 px-2.5 border-r border-border text-center text-primary" title="Hari Efektif Fakultatif">HEF</th>
+                <th className="py-2.5 px-3 border-r border-border text-center font-bold bg-primary/10 text-primary" title="Hari Efektif Belajar">HEB</th>
                 <th className="py-2.5 px-3 border-r border-border text-center font-bold bg-primary/10 text-primary" title="Minggu Efektif Belajar">MEB</th>
                 <th className="py-2.5 px-3 border-r border-border text-center text-muted-foreground" title="Minggu Tidak Efektif">MTE</th>
                 <th className="py-2.5 px-3 min-w-[200px]">Keterangan Kegiatan / Dominan MTE</th>
@@ -139,7 +139,7 @@ export function MatriksKaldikView({ summary }: MatriksKaldikViewProps) {
                   <td className="py-2.5 px-2.5 border-r border-border text-center">{b.liburResmi}</td>
                   <td className="py-2.5 px-2.5 border-r border-border text-center">{b.nonEfektif}</td>
                   <td className="py-2.5 px-2.5 border-r border-border text-center">{b.hef}</td>
-                  <td className="py-2.5 px-3 border-r border-border text-center font-bold bg-emerald-500/5 text-emerald-950 dark:text-emerald-100">{b.heb}</td>
+                  <td className="py-2.5 px-3 border-r border-border text-center font-bold bg-primary/5 text-primary">{b.heb}</td>
                   <td className="py-2.5 px-3 border-r border-border text-center font-bold bg-primary/5 text-primary">{b.meb}</td>
                   <td className="py-2.5 px-3 border-r border-border text-center text-muted-foreground">{b.mte}</td>
                   <td className="py-2.5 px-3 text-muted-foreground">
@@ -152,7 +152,7 @@ export function MatriksKaldikView({ summary }: MatriksKaldikViewProps) {
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[11px] text-emerald-800 dark:text-emerald-400">Proses Pembelajaran Penuh</span>
+                      <span className="text-[11px] text-primary">Proses Pembelajaran Penuh</span>
                     )}
                   </td>
                 </tr>
@@ -168,7 +168,7 @@ export function MatriksKaldikView({ summary }: MatriksKaldikViewProps) {
                 <td className="py-3 px-2.5 border-r border-border text-center">{totalLiburResmi}</td>
                 <td className="py-3 px-2.5 border-r border-border text-center">{totalNonEfektif}</td>
                 <td className="py-3 px-2.5 border-r border-border text-center">{totalHef}</td>
-                <td className="py-3 px-3 border-r border-border text-center bg-emerald-500/20 text-emerald-950 dark:text-emerald-100 text-sm">
+                <td className="py-3 px-3 border-r border-border text-center bg-primary/20 text-primary text-sm">
                   {totalHeb}
                 </td>
                 <td className="py-3 px-3 border-r border-border text-center bg-primary/20 text-primary text-sm">

@@ -499,7 +499,7 @@ export function TugasTambahanClient({
                           variant="outline"
                           className={`text-[10px] font-semibold uppercase tracking-wider shrink-0 ${
                             assignment
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              ? "bg-primary/10 text-primary border-primary/20"
                               : "bg-muted text-muted-foreground"
                           }`}
                         >
@@ -619,7 +619,7 @@ export function TugasTambahanClient({
                           onClick={() => handleRemoveStruktural(assignment)}
                           size="sm"
                           variant="ghost"
-                          className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 px-2.5 cursor-pointer"
+                          className="text-xs text-destructive hover:bg-destructive/10 px-2.5 cursor-pointer"
                           title="Cabut Penugasan"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -799,7 +799,7 @@ export function TugasTambahanClient({
 
                       <TableCell>
                         {k.waliKelas ? (
-                          <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                          <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">
                             Aktif Bertugas
                           </Badge>
                         ) : (
@@ -826,7 +826,7 @@ export function TugasTambahanClient({
                               onClick={() => handleRemoveWaliKelas(k)}
                               size="sm"
                               variant="ghost"
-                              className="text-xs h-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 cursor-pointer"
+                              className="text-xs h-8 text-destructive hover:bg-destructive/10 px-2 cursor-pointer"
                               title="Lepaskan Wali Kelas"
                             >
                               <UserX className="w-3.5 h-3.5" />
@@ -879,8 +879,8 @@ export function TugasTambahanClient({
               <div
                 className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
                   feedback.type === "success"
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                    : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "bg-destructive/10 text-destructive border border-destructive/20"
                 }`}
               >
                 {feedback.type === "success" ? (
@@ -981,8 +981,8 @@ export function TugasTambahanClient({
               <div
                 className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
                   waliFeedback.type === "success"
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                    : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "bg-destructive/10 text-destructive border border-destructive/20"
                 }`}
               >
                 {waliFeedback.type === "success" ? (

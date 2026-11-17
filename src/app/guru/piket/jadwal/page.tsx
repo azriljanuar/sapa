@@ -16,11 +16,9 @@ export default async function GuruPiketJadwalPage() {
 
   if (!activeSemester) {
     return (
-      <div className="p-6">
-        <div className="p-6 bg-red-50 text-red-600 rounded-lg">
+      <div className="p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 text-sm font-medium">
           Semester aktif belum ditentukan. Silakan hubungi admin sekolah.
         </div>
-      </div>
     )
   }
 

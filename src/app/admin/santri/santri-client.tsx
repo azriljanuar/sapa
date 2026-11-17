@@ -424,7 +424,6 @@ export function SantriClient({
             <Button 
               variant="destructive" 
               onClick={handleDeleteBulk}
-              className="bg-red-500 hover:bg-red-600 text-white"
               disabled={isSubmitting}
             >
               <Trash2 className="mr-2 h-4 w-4" /> Hapus Terpilih ({tableSelectedIds.length})
@@ -522,7 +521,7 @@ export function SantriClient({
           </div>
         )}
 
-        <div className="rounded-md border bg-white shadow-sm overflow-x-auto -mx-4 sm:mx-0">
+        <div className="rounded-md border border-border bg-card shadow-sm overflow-x-auto -mx-4 sm:mx-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -530,7 +529,7 @@ export function SantriClient({
                   {activeTab !== "alumni" && (
                     <input 
                       type="checkbox" 
-                      className="w-4 h-4 rounded border-gray-300"
+                      className="w-4 h-4 rounded border-input"
                       checked={paginatedData.length > 0 && tableSelectedIds.length === paginatedData.length}
                       onChange={toggleAllTableSelection}
                     />
@@ -552,12 +551,12 @@ export function SantriClient({
             <TableBody>
               {paginatedData.length > 0 ? (
                 paginatedData.map((item, index) => (
-                  <TableRow key={item.id} className={tableSelectedIds.includes(item.id) ? "bg-slate-50" : ""}>
+                  <TableRow key={item.id} className={tableSelectedIds.includes(item.id) ? "bg-muted/50" : ""}>
                     <TableCell className="text-center">
                       {activeTab !== "alumni" && (
                         <input 
                           type="checkbox" 
-                          className="w-4 h-4 rounded border-gray-300"
+                          className="w-4 h-4 rounded border-input"
                           checked={tableSelectedIds.includes(item.id)}
                           onChange={() => toggleTableSelection(item.id)}
                         />
@@ -574,14 +573,14 @@ export function SantriClient({
                           </span>
                         )}
                         {item.statusMukim && (
-                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">· Mukim</span>
+                          <span className="text-primary font-medium">· Mukim</span>
                         )}
                       </div>
                       {activeTab === "pindah" && (
                         <div className="text-xs text-amber-600 mt-1 font-semibold">{item.statusKeluar?.replace(/_/g, ' ')}</div>
                       )}
                       {activeTab === "alumni" && item.namaInstansi && (
-                        <div className="text-xs text-slate-500 mt-0.5">{item.namaInstansi} {item.programStudi ? `(${item.programStudi})` : ''}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{item.namaInstansi} {item.programStudi ? `(${item.programStudi})` : ''}</div>
                       )}
                     </TableCell>
                     
@@ -604,7 +603,7 @@ export function SantriClient({
                       </TableCell>
                     ) : (
                       <TableCell className="text-center">
-                        <Badge variant="outline" className="font-medium bg-slate-50 text-slate-700">
+                        <Badge variant="outline" className="font-medium bg-muted text-muted-foreground">
                           {item.tahunLulusNama || "Lulus"}
                         </Badge>
                       </TableCell>
@@ -625,7 +624,7 @@ export function SantriClient({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className={item.rfidCardId ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" : "text-muted-foreground hover:text-primary"}
+                            className={item.rfidCardId ? "text-primary hover:text-primary hover:bg-primary/10" : "text-muted-foreground hover:text-primary"}
                             onClick={() => { setRfidTarget(item); setIsRfidModalOpen(true); }}
                             title={item.rfidCardId ? `RFID: ${item.rfidCardId} (Klik untuk kelola)` : "Daftarkan Kartu RFID"}
                           >
@@ -704,7 +703,7 @@ export function SantriClient({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     Tidak ada data.
                   </TableCell>
                 </TableRow>
@@ -1003,11 +1002,11 @@ export function SantriClient({
                   </TabsContent>
 
                   <TabsContent value="kehadiran" className="space-y-4 mt-0">
-                    <div className="bg-white p-4 rounded-xl border border-slate-100">
+                    <div className="bg-card p-4 rounded-xl border border-border">
                       <h3 className="font-semibold text-sm mb-4">Agustus 2026</h3>
                       <div className="grid grid-cols-7 gap-1 text-center mb-1">
                         {['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(day => (
-                          <div key={day} className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{day}</div>
+                          <div key={day} className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{day}</div>
                         ))}
                       </div>
                       <div className="grid grid-cols-7 gap-1">
@@ -1019,7 +1018,7 @@ export function SantriClient({
                         <div className="aspect-square"></div>
                         {Array.from({ length: 31 }).map((_, i) => {
                           const isWeekend = (i + 1) % 7 === 0 || (i + 2) % 7 === 0
-                          if (isWeekend) return <div key={i} className="aspect-square flex items-center justify-center rounded text-xs font-medium bg-slate-50 border border-slate-100 text-slate-400">{i+1}</div>
+                          if (isWeekend) return <div key={i} className="aspect-square flex items-center justify-center rounded text-xs font-medium bg-muted/50 border border-border text-muted-foreground">{i+1}</div>
                           
                           const isAbsent = i === 4 || i === 12 || i === 18
                           return (
@@ -1027,8 +1026,8 @@ export function SantriClient({
                               key={i} 
                               className={`aspect-square flex items-center justify-center rounded text-xs font-medium border ${
                                 isAbsent 
-                                  ? "bg-red-50 border-red-200 text-red-600" 
-                                  : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                  ? "bg-destructive/10 border-destructive/20 text-destructive" 
+                                  : "bg-primary/10 border-primary/20 text-primary"
                               }`}
                             >
                               {i+1}
@@ -1036,12 +1035,12 @@ export function SantriClient({
                           )
                         })}
                       </div>
-                      <div className="mt-4 flex gap-4 border-t border-slate-100 pt-3">
-                        <div className="flex items-center gap-1 text-xs text-slate-600">
-                          <div className="w-3 h-3 rounded-sm bg-emerald-50 border border-emerald-200"></div> Hadir
+                      <div className="mt-4 flex gap-4 border-t border-border pt-3">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <div className="w-3 h-3 rounded-sm bg-primary/10 border border-primary/20"></div> Hadir
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-slate-600">
-                          <div className="w-3 h-3 rounded-sm bg-red-50 border border-red-200"></div> Absen
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <div className="w-3 h-3 rounded-sm bg-destructive/10 border border-destructive/20"></div> Absen
                         </div>
                       </div>
                     </div>
@@ -1089,7 +1088,7 @@ export function SantriClient({
                 </p>
               </div>
             </div>
-            <div className="flex justify-between pt-4 items-center border-t border-slate-100">
+            <div className="flex justify-between pt-4 items-center border-t border-border">
               <Button type="button" variant="link" onClick={handleDownloadTemplate} className="px-0">
                 <FileDown className="mr-2 h-4 w-4" /> Unduh Template
               </Button>
@@ -1110,14 +1109,14 @@ export function SantriClient({
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
-              <KeyRound className="h-5 w-5 text-blue-600" />
+              <KeyRound className="h-5 w-5 text-primary" />
               Ekspor Akun Siswa (Username & Password)
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Pilih Filter Kelas</label>
+              <label className="text-sm font-medium text-foreground">Pilih Filter Kelas</label>
               <select
                 className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background text-foreground"
                 value={exportKelas}
@@ -1141,21 +1140,21 @@ export function SantriClient({
             </div>
 
             {/* Info Box */}
-            <div className="rounded-lg border border-blue-100 bg-blue-50/60 p-3.5 text-xs text-blue-900 space-y-2">
-              <div className="font-semibold flex items-center gap-1.5 text-blue-800">
+            <div className="rounded-lg border border-primary/20 bg-primary/10 p-3.5 text-xs text-foreground space-y-2">
+              <div className="font-semibold flex items-center gap-1.5 text-primary">
                 <span>ℹ️</span> Format Kredensial Siswa
               </div>
-              <ul className="list-disc list-inside space-y-1 text-slate-700 pl-1">
-                <li><strong>Username:</strong> NISN masing-masing siswa (disimpan sebagai teks agar angka 0 di depan tidak terpotong)</li>
-                <li><strong>Password Default:</strong> <code className="bg-white px-1.5 py-0.5 rounded text-blue-700 font-mono font-bold">password123</code></li>
-                <li><strong>Format File:</strong> Excel (.xlsx) dengan kolom No, NISN (Username), Nama Lengkap, Kelas, Jenis Kelamin, Status Mukim, Password Default, dan Status Akun.</li>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground pl-1">
+                <li><strong className="text-foreground">Username:</strong> NISN masing-masing siswa (disimpan sebagai teks agar angka 0 di depan tidak terpotong)</li>
+                <li><strong className="text-foreground">Password Default:</strong> <code className="bg-card px-1.5 py-0.5 rounded text-primary font-mono font-bold border border-border">password123</code></li>
+                <li><strong className="text-foreground">Format File:</strong> Excel (.xlsx) dengan kolom No, NISN (Username), Nama Lengkap, Kelas, Jenis Kelamin, Status Mukim, Password Default, dan Status Akun.</li>
               </ul>
             </div>
 
             {/* Summary */}
-            <div className="flex items-center justify-between text-sm py-2 px-3 bg-slate-50 rounded-md border border-slate-200">
-              <span className="text-slate-600">Siswa yang akan diekspor:</span>
-              <span className="font-bold text-slate-900">
+            <div className="flex items-center justify-between text-sm py-2 px-3 bg-muted/50 rounded-md border border-border">
+              <span className="text-muted-foreground">Siswa yang akan diekspor:</span>
+              <span className="font-bold text-foreground">
                 {(() => {
                   if (exportKelas === "none") {
                     return data.filter(s => !s.statusKeluar && !s.namaKelas).length
@@ -1168,7 +1167,7 @@ export function SantriClient({
               </span>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex justify-end gap-2 pt-3 border-t border-border">
               <Button variant="outline" type="button" onClick={() => setIsExportDialogOpen(false)}>
                 Batal
               </Button>

@@ -27,7 +27,7 @@ export default async function CetakSKLPage({ params }: { params: { id: string } 
 
   const alumniData = santri.jenjangs[0]
   if (!alumniData.isAlumni) {
-    return <div className="p-6 text-center text-red-500">Santri ini bukan alumni.</div>
+    return <div className="p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 text-sm font-medium text-center">Santri ini bukan alumni.</div>
   }
 
   const jenjang = alumniData.jenjang

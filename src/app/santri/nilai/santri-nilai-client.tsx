@@ -98,7 +98,7 @@ export default function SantriNilaiClient({
         </div>
 
         <div className="bg-card rounded-xl border border-border p-3.5 shadow-2xs">
-          <div className="text-2xl font-bold text-emerald-600">
+          <div className="text-2xl font-bold text-primary">
             {mapelRilis.length} <span className="text-xs font-normal text-muted-foreground">/ {totalMapel}</span>
           </div>
           <div className="text-xs font-medium text-muted-foreground mt-0.5">Nilai Dirilis</div>
@@ -186,7 +186,7 @@ export default function SantriNilaiClient({
                                 Belum Lengkap
                               </span>
                             ) : isLulus ? (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
                                 Lulus
                               </span>
                             ) : (

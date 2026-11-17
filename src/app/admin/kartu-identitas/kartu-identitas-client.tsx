@@ -111,11 +111,11 @@ export function KartuIdentitasClient() {
         </CardHeader>
         <CardContent>
           {currentTemplate.frontUrl ? (
-            <div className="mb-4 aspect-[2.12/3.37] w-48 relative border rounded-lg overflow-hidden bg-slate-100">
+            <div className="mb-4 aspect-[2.12/3.37] w-48 relative border border-border rounded-lg overflow-hidden bg-muted">
               <img src={currentTemplate.frontUrl} alt="Front Template" className="object-cover w-full h-full" />
             </div>
           ) : (
-            <div className="mb-4 aspect-[2.12/3.37] w-48 border-2 border-dashed flex items-center justify-center rounded-lg bg-slate-50 text-slate-400">
+            <div className="mb-4 aspect-[2.12/3.37] w-48 border-2 border-dashed border-border flex items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
               <ImageIcon className="size-8" />
             </div>
           )}
@@ -141,11 +141,11 @@ export function KartuIdentitasClient() {
         </CardHeader>
         <CardContent>
           {currentTemplate.backUrl ? (
-            <div className="mb-4 aspect-[2.12/3.37] w-48 relative border rounded-lg overflow-hidden bg-slate-100">
+            <div className="mb-4 aspect-[2.12/3.37] w-48 relative border border-border rounded-lg overflow-hidden bg-muted">
               <img src={currentTemplate.backUrl} alt="Back Template" className="object-cover w-full h-full" />
             </div>
           ) : (
-            <div className="mb-4 aspect-[2.12/3.37] w-48 border-2 border-dashed flex items-center justify-center rounded-lg bg-slate-50 text-slate-400">
+            <div className="mb-4 aspect-[2.12/3.37] w-48 border-2 border-dashed border-border flex items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
               <ImageIcon className="size-8" />
             </div>
           )}
@@ -240,8 +240,8 @@ export function KartuIdentitasClient() {
       
       {/* Preview Modal */}
       <Dialog open={!!previewUser} onOpenChange={(open) => !open && setPreviewUser(null)}>
-        <DialogContent className="sm:max-w-4xl p-0 overflow-hidden bg-slate-50 gap-0">
-          <DialogHeader className="p-4 border-b bg-white">
+        <DialogContent className="sm:max-w-4xl p-0 overflow-hidden bg-background border-border gap-0">
+          <DialogHeader className="p-4 border-b border-border bg-card">
             <DialogTitle>Preview Kartu: {previewUser?.user.nama || previewUser?.user.namaLengkap}</DialogTitle>
           </DialogHeader>
             
@@ -249,22 +249,22 @@ export function KartuIdentitasClient() {
               {previewUser && (
                 <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
                   <div className="flex flex-col items-center gap-2">
-                    <span className="text-sm font-semibold text-slate-500">Tampak Depan</span>
+                    <span className="text-sm font-semibold text-muted-foreground">Tampak Depan</span>
                     {renderCardPreviewFront(previewUser.user, previewUser.tipe, activeTemplate, frontRef)}
                   </div>
                   <div className="flex flex-col items-center gap-2">
-                    <span className="text-sm font-semibold text-slate-500">Tampak Belakang</span>
+                    <span className="text-sm font-semibold text-muted-foreground">Tampak Belakang</span>
                     {renderCardPreviewBack(previewUser.user, previewUser.tipe, activeTemplate, backRef)}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="p-4 border-t bg-white flex justify-end gap-3">
+            <div className="p-4 border-t border-border bg-card flex justify-end gap-3">
               <Button variant="outline" onClick={() => setPreviewUser(null)}>
                 Batal
               </Button>
-              <Button onClick={downloadPDF} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={downloadPDF}>
                 <Download className="w-4 h-4 mr-2" />
                 Unduh PDF
               </Button>
@@ -273,7 +273,7 @@ export function KartuIdentitasClient() {
       </Dialog>
 
       <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)}>
-        <TabsList className="mb-6 bg-white border">
+        <TabsList className="mb-6 bg-card border border-border">
           <TabsTrigger value="GURU">Kartu Guru</TabsTrigger>
           <TabsTrigger value="SANTRI">Kartu Santri</TabsTrigger>
         </TabsList>
@@ -287,8 +287,8 @@ export function KartuIdentitasClient() {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-slate-600">
-                  <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b">
+                <table className="w-full text-sm text-left text-muted-foreground">
+                  <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
                     <tr>
                       <th className="px-4 py-3">Nama Guru</th>
                       <th className="px-4 py-3">NIP/NIK</th>
@@ -297,8 +297,8 @@ export function KartuIdentitasClient() {
                   </thead>
                   <tbody>
                     {guruList.map(g => (
-                      <tr key={g.id} className="border-b hover:bg-slate-50/50">
-                        <td className="px-4 py-3 font-medium text-slate-800">{g.nama}</td>
+                      <tr key={g.id} className="border-b border-border hover:bg-muted/50">
+                        <td className="px-4 py-3 font-medium text-foreground">{g.nama}</td>
                         <td className="px-4 py-3">{g.nip || "-"}</td>
                         <td className="px-4 py-3 text-right">
                           <Button size="sm" variant="outline" onClick={() => setPreviewUser({ user: g, tipe: "GURU" })}>
@@ -323,8 +323,8 @@ export function KartuIdentitasClient() {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-slate-600">
-                  <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b">
+                <table className="w-full text-sm text-left text-muted-foreground">
+                  <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
                     <tr>
                       <th className="px-4 py-3">Nama Santri</th>
                       <th className="px-4 py-3">NISN</th>
@@ -333,8 +333,8 @@ export function KartuIdentitasClient() {
                   </thead>
                   <tbody>
                     {santriList.map(s => (
-                      <tr key={s.id} className="border-b hover:bg-slate-50/50">
-                        <td className="px-4 py-3 font-medium text-slate-800">{s.namaLengkap}</td>
+                      <tr key={s.id} className="border-b border-border hover:bg-muted/50">
+                        <td className="px-4 py-3 font-medium text-foreground">{s.namaLengkap}</td>
                         <td className="px-4 py-3">{s.nisn || "-"}</td>
                         <td className="px-4 py-3 text-right">
                           <Button size="sm" variant="outline" onClick={() => setPreviewUser({ user: s, tipe: "SANTRI" })}>

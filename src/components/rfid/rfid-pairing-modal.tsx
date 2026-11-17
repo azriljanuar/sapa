@@ -151,7 +151,7 @@ export function RfidPairingModal({
             <div className="text-right">
               <div className="text-xs text-muted-foreground mb-1">Status Kartu:</div>
               {target.currentRfid ? (
-                <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-mono text-xs">
+                <Badge className="bg-primary/10 text-primary border border-primary/20 font-mono text-xs">
                   {target.currentRfid}
                 </Badge>
               ) : (
@@ -198,8 +198,8 @@ export function RfidPairingModal({
 
           {/* Pesan Sukses / Error */}
           {successMsg && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+            <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-2 text-xs text-primary">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-primary" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -217,7 +217,7 @@ export function RfidPairingModal({
             <Button
               type="button"
               variant="destructive"
-              className="sm:mr-auto bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20"
+              className="sm:mr-auto bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20"
               onClick={() => handleSave(null)}
               disabled={isSaving}
             >

@@ -289,11 +289,11 @@ export function WaliRekapClient({
         </div>
 
         {/* Hadir */}
-        <div className="bg-card rounded-xl p-4 border border-emerald-500/20 shadow-2xs bg-emerald-500/[0.02]">
-          <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+        <div className="bg-card rounded-xl p-4 border border-primary/20 shadow-2xs bg-primary/[0.02]">
+          <div className="text-[11px] font-semibold text-primary uppercase tracking-wider flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" /> Hadir
           </div>
-          <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+          <div className="text-2xl font-extrabold text-primary mt-1">
             {data?.summary.hadir || 0}
           </div>
           <div className="text-[10px] text-muted-foreground mt-0.5">{persentaseHadir}% kehadiran</div>
@@ -443,7 +443,7 @@ export function WaliRekapClient({
                       </td>
                       <td className="py-3 px-4 text-center">
                         {santri.status === "HADIR" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-primary/10 text-primary">
                             <CheckCircle2 className="w-3 h-3" /> Hadir
                           </span>
                         ) : santri.status === "TERLAMBAT" ? (
@@ -459,7 +459,7 @@ export function WaliRekapClient({
                             <Clock className="w-3 h-3" /> Izin
                           </span>
                         ) : santri.status === "ALPA" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-destructive/10 text-destructive">
                             <AlertCircle className="w-3 h-3" /> Alpa
                           </span>
                         ) : (
@@ -470,7 +470,7 @@ export function WaliRekapClient({
                       </td>
                       <td className="py-3 px-4 font-mono text-[11px]">
                         {santri.jamMasuk ? (
-                          <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                          <span className="text-primary font-medium">
                             {new Date(santri.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
                             {santri.jamPulang && (
                               <span className="text-muted-foreground font-normal">
@@ -494,8 +494,8 @@ export function WaliRekapClient({
                             className={cn(
                               "px-2 py-1 rounded text-[10px] font-bold transition-colors",
                               santri.status === "HADIR"
-                                ? "bg-emerald-600 text-white"
-                                : "bg-muted hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted hover:bg-primary/20 text-primary"
                             )}
                           >
                             H

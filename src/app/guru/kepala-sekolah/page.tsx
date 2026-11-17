@@ -168,7 +168,7 @@ export default async function KepalaSekolahDashboardPage() {
         <div className="bg-card p-4 rounded-xl border border-border shadow-2xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-muted-foreground">Tenaga Pendidik</span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -228,14 +228,14 @@ export default async function KepalaSekolahDashboardPage() {
               <span className="font-bold text-foreground">{persenSantri}% Hadir</span>
             </div>
             <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden flex">
-              <div style={{ width: `${persenSantri}%` }} className="bg-emerald-500 h-full" />
+              <div style={{ width: `${persenSantri}%` }} className="bg-primary h-full" />
             </div>
             <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground pt-1">
               <span>Hadir: <strong className="text-foreground">{santriHadir}</strong></span>
               <span>Terlambat: <strong className="text-amber-600">{santriTerlambat}</strong></span>
               <span>Izin: <strong className="text-blue-600">{santriIzin}</strong></span>
               <span>Sakit: <strong className="text-yellow-600">{santriSakit}</strong></span>
-              <span>Alpa: <strong className="text-red-600">{santriAlpa}</strong></span>
+              <span>Alpa: <strong className="text-destructive">{santriAlpa}</strong></span>
             </div>
           </div>
 
@@ -243,20 +243,20 @@ export default async function KepalaSekolahDashboardPage() {
           <div className="space-y-2 pt-3 border-t border-border/60">
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-emerald-600" />
+                <Users className="w-3.5 h-3.5 text-primary" />
                 Presensi Guru
               </span>
               <span className="font-bold text-foreground">{persenGuru}% Hadir</span>
             </div>
             <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden flex">
-              <div style={{ width: `${persenGuru}%` }} className="bg-emerald-600 h-full" />
+              <div style={{ width: `${persenGuru}%` }} className="bg-primary h-full" />
             </div>
             <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground pt-1">
               <span>Hadir: <strong className="text-foreground">{guruHadir}</strong></span>
               <span>Terlambat: <strong className="text-amber-600">{guruTerlambat}</strong></span>
               <span>Izin: <strong className="text-blue-600">{guruIzin}</strong></span>
               <span>Sakit: <strong className="text-yellow-600">{guruSakit}</strong></span>
-              <span>Alpa: <strong className="text-red-600">{guruAlpa}</strong></span>
+              <span>Alpa: <strong className="text-destructive">{guruAlpa}</strong></span>
             </div>
           </div>
         </div>
@@ -284,7 +284,7 @@ export default async function KepalaSekolahDashboardPage() {
                   {pengampuDirilis} / {totalPengampu} Mapel Dirilis
                 </div>
               </div>
-              <Badge className={pengampuDirilis === totalPengampu && totalPengampu > 0 ? "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" : "bg-amber-500/15 text-amber-700 border-amber-500/30"}>
+              <Badge className={pengampuDirilis === totalPengampu && totalPengampu > 0 ? "bg-primary/10 text-primary border-primary/20" : "bg-amber-500/15 text-amber-700 border-amber-500/30"}>
                 {pengampuDirilis === totalPengampu && totalPengampu > 0 ? "Lengkap" : "Dalam Proses"}
               </Badge>
             </div>

@@ -177,7 +177,7 @@ export function ManajemenAbsensiTab({
               {/* Kolom 1: Jam Masuk */}
               <div className="space-y-4 p-4 rounded-xl bg-muted/40 border border-border/60">
                 <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <Clock className="w-4 h-4 text-primary" />
                   Presensi Masuk
                 </div>
 
@@ -284,14 +284,14 @@ export function ManajemenAbsensiTab({
               <div
                 className={`p-3 rounded-lg text-xs font-medium flex items-center gap-2 ${
                   statusMessage.type === "success"
-                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
-                    : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "bg-destructive/10 text-destructive border border-destructive/20"
                 }`}
               >
                 {statusMessage.type === "success" ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
                 )}
                 {statusMessage.text}
               </div>
@@ -388,13 +388,13 @@ export function ManajemenAbsensiTab({
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
                               g.status === "HADIR"
-                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                ? "bg-primary/10 text-primary"
                                 : g.status === "IZIN"
                                 ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
                                 : g.status === "SAKIT"
                                 ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
                                 : g.status === "ALPA"
-                                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                                ? "bg-destructive/10 text-destructive"
                                 : "bg-muted text-muted-foreground"
                             }`}
                           >

@@ -93,32 +93,32 @@ export function SarprasJenjangClient({ initialData, jenjangName }: { initialData
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            <Box className="h-6 w-6 text-blue-600" />
+          <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Box className="h-6 w-6 text-primary" />
             Data Sarana Prasarana
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Kelola inventaris dan aset milik jenjang {jenjangName}.
           </p>
         </div>
-        <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => handleOpenDialog()}>
           <Plus className="h-4 w-4 mr-2" />
           Tambah Barang
         </Button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="p-4 border-b border-border bg-muted/50 flex justify-between items-center">
           <div className="relative w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Cari nama barang atau kategori..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-white"
+              className="pl-9 bg-card"
             />
           </div>
-          <div className="text-sm text-slate-500">
+          <div className="text-sm text-muted-foreground">
             Total {filteredData.length} barang
           </div>
         </div>
@@ -140,13 +140,13 @@ export function SarprasJenjangClient({ initialData, jenjangName }: { initialData
               filteredData.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-mono text-xs">{item.kodeBarang || "-"}</TableCell>
-                  <TableCell className="font-medium text-slate-900">{item.namaBarang}</TableCell>
+                  <TableCell className="font-medium text-foreground">{item.namaBarang}</TableCell>
                   <TableCell>{item.kategori || "-"}</TableCell>
                   <TableCell>{item.jumlah}</TableCell>
                   <TableCell>
                     <div className="text-xs space-y-1">
-                      <div className="text-emerald-600">Baik: {item.kondisiBaik}</div>
-                      <div className="text-red-600">Rusak: {item.kondisiRusak}</div>
+                      <div className="text-primary font-medium">Baik: {item.kondisiBaik}</div>
+                      <div className="text-destructive font-medium">Rusak: {item.kondisiRusak}</div>
                     </div>
                   </TableCell>
                   <TableCell>{item.tahunPerolehan || "-"}</TableCell>
@@ -156,7 +156,7 @@ export function SarprasJenjangClient({ initialData, jenjangName }: { initialData
                         variant="ghost"
                         size="sm"
                         onClick={() => handleOpenDialog(item)}
-                        className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-muted"
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -164,7 +164,7 @@ export function SarprasJenjangClient({ initialData, jenjangName }: { initialData
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(item.id)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -174,7 +174,7 @@ export function SarprasJenjangClient({ initialData, jenjangName }: { initialData
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   Tidak ada data sarpras yang ditemukan.
                 </TableCell>
               </TableRow>

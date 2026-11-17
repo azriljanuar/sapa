@@ -220,8 +220,8 @@ export function ManajemenHariLibur({
             <div
               className={`p-2.5 rounded-lg text-xs font-medium flex items-center gap-2 ${
                 mingguanFeedback.type === "success"
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
-                  : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
+                  ? "bg-primary/10 text-primary border border-primary/20"
+                  : "bg-destructive/10 text-destructive border border-destructive/20"
               }`}
             >
               {mingguanFeedback.text}
@@ -303,8 +303,8 @@ export function ManajemenHariLibur({
             <div
               className={`p-2.5 rounded-lg text-xs font-medium flex items-center gap-2 ${
                 kondisionalFeedback.type === "success"
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
-                  : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
+                  ? "bg-primary/10 text-primary border border-primary/20"
+                  : "bg-destructive/10 text-destructive border border-destructive/20"
               }`}
             >
               {kondisionalFeedback.text}
@@ -366,7 +366,7 @@ export function ManajemenHariLibur({
       <Card className="border-border shadow-xs">
         <CardHeader>
           <div className="flex items-center gap-2 text-primary">
-            <CalendarDays className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <CalendarDays className="w-5 h-5 text-primary" />
             <CardTitle className="text-base sm:text-lg">3. Hari Libur Semester (Rentang Tanggal)</CardTitle>
           </div>
           <CardDescription className="text-xs">
@@ -375,9 +375,9 @@ export function ManajemenHariLibur({
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Note Khusus Libur Semester */}
-          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
-            <Info className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
-            <div className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
+          <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/20 flex items-start gap-3">
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <div className="text-xs text-foreground leading-relaxed">
               <strong>Ketentuan Khusus Libur Semester:</strong> Berbeda dengan libur mingguan/nasional, pada masa libur semester mesin RFID <strong>tetap dapat mencatat kehadiran</strong> bagi guru, karyawan, atau santri yang datang berkegiatan/piket di madrasah.
             </div>
           </div>
@@ -444,8 +444,8 @@ export function ManajemenHariLibur({
             <div
               className={`p-2.5 rounded-lg text-xs font-medium flex items-center gap-2 ${
                 semesterFeedback.type === "success"
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
-                  : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
+                  ? "bg-primary/10 text-primary border border-primary/20"
+                  : "bg-destructive/10 text-destructive border border-destructive/20"
               }`}
             >
               {semesterFeedback.text}

@@ -206,7 +206,7 @@ export function AlumniClient({
               <Input
                 type="text"
                 placeholder="Cari NISN atau nama alumni..."
-                className="pl-9 bg-white"
+                className="pl-9 bg-card"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -214,7 +214,7 @@ export function AlumniClient({
             
             {tahunAjarans.length > 0 && (
               <select
-                className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background text-foreground"
                 value={filterTahunLulus}
                 onChange={(e) => setFilterTahunLulus(e.target.value)}
               >
@@ -230,14 +230,13 @@ export function AlumniClient({
             {!isMA && tableSelectedIds.length > 0 && (
               <Button 
                 onClick={() => setIsTransferDialogOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Send className="mr-2 h-4 w-4" /> Lanjutkan ({tableSelectedIds.length})
               </Button>
             )}
             
             <a href="/admin/alumni/export" target="_blank">
-              <Button variant="outline" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50">
+              <Button variant="outline" className="text-primary border-primary/20 hover:bg-primary/10">
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 Export Excel
               </Button>
@@ -245,16 +244,16 @@ export function AlumniClient({
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50/50">
+                <TableRow className="bg-muted/50">
                   {!isMA && (
                     <TableHead className="w-[50px] text-center">
                       <input 
                         type="checkbox" 
-                        className="w-4 h-4 rounded border-gray-300"
+                        className="w-4 h-4 rounded border-input"
                         checked={filteredData.length > 0 && tableSelectedIds.length === filteredData.length}
                         onChange={toggleAllTableSelection}
                       />
@@ -271,30 +270,30 @@ export function AlumniClient({
               <TableBody>
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
-                    <TableRow key={item.id} className={tableSelectedIds.includes(item.id) ? "bg-slate-50" : ""}>
+                    <TableRow key={item.id} className={tableSelectedIds.includes(item.id) ? "bg-muted/50" : ""}>
                       {!isMA && (
                         <TableCell className="text-center">
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 rounded border-gray-300"
+                            className="w-4 h-4 rounded border-input"
                             checked={tableSelectedIds.includes(item.id)}
                             onChange={() => toggleTableSelection(item.id)}
                           />
                         </TableCell>
                       )}
                       <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell className="text-slate-500 font-mono text-xs">{item.nisn}</TableCell>
-                      <TableCell className="font-semibold text-slate-900">{item.namaLengkap}</TableCell>
+                      <TableCell className="text-muted-foreground font-mono text-xs">{item.nisn}</TableCell>
+                      <TableCell className="font-semibold text-foreground">{item.namaLengkap}</TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="outline" className="font-medium bg-slate-50 text-slate-700">
+                        <Badge variant="outline" className="font-medium bg-muted text-muted-foreground">
                           {item.tahunLulusNama || "Lulus"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
                         {item.statusMukim ? (
-                          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shadow-none font-medium">Mukim</Badge>
+                          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 shadow-none font-medium">Mukim</Badge>
                         ) : (
-                          <Badge className="bg-slate-100 text-slate-500 hover:bg-slate-100 shadow-none font-medium text-xs">Tidak</Badge>
+                          <Badge className="bg-muted text-muted-foreground hover:bg-muted shadow-none font-medium text-xs">Tidak</Badge>
                         )}
                       </TableCell>
                       
@@ -304,7 +303,7 @@ export function AlumniClient({
                             <Button 
                               size="sm" 
                               variant="ghost" 
-                              className="h-8 text-xs font-semibold text-slate-700 hover:text-indigo-700"
+                              className="h-8 text-xs font-semibold text-foreground hover:text-primary"
                             >
                               Detail
                             </Button>
@@ -323,7 +322,7 @@ export function AlumniClient({
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={isMA ? 6 : 7} className="h-32 text-center text-slate-500">
+                    <TableCell colSpan={isMA ? 6 : 7} className="h-32 text-center text-muted-foreground">
                       Tidak ada data alumni.
                     </TableCell>
                   </TableRow>
@@ -419,7 +418,7 @@ export function AlumniClient({
             <DialogTitle>Lanjutkan Alumni ke Jenjang</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Data <strong>{tableSelectedIds.length} alumni</strong> akan disalin dan didaftarkan sebagai santri baru (aktif) di jenjang tujuan.
             </p>
             <div className="space-y-2">

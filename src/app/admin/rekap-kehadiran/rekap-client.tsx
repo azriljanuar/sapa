@@ -261,7 +261,7 @@ export default function RekapKehadiranClient({
                             </td>
                             <td className="px-5 py-3 text-xs font-mono">
                               {santri.jamMasuk ? (
-                                <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                                <span className="text-primary font-medium">
                                   {new Date(santri.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
                                   {santri.jamPulang && (
                                     <span className="text-muted-foreground font-normal">
@@ -363,12 +363,12 @@ export default function RekapKehadiranClient({
                   </CardContent>
                 </Card>
 
-                <Card className="bg-emerald-500/10 border-emerald-500/20 shadow-none">
+                <Card className="bg-primary/10 border-primary/20 shadow-none">
                   <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
-                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">
+                    <span className="text-xs font-semibold text-primary mb-1">
                       Hadir Sesuai Jadwal
                     </span>
-                    <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+                    <span className="text-2xl font-bold text-primary">
                       {guruData.summary.hadirTerjadwal ?? 0}
                     </span>
                     <span className="text-[11px] text-muted-foreground mt-0.5">
@@ -476,7 +476,7 @@ export default function RekapKehadiranClient({
                             </td>
                             <td className="px-4 py-3 text-xs font-mono">
                               {guru.jamMasuk ? (
-                                <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                                <span className="text-primary font-medium">
                                   {new Date(guru.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
                                   {guru.jamPulang && (
                                     <span className="text-muted-foreground font-normal">
@@ -552,7 +552,7 @@ export default function RekapKehadiranClient({
                             </td>
                             <td className="px-4 py-3 text-xs font-mono">
                               {guru.jamMasuk ? (
-                                <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                                <span className="text-primary font-medium">
                                   {new Date(guru.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
                                   {guru.jamPulang && (
                                     <span className="text-muted-foreground font-normal">
