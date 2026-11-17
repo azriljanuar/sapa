@@ -68,10 +68,12 @@ export function GuruPiketClient({
   initialData,
   guruList,
   activeTaName,
+  isEmbedded = false,
 }: {
   initialData: GuruPiketEntry[]
   guruList: AvailableGuru[]
   activeTaName: string
+  isEmbedded?: boolean
 }) {
   const [data, setData] = useState<GuruPiketEntry[]>(initialData)
   const [searchQuery, setSearchQuery] = useState("")
@@ -239,22 +241,31 @@ export function GuruPiketClient({
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className={isEmbedded ? "space-y-4" : "p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto"}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Manajemen Guru Piket
-            </h1>
-            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-              {activeTaName}
-            </Badge>
+        {!isEmbedded ? (
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Manajemen Guru Piket
+              </h1>
+              <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
+                {activeTaName}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Atur dan tetapkan guru yang bertugas sebagai guru piket harian untuk memantau jadwal, kehadiran, dan kartu identitas.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Atur dan tetapkan guru yang bertugas sebagai guru piket harian untuk memantau jadwal, kehadiran, dan kartu identitas.
-          </p>
-        </div>
+        ) : (
+          <div>
+            <h2 className="text-base font-bold text-foreground">Jadwal Harian Guru Piket</h2>
+            <p className="text-xs text-muted-foreground">
+              Petugas piket harian yang bertanggung jawab mengawal presensi dan ketertiban harian.
+            </p>
+          </div>
+        )}
         <Button onClick={handleOpenAdd} className="gap-2 shadow-xs shrink-0">
           <Plus className="w-4 h-4" />
           Tambah Guru Piket

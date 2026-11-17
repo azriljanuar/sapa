@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 
 export const metadata = {
   title: "Tugas Tambahan Guru - SAPA",
-  description: "Kelola penugasan struktural guru: Kepala Sekolah, Kurikulum, dan Kesiswaan",
+  description: "Kelola penugasan tugas tambahan guru: Pimpinan & Waka, Wali Kelas, dan Guru Piket",
 }
 
 export default async function TugasTambahanPage() {
@@ -28,6 +28,8 @@ export default async function TugasTambahanPage() {
       initialAssignments={res.data.assignments as any}
       availableGurus={res.data.availableGurus as any}
       activeTA={res.data.activeTA}
+      kelasList={res.data.kelasList as any}
+      piketList={res.data.piketList as any}
     />
   )
 }

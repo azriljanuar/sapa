@@ -130,6 +130,7 @@ export async function saveGuruPiketAssignment(data: {
     })
 
     revalidatePath("/admin/guru-piket")
+    revalidatePath("/admin/tugas-tambahan")
     revalidatePath("/guru/kesiswaan/guru-piket")
     revalidatePath("/guru")
     return { success: true }
@@ -154,6 +155,7 @@ export async function removeGuruPiketAssignment(guruId: number) {
     })
 
     revalidatePath("/admin/guru-piket")
+    revalidatePath("/admin/tugas-tambahan")
     revalidatePath("/guru/kesiswaan/guru-piket")
     revalidatePath("/guru")
     return { success: true }

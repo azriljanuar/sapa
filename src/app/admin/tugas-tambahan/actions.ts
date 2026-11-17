@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma"
 import { getLoggedInAdminJenjang } from "@/lib/auth"
 import { getSelectedTahunAjaran } from "@/lib/ta-context"
 import { PeranStruktural } from "@prisma/client"
+import { getGuruPiketList } from "@/app/admin/guru-piket/actions"
 
 export async function getTugasTambahanData() {
   try {
@@ -14,7 +15,7 @@ export async function getTugasTambahanData() {
     const activeTA = await getSelectedTahunAjaran()
     if (!activeTA) return { success: false, error: "Tahun ajaran belum dipilih", data: null }
 
-    const [assignments, availableGurus] = await Promise.all([
+    const [assignments, availableGurus, kelasList, piketList] = await Promise.all([
       prisma.tugasTambahanGuru.findMany({
         where: {
           jenjangId: admin.jenjangId,
@@ -46,9 +47,37 @@ export async function getTugasTambahanData() {
           nip: true,
           fotoWajah: true,
           email: true,
+          noTelepon: true,
+          statusPegawai: true,
+          pendidikanTerakhir: true,
         },
         orderBy: { nama: "asc" },
       }),
+      prisma.kelasFormal.findMany({
+        where: {
+          jenjangId: admin.jenjangId,
+          tahunAjaranId: activeTA.id,
+        },
+        include: {
+          waliKelas: {
+            select: {
+              id: true,
+              nama: true,
+              nip: true,
+              fotoWajah: true,
+              email: true,
+              noTelepon: true,
+            },
+          },
+          _count: {
+            select: {
+              anggota: true,
+            },
+          },
+        },
+        orderBy: { namaKelas: "asc" },
+      }),
+      getGuruPiketList(),
     ])
 
     return {
@@ -57,6 +86,8 @@ export async function getTugasTambahanData() {
         activeTA: { id: activeTA.id, nama: activeTA.nama },
         assignments,
         availableGurus,
+        kelasList,
+        piketList,
       },
     }
   } catch (error: any) {
@@ -87,7 +118,6 @@ export async function saveTugasTambahan({
     if (!peran) throw new Error("Peran struktural wajib ditentukan")
 
     // Pastikan peran struktural (Kepala Sekolah, Kurikulum, Kesiswaan) unik per jenjang & TA
-    // Jika sudah ada pejabat lama untuk peran ini, ganti dengan yang baru
     await prisma.$transaction(async (tx) => {
       // Hapus penugasan peran ini di TA & jenjang yang sama jika sudah ada
       await tx.tugasTambahanGuru.deleteMany({
@@ -163,5 +193,44 @@ export async function removeTugasTambahan(id: number) {
   } catch (error: any) {
     console.error("removeTugasTambahan error:", error)
     return { success: false, error: error.message || "Gagal mencabut penugasan guru" }
+  }
+}
+
+export async function assignWaliKelas({
+  kelasId,
+  waliKelasId,
+}: {
+  kelasId: number
+  waliKelasId: number | null
+}) {
+  try {
+    const admin = await getLoggedInAdminJenjang()
+    if (!admin.jenjangId) throw new Error("Akses ditolak")
+
+    const existingKelas = await prisma.kelasFormal.findUnique({
+      where: { id: kelasId },
+    })
+
+    if (!existingKelas || existingKelas.jenjangId !== admin.jenjangId) {
+      throw new Error("Kelas tidak ditemukan atau tidak berada di jenjang Anda")
+    }
+
+    await prisma.kelasFormal.update({
+      where: { id: kelasId },
+      data: {
+        waliKelasId: waliKelasId ?? null,
+      },
+    })
+
+    revalidatePath("/admin/tugas-tambahan")
+    revalidatePath("/admin/kelas-formal")
+    revalidatePath("/guru")
+    revalidatePath("/guru/kurikulum/kelas-formal")
+    revalidatePath("/guru/kesiswaan/kelas-formal")
+
+    return { success: true, message: "Penugasan wali kelas berhasil diperbarui." }
+  } catch (error: any) {
+    console.error("assignWaliKelas error:", error)
+    return { success: false, error: error.message || "Gagal memperbarui wali kelas" }
   }
 }
