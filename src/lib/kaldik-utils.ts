@@ -105,11 +105,22 @@ export async function checkDateStatus(
 ): Promise<DateAcademicStatus> {
   const { dateObj, dateStr, hari } = normalizeDate(tanggalInput)
 
-  // Ambil Tahun Ajaran Aktif
-  const activeTA = await prisma.tahunAjaran.findFirst({
-    where: { isActive: true },
+  // Ambil Tahun Ajaran yang sesuai dengan tahun penanggalan yang dicek, atau TA aktif/terbaru
+  const [yStr] = dateStr.split("-")
+  let activeTA = await prisma.tahunAjaran.findFirst({
+    where: { nama: { contains: yStr } },
     include: { kaldikPengaturan: true },
   })
+
+  if (!activeTA) {
+    activeTA = await prisma.tahunAjaran.findFirst({
+      where: { isActive: true },
+      include: { kaldikPengaturan: true },
+    }) || await prisma.tahunAjaran.findFirst({
+      orderBy: { nama: "desc" },
+      include: { kaldikPengaturan: true },
+    })
+  }
 
   const tahunAjaranId = activeTA?.id
   const hariLiburRutin = parseHariLiburRutin(activeTA?.kaldikPengaturan?.hariLiburRutin)

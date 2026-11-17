@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RfidPairingModal } from "@/components/rfid/rfid-pairing-modal"
-import { createGuru, updateGuru, deleteGuru, resetPasswordGuru, importGuruExcel, GuruFormValues } from "./actions"
+import { createGuru, updateGuru, deleteGuru, resetPasswordGuru, importGuruExcel, type GuruFormValues } from "./actions"
 
 export type GuruItem = {
   id: number

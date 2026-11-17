@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Hari, KaldikAgenda } from "@prisma/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -44,7 +44,33 @@ export function KalenderVisualView({
   onSelectDate,
   onEditAgenda,
 }: KalenderVisualViewProps) {
-  const [selectedMonthIdx, setSelectedMonthIdx] = useState(0)
+  // Hitung bulan & tahun saat ini (WIB)
+  const now = new Date()
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000
+  const nowWib = new Date(utc + 7 * 3600000)
+  const currentMonthNum = nowWib.getMonth() + 1
+  const currentYearNum = nowWib.getFullYear()
+
+  const findActiveMonthIndex = () => {
+    if (!daftarBulan || daftarBulan.length === 0) return 0
+    // 1. Coba cari yang bulan dan tahunnya sama persis
+    const exact = daftarBulan.findIndex(
+      (b) => b.bulan === currentMonthNum && b.tahun === currentYearNum
+    )
+    if (exact !== -1) return exact
+
+    // 2. Jika tahun berbeda, cari yang bulannya sama
+    const byMonth = daftarBulan.findIndex((b) => b.bulan === currentMonthNum)
+    if (byMonth !== -1) return byMonth
+
+    return 0
+  }
+
+  const [selectedMonthIdx, setSelectedMonthIdx] = useState(findActiveMonthIndex)
+
+  useEffect(() => {
+    setSelectedMonthIdx(findActiveMonthIndex())
+  }, [daftarBulan])
 
   if (!daftarBulan || daftarBulan.length === 0) {
     return (
@@ -109,7 +135,7 @@ export function KalenderVisualView({
     })
   }
 
-  const todayStr = new Date().toISOString().split("T")[0]
+  const todayStr = `${currentYearNum}-${String(currentMonthNum).padStart(2, "0")}-${String(nowWib.getDate()).padStart(2, "0")}`
 
   return (
     <div className="space-y-4">
@@ -125,7 +151,7 @@ export function KalenderVisualView({
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="text-base font-bold text-foreground px-2 min-w-[140px] text-center">
+          <div className="text-base font-bold text-foreground px-2 min-w-[150px] text-center">
             {namaBulan}
           </div>
           <Button
@@ -141,19 +167,27 @@ export function KalenderVisualView({
 
         {/* Tab Pilihan Cepat Bulan dalam Semester */}
         <div className="flex flex-wrap items-center gap-1">
-          {daftarBulan.map((b, idx) => (
-            <button
-              key={`${b.tahun}-${b.bulan}`}
-              onClick={() => setSelectedMonthIdx(idx)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                selectedMonthIdx === idx
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              {b.namaBulan.split(" ")[0]}
-            </button>
-          ))}
+          {daftarBulan.map((b, idx) => {
+            const isCurrentRunningMonth = b.bulan === currentMonthNum && b.tahun === currentYearNum
+            return (
+              <button
+                key={`${b.tahun}-${b.bulan}`}
+                onClick={() => setSelectedMonthIdx(idx)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  selectedMonthIdx === idx
+                    ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                    : isCurrentRunningMonth
+                    ? "bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 font-semibold"
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <span>{b.namaBulan.split(" ")[0]}</span>
+                {isCurrentRunningMonth && (
+                  <span className="ml-1 text-[9px] font-bold uppercase opacity-90">(Bulan Ini)</span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -201,14 +235,14 @@ export function KalenderVisualView({
                 onClick={() => onSelectDate(item.dateStr)}
                 className={`min-h-[95px] sm:min-h-[110px] p-1.5 border-b border-r border-border group relative transition-colors cursor-pointer hover:bg-primary/5 ${
                   item.isRutineHoliday ? "bg-destructive/[0.02]" : "bg-card"
-                } ${isToday ? "ring-2 ring-primary ring-inset" : ""}`}
+                } ${isToday ? "ring-2 ring-primary ring-inset bg-primary/[0.04]" : ""}`}
               >
                 {/* Baris Tanggal & Tombol Tambah */}
                 <div className="flex items-center justify-between mb-1">
                   <span
                     className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold ${
                       isToday
-                        ? "bg-primary text-primary-foreground shadow-xs"
+                        ? "bg-primary text-primary-foreground shadow-xs font-bold ring-2 ring-primary/30"
                         : isDayRed
                         ? "text-destructive font-bold"
                         : "text-foreground"
@@ -216,6 +250,10 @@ export function KalenderVisualView({
                   >
                     {item.dayNum}
                   </span>
+
+                  {isToday && (
+                    <span className="text-[9px] font-bold text-primary uppercase tracking-tight">Hari Ini</span>
+                  )}
 
                   <button
                     type="button"

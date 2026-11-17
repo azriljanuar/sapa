@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   CalendarDays,
   Plus,
   Settings2,
@@ -22,19 +29,39 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
+  ArrowUpDown,
 } from "lucide-react"
 import { KalenderVisualView } from "./kalender-visual-view"
 import { MatriksKaldikView } from "./matriks-kaldik-view"
 import { AgendaModal } from "./agenda-modal"
 import { PengaturanHariSekolahModal } from "./pengaturan-hari-sekolah-modal"
 import { deleteKaldikAgenda, applyTemplateKaldikKemenag } from "./actions"
+import { setSelectedSemesterCookie } from "@/lib/ta-actions"
+
+interface TahunAjaranWithSemesters {
+  id: number
+  nama: string
+  isActive: boolean
+  semester: {
+    id: number
+    nama: string
+    isActive: boolean
+  }[]
+}
 
 interface KaldikClientProps {
   summary: MatriksSemesterSummary
   allAgendas: KaldikAgenda[]
+  allTahunAjarans: TahunAjaranWithSemesters[]
+  currentSemesterId: number | null
 }
 
-export default function KaldikClient({ summary, allAgendas }: KaldikClientProps) {
+export default function KaldikClient({
+  summary,
+  allAgendas,
+  allTahunAjarans = [],
+  currentSemesterId,
+}: KaldikClientProps) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("kalender")
 
@@ -46,8 +73,28 @@ export default function KaldikClient({ summary, allAgendas }: KaldikClientProps)
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false)
   const [isPendingTemplate, startTransitionTemplate] = useTransition()
   const [isPendingDelete, startTransitionDelete] = useTransition()
+  const [isPendingSwitch, startTransitionSwitch] = useTransition()
 
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
+  // Current selected TA
+  const activeTaObj = allTahunAjarans.find((ta) => ta.id === summary.tahunAjaranId) || allTahunAjarans[0]
+  const availableSemesters = activeTaObj?.semester || []
+
+  const handlePeriodChange = (taId: number, semId?: number) => {
+    startTransitionSwitch(async () => {
+      const targetTa = allTahunAjarans.find((t) => t.id === taId)
+      const targetSem = semId
+        ? targetTa?.semester.find((s) => s.id === semId)
+        : targetTa?.semester[0]
+
+      if (targetSem) {
+        await setSelectedSemesterCookie(targetSem.id)
+      }
+
+      router.push(`/admin/kalender-pendidikan?taId=${taId}${targetSem ? `&semesterId=${targetSem.id}` : ""}`)
+    })
+  }
 
   const handleOpenAddModal = (dateStr?: string) => {
     setEditingAgenda(null)
@@ -131,9 +178,7 @@ export default function KaldikClient({ summary, allAgendas }: KaldikClientProps)
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Penanggalan akademik madrasah/pesantren • Tahun Ajaran{" "}
-            <strong className="text-foreground">{summary.tahunAjaranNama}</strong> • Semester{" "}
-            <strong className="text-foreground">{summary.semesterNama} (Aktif)</strong>
+            Penanggalan akademik madrasah/pesantren • Sesuai Tahun Ajaran dan Semester yang sedang berjalan
           </p>
         </div>
 
@@ -168,6 +213,88 @@ export default function KaldikClient({ summary, allAgendas }: KaldikClientProps)
             <Plus className="w-4 h-4" />
             <span>Tambah Agenda</span>
           </Button>
+        </div>
+      </div>
+
+      {/* Bar Pemilih Periode Akademik (Tahun Ajaran & Semester) */}
+      <div className="bg-card p-3 sm:p-4 rounded-xl border border-border shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Pemilih Tahun Ajaran */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+              Tahun Ajaran:
+            </span>
+            <Select
+              value={String(summary.tahunAjaranId)}
+              onValueChange={(val) => {
+                if (val) handlePeriodChange(parseInt(val))
+              }}
+              disabled={isPendingSwitch}
+            >
+              <SelectTrigger className="w-[140px] sm:w-[160px] h-9 text-xs sm:text-sm font-semibold">
+                <SelectValue placeholder="Pilih Tahun Ajaran" />
+              </SelectTrigger>
+              <SelectContent>
+                {allTahunAjarans.map((ta) => (
+                  <SelectItem key={ta.id} value={String(ta.id)}>
+                    <div className="flex items-center gap-1.5">
+                      <span>{ta.nama}</span>
+                      {ta.isActive && (
+                        <span className="text-[10px] text-primary font-bold">(Aktif)</span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Pemilih Semester */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+              Semester:
+            </span>
+            <Select
+              value={String(currentSemesterId || summary.semesterId || "")}
+              onValueChange={(val) => {
+                if (val) handlePeriodChange(summary.tahunAjaranId, parseInt(val))
+              }}
+              disabled={isPendingSwitch}
+            >
+              <SelectTrigger className="w-[150px] sm:w-[170px] h-9 text-xs sm:text-sm font-semibold">
+                <SelectValue placeholder="Pilih Semester" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSemesters.map((sem) => (
+                  <SelectItem key={sem.id} value={String(sem.id)}>
+                    <span>Semester {sem.nama}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Info Cepat Status Periode */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {isPendingSwitch ? (
+            <div className="flex items-center gap-1 text-primary">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Memuat periode...</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs font-medium border-border">
+                {summary.sistemHariSekolah === "ENAM_HARI"
+                  ? "6 Hari Sekolah (Senin-Sabtu)"
+                  : summary.sistemHariSekolah === "LIMA_HARI"
+                  ? "5 Hari Sekolah (Senin-Jumat)"
+                  : summary.sistemHariSekolah === "PESANTREN_JUMAT"
+                  ? "Pesantren (Libur Jumat)"
+                  : "Kustom"}
+              </Badge>
+            </div>
+          )}
         </div>
       </div>
 
@@ -236,7 +363,7 @@ export default function KaldikClient({ summary, allAgendas }: KaldikClientProps)
               <div>
                 <CardTitle className="text-lg font-bold">Daftar Agenda & Libur Kaldik</CardTitle>
                 <CardDescription className="text-xs">
-                  Seluruh agenda terdaftar pada Tahun Ajaran {summary.tahunAjaranNama}
+                  Seluruh agenda terdaftar pada Tahun Ajaran {summary.tahunAjaranNama} (Semester {summary.semesterNama})
                 </CardDescription>
               </div>
               <Button size="sm" onClick={() => handleOpenAddModal()} className="gap-1.5 self-start sm:self-auto">
@@ -248,7 +375,7 @@ export default function KaldikClient({ summary, allAgendas }: KaldikClientProps)
             <CardContent className="p-0 overflow-x-auto">
               {allAgendas.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground text-sm">
-                  Belum ada agenda yang ditambahkan. Klik tombol <strong>Template Kemenag</strong> untuk menambahkan acuan agenda otomatis atau klik <strong>Tambah Agenda</strong>.
+                  Belum ada agenda yang ditambahkan untuk Tahun Ajaran ini. Klik tombol <strong>Template Kemenag</strong> untuk menambahkan acuan agenda otomatis atau klik <strong>Tambah Agenda</strong>.
                 </div>
               ) : (
                 <table className="w-full text-xs text-left border-collapse">
