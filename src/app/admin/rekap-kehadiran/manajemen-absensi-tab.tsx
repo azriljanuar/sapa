@@ -17,6 +17,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface PengaturanAbsensiData {
   id: number
@@ -367,24 +375,24 @@ export function ManajemenAbsensiTab({
           <CardContent>
             <div className="border border-border rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
-                    <tr>
-                      <th className="px-4 py-3 font-semibold">Nama Guru</th>
-                      <th className="px-4 py-3 font-semibold text-center">Status</th>
-                      <th className="px-4 py-3 font-semibold">Jam Masuk / Pulang</th>
-                      <th className="px-4 py-3 font-semibold">Keterangan</th>
-                      <th className="px-4 py-3 font-semibold text-center">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
+                <Table className="w-full text-sm text-left">
+                  <TableHeader className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
+                    <TableRow>
+                      <TableHead className="px-4 py-3 font-semibold">Nama Guru</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-center">Status</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold">Jam Masuk / Pulang</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold">Keterangan</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-center">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="divide-y divide-border">
                     {guruList.map((g) => (
-                      <tr key={g.id} className="hover:bg-muted/40 transition-colors">
-                        <td className="px-4 py-3 font-medium text-foreground">
+                      <TableRow key={g.id} className="hover:bg-muted/40 transition-colors">
+                        <TableCell className="px-4 py-3 font-medium text-foreground">
                           {g.nama}
                           {g.nip && <div className="text-[11px] text-muted-foreground font-mono">{g.nip}</div>}
-                        </td>
-                        <td className="px-4 py-3 text-center">
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-center">
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
                               g.status === "HADIR"
@@ -400,8 +408,8 @@ export function ManajemenAbsensiTab({
                           >
                             {g.status || "Belum Absen"}
                           </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs font-mono">
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-xs font-mono">
                           {g.jamMasuk ? (
                             <span>
                               {new Date(g.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
@@ -414,11 +422,11 @@ export function ManajemenAbsensiTab({
                           ) : (
                             <span className="text-muted-foreground">-</span>
                           )}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-muted-foreground italic truncate max-w-[200px]">
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-xs text-muted-foreground italic truncate max-w-[200px]">
                           {g.keterangan || "-"}
-                        </td>
-                        <td className="px-4 py-3 text-center">
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-center">
                           <Button
                             variant="outline"
                             size="sm"
@@ -428,11 +436,11 @@ export function ManajemenAbsensiTab({
                             <Edit className="w-3.5 h-3.5 text-primary" />
                             Koreksi
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </div>
           </CardContent>

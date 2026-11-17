@@ -9,6 +9,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table"
+import {
   saveLiburMingguan,
   addLiburKondisional,
   addLiburSemester,
@@ -313,51 +321,49 @@ export function ManajemenHariLibur({
 
           {/* Tabel Libur Kondisional */}
           <div className="border border-border rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-muted-foreground uppercase bg-muted/40 border-b border-border">
-                  <tr>
-                    <th className="px-4 py-2.5 font-semibold">Tanggal</th>
-                    <th className="px-4 py-2.5 font-semibold">Nama Hari Libur</th>
-                    <th className="px-4 py-2.5 font-semibold">Keterangan</th>
-                    <th className="px-4 py-2.5 font-semibold text-center w-20">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {kondisionalList.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-6 text-center text-xs text-muted-foreground">
-                        Belum ada daftar libur kondisional yang ditambahkan.
-                      </td>
-                    </tr>
-                  ) : (
-                    kondisionalList.map((item) => (
-                      <tr key={item.id} className="hover:bg-muted/40 transition-colors">
-                        <td className="px-4 py-2.5 text-xs font-mono font-medium text-foreground">
-                          {item.tanggal ? new Date(item.tanggal).toLocaleDateString("id-ID", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }) : "-"}
-                        </td>
-                        <td className="px-4 py-2.5 text-xs font-semibold text-foreground">
-                          {item.nama}
-                        </td>
-                        <td className="px-4 py-2.5 text-xs text-muted-foreground italic">
-                          {item.keterangan || "-"}
-                        </td>
-                        <td className="px-4 py-2.5 text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(item.id, item.nama, "KONDISIONAL")}
-                            className="h-7 w-7 p-0 text-muted-foreground hover:text-rose-600"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <TableHeader className="bg-muted/40">
+                <TableRow>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase text-muted-foreground">Tanggal</TableHead>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase text-muted-foreground">Nama Hari Libur</TableHead>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase text-muted-foreground">Keterangan</TableHead>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase text-muted-foreground text-center w-20">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {kondisionalList.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="px-4 py-6 text-center text-xs text-muted-foreground">
+                      Belum ada daftar libur kondisional yang ditambahkan.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  kondisionalList.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="px-4 py-2.5 text-xs font-mono font-medium text-foreground">
+                        {item.tanggal ? new Date(item.tanggal).toLocaleDateString("id-ID", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }) : "-"}
+                      </TableCell>
+                      <TableCell className="px-4 py-2.5 text-xs font-semibold text-foreground">
+                        {item.nama}
+                      </TableCell>
+                      <TableCell className="px-4 py-2.5 text-xs text-muted-foreground italic">
+                        {item.keterangan || "-"}
+                      </TableCell>
+                      <TableCell className="px-4 py-2.5 text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(item.id, item.nama, "KONDISIONAL")}
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
@@ -454,63 +460,61 @@ export function ManajemenHariLibur({
 
           {/* Tabel Libur Semester */}
           <div className="border border-border rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-muted-foreground uppercase bg-muted/40 border-b border-border">
-                  <tr>
-                    <th className="px-4 py-2.5 font-semibold">Nama Libur</th>
-                    <th className="px-4 py-2.5 font-semibold">Rentang Tanggal</th>
-                    <th className="px-4 py-2.5 font-semibold">Durasi</th>
-                    <th className="px-4 py-2.5 font-semibold text-center w-20">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {semesterList.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-6 text-center text-xs text-muted-foreground">
-                        Belum ada rentang libur semester yang didaftarkan.
-                      </td>
-                    </tr>
-                  ) : (
-                    semesterList.map((item) => {
-                      let durasiHari = 0
-                      if (item.tanggalMulai && item.tanggalAkhir) {
-                        const m = new Date(item.tanggalMulai).getTime()
-                        const a = new Date(item.tanggalAkhir).getTime()
-                        durasiHari = Math.max(1, Math.round((a - m) / (1000 * 60 * 60 * 24)) + 1)
-                      }
-                      return (
-                        <tr key={item.id} className="hover:bg-muted/40 transition-colors">
-                          <td className="px-4 py-2.5 text-xs font-semibold text-foreground">
-                            {item.nama}
-                          </td>
-                          <td className="px-4 py-2.5 text-xs font-mono text-muted-foreground">
-                            {item.tanggalMulai ? new Date(item.tanggalMulai).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}
-                            {" s/d "}
-                            {item.tanggalAkhir ? new Date(item.tanggalAkhir).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}
-                          </td>
-                          <td className="px-4 py-2.5 text-xs">
-                            <Badge variant="outline" className="font-mono text-[11px]">
-                              {durasiHari} Hari
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-2.5 text-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(item.id, item.nama, "SEMESTER")}
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-rose-600"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </td>
-                        </tr>
-                      )
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <TableHeader className="bg-muted/40">
+                <TableRow>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase text-muted-foreground">Nama Libur</TableHead>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase text-muted-foreground">Rentang Tanggal</TableHead>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase text-muted-foreground">Durasi</TableHead>
+                  <TableHead className="px-4 py-2.5 font-semibold text-xs uppercase text-muted-foreground text-center w-20">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {semesterList.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="px-4 py-6 text-center text-xs text-muted-foreground">
+                      Belum ada rentang libur semester yang didaftarkan.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  semesterList.map((item) => {
+                    let durasiHari = 0
+                    if (item.tanggalMulai && item.tanggalAkhir) {
+                      const m = new Date(item.tanggalMulai).getTime()
+                      const a = new Date(item.tanggalAkhir).getTime()
+                      durasiHari = Math.max(1, Math.round((a - m) / (1000 * 60 * 60 * 24)) + 1)
+                    }
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell className="px-4 py-2.5 text-xs font-semibold text-foreground">
+                          {item.nama}
+                        </TableCell>
+                        <TableCell className="px-4 py-2.5 text-xs font-mono text-muted-foreground">
+                          {item.tanggalMulai ? new Date(item.tanggalMulai).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}
+                          {" s/d "}
+                          {item.tanggalAkhir ? new Date(item.tanggalAkhir).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}
+                        </TableCell>
+                        <TableCell className="px-4 py-2.5 text-xs">
+                          <Badge variant="outline" className="font-mono text-[11px]">
+                            {durasiHari} Hari
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-4 py-2.5 text-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(item.id, item.nama, "SEMESTER")}
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>

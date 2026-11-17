@@ -23,7 +23,7 @@ import {
   Radio,
   Trash2,
   Edit,
-  Table,
+  Table as TableIcon,
   Calendar,
   ListOrdered,
   Loader2,
@@ -31,6 +31,14 @@ import {
   CheckCircle2,
   ArrowUpDown,
 } from "lucide-react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { KalenderVisualView } from "./kalender-visual-view"
 import { MatriksKaldikView } from "./matriks-kaldik-view"
 import { AgendaModal } from "./agenda-modal"
@@ -332,7 +340,7 @@ export default function KaldikClient({
             <span>Kalender Visual</span>
           </TabsTrigger>
           <TabsTrigger value="matriks" className="flex items-center gap-1.5">
-            <Table className="w-4 h-4" />
+            <TableIcon className="w-4 h-4" />
             <span>Matriks Kemenag (MEB/HEB)</span>
           </TabsTrigger>
           <TabsTrigger value="agenda" className="flex items-center gap-1.5">
@@ -378,29 +386,29 @@ export default function KaldikClient({
                   Belum ada agenda yang ditambahkan untuk Tahun Ajaran ini. Klik tombol <strong>Template Kemenag</strong> untuk menambahkan acuan agenda otomatis atau klik <strong>Tambah Agenda</strong>.
                 </div>
               ) : (
-                <table className="w-full text-xs text-left border-collapse">
-                  <thead>
-                    <tr className="bg-muted/70 text-foreground font-semibold border-b border-border">
-                      <th className="py-2.5 px-3 border-r border-border w-10 text-center">No</th>
-                      <th className="py-2.5 px-3 border-r border-border min-w-[220px]">Nama Agenda</th>
-                      <th className="py-2.5 px-3 border-r border-border min-w-[130px]">Kategori</th>
-                      <th className="py-2.5 px-3 border-r border-border min-w-[180px]">Rentang Tanggal</th>
-                      <th className="py-2.5 px-3 border-r border-border text-center min-w-[100px]">Presensi RFID</th>
-                      <th className="py-2.5 px-3 border-r border-border">Keterangan</th>
-                      <th className="py-2.5 px-3 text-center w-24">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table className="w-full text-xs text-left border-collapse">
+                  <TableHeader>
+                    <TableRow className="bg-muted/70 text-foreground font-semibold border-b border-border">
+                      <TableHead className="py-2.5 px-3 border-r border-border w-10 text-center">No</TableHead>
+                      <TableHead className="py-2.5 px-3 border-r border-border min-w-[220px]">Nama Agenda</TableHead>
+                      <TableHead className="py-2.5 px-3 border-r border-border min-w-[130px]">Kategori</TableHead>
+                      <TableHead className="py-2.5 px-3 border-r border-border min-w-[180px]">Rentang Tanggal</TableHead>
+                      <TableHead className="py-2.5 px-3 border-r border-border text-center min-w-[100px]">Presensi RFID</TableHead>
+                      <TableHead className="py-2.5 px-3 border-r border-border">Keterangan</TableHead>
+                      <TableHead className="py-2.5 px-3 text-center w-24">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {allAgendas.map((item, idx) => {
                       const meta = KATEGORI_KALDIK_LABEL[item.kategori]
                       const color = item.warnaHex || meta?.defaultWarna || "#3b82f6"
 
                       return (
-                        <tr key={item.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                          <td className="py-2.5 px-3 border-r border-border text-center text-muted-foreground">
+                        <TableRow key={item.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                          <TableCell className="py-2.5 px-3 border-r border-border text-center text-muted-foreground">
                             {idx + 1}
-                          </td>
-                          <td className="py-2.5 px-3 border-r border-border">
+                          </TableCell>
+                          <TableCell className="py-2.5 px-3 border-r border-border">
                             <div className="flex items-center gap-2">
                               <span
                                 className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -413,16 +421,16 @@ export default function KaldikClient({
                                 </Badge>
                               )}
                             </div>
-                          </td>
-                          <td className="py-2.5 px-3 border-r border-border">
+                          </TableCell>
+                          <TableCell className="py-2.5 px-3 border-r border-border">
                             <span className="font-medium text-foreground">{meta?.label || item.kategori}</span>
-                          </td>
-                          <td className="py-2.5 px-3 border-r border-border font-medium text-foreground">
+                          </TableCell>
+                          <TableCell className="py-2.5 px-3 border-r border-border font-medium text-foreground">
                             {formatTanggalRange(item.tanggalMulai, item.tanggalAkhir)}
-                          </td>
-                          <td className="py-2.5 px-3 border-r border-border text-center">
+                          </TableCell>
+                          <TableCell className="py-2.5 px-3 border-r border-border text-center">
                             {item.allowAbsensiRfid ? (
-                              <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-transparent shadow-none gap-1">
+                              <Badge className="bg-primary/10 text-primary border-transparent shadow-none gap-1">
                                 <Radio className="w-3 h-3" />
                                 <span>Diizinkan</span>
                               </Badge>
@@ -431,11 +439,11 @@ export default function KaldikClient({
                                 Ditolak
                               </Badge>
                             )}
-                          </td>
-                          <td className="py-2.5 px-3 border-r border-border text-muted-foreground max-w-[220px] truncate">
+                          </TableCell>
+                          <TableCell className="py-2.5 px-3 border-r border-border text-muted-foreground max-w-[220px] truncate">
                             {item.keterangan || "-"}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
+                          </TableCell>
+                          <TableCell className="py-2.5 px-3 text-center">
                             <div className="flex items-center justify-center gap-1">
                               <Button
                                 variant="ghost"
@@ -457,12 +465,12 @@ export default function KaldikClient({
                                 <Trash2 className="w-3.5 h-3.5" />
                               </Button>
                             </div>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       )
                     })}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>

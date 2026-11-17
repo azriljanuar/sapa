@@ -6,6 +6,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table"
 import { ManajemenAbsensiTab } from "./manajemen-absensi-tab"
 
 export default function RekapKehadiranClient({ 
@@ -231,57 +239,55 @@ export default function RekapKehadiranClient({
               </div>
 
               <div className="bg-card border border-border rounded-xl shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
-                      <tr>
-                        <th className="px-5 py-3 font-semibold">No</th>
-                        <th className="px-5 py-3 font-semibold">Nama Santri</th>
-                        <th className="px-5 py-3 font-semibold">NISN</th>
-                        <th className="px-5 py-3 font-semibold text-center">Status</th>
-                        <th className="px-5 py-3 font-semibold">Jam Absen</th>
-                        <th className="px-5 py-3 font-semibold">Keterangan</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {data.data.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
-                            Tidak ada data santri di kelas ini.
-                          </td>
-                        </tr>
-                      ) : (
-                        data.data.map((santri: any, idx: number) => (
-                          <tr key={santri.id} className="hover:bg-muted/40 transition-colors">
-                            <td className="px-5 py-3 text-muted-foreground text-xs">{idx + 1}</td>
-                            <td className="px-5 py-3 font-medium text-foreground">{santri.namaLengkap}</td>
-                            <td className="px-5 py-3 text-muted-foreground text-xs">{santri.nisn || "-"}</td>
-                            <td className="px-5 py-3 text-center">
-                              {getStatusBadge(santri.status)}
-                            </td>
-                            <td className="px-5 py-3 text-xs font-mono">
-                              {santri.jamMasuk ? (
-                                <span className="text-primary font-medium">
-                                  {new Date(santri.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                                  {santri.jamPulang && (
-                                    <span className="text-muted-foreground font-normal">
-                                      {" "}— {new Date(santri.jamPulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                                    </span>
-                                  )}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </td>
-                            <td className="px-5 py-3 text-muted-foreground text-xs italic">
-                              {santri.keterangan || "-"}
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-muted-foreground">No</TableHead>
+                      <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-muted-foreground">Nama Santri</TableHead>
+                      <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-muted-foreground">NISN</TableHead>
+                      <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-muted-foreground text-center">Status</TableHead>
+                      <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-muted-foreground">Jam Absen</TableHead>
+                      <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-muted-foreground">Keterangan</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.data.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
+                          Tidak ada data santri di kelas ini.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      data.data.map((santri: any, idx: number) => (
+                        <TableRow key={santri.id}>
+                          <TableCell className="px-5 py-3 text-muted-foreground text-xs">{idx + 1}</TableCell>
+                          <TableCell className="px-5 py-3 font-medium text-foreground">{santri.namaLengkap}</TableCell>
+                          <TableCell className="px-5 py-3 text-muted-foreground text-xs">{santri.nisn || "-"}</TableCell>
+                          <TableCell className="px-5 py-3 text-center">
+                            {getStatusBadge(santri.status)}
+                          </TableCell>
+                          <TableCell className="px-5 py-3 text-xs font-mono">
+                            {santri.jamMasuk ? (
+                              <span className="text-primary font-medium">
+                                {new Date(santri.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                {santri.jamPulang && (
+                                  <span className="text-muted-foreground font-normal">
+                                    {" "}— {new Date(santri.jamPulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                  </span>
+                                )}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="px-5 py-3 text-muted-foreground text-xs italic">
+                            {santri.keterangan || "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </div>
             </div>
           ) : (
@@ -427,76 +433,74 @@ export default function RekapKehadiranClient({
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-muted-foreground uppercase bg-muted/30 border-b border-border">
-                      <tr>
-                        <th className="px-4 py-3 font-semibold">No</th>
-                        <th className="px-4 py-3 font-semibold">Nama Guru</th>
-                        <th className="px-4 py-3 font-semibold">Jadwal Mengajar Hari Ini</th>
-                        <th className="px-4 py-3 font-semibold text-center">Status</th>
-                        <th className="px-4 py-3 font-semibold">Jam Absen</th>
-                        <th className="px-4 py-3 font-semibold">Keterangan</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {!guruData.guruTerjadwal || guruData.guruTerjadwal.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-xs">
-                            Tidak ada jadwal mengajar pada hari {guruData.namaHari}.
-                          </td>
-                        </tr>
-                      ) : (
-                        guruData.guruTerjadwal.map((guru: any, idx: number) => (
-                          <tr key={guru.id} className="hover:bg-muted/40 transition-colors">
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{idx + 1}</td>
-                            <td className="px-4 py-3 font-medium text-foreground">
-                              {guru.nama}
-                              {guru.nip && <div className="text-[11px] text-muted-foreground font-mono">{guru.nip}</div>}
-                            </td>
-                            <td className="px-4 py-3 text-xs">
-                              <div className="flex flex-wrap gap-1.5">
-                                {guru.jadwal && guru.jadwal.length > 0 ? (
-                                  guru.jadwal.map((j: any, jIdx: number) => (
-                                    <span
-                                      key={jIdx}
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
-                                    >
-                                      <BookOpen className="w-3 h-3 shrink-0" />
-                                      {j.mapel} ({j.kelas}) • {j.jamMulai}-{j.jamSelesai}
-                                    </span>
-                                  ))
-                                ) : (
-                                  <span className="text-muted-foreground">-</span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {getStatusBadge(guru.status)}
-                            </td>
-                            <td className="px-4 py-3 text-xs font-mono">
-                              {guru.jamMasuk ? (
-                                <span className="text-primary font-medium">
-                                  {new Date(guru.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                                  {guru.jamPulang && (
-                                    <span className="text-muted-foreground font-normal">
-                                      {" "}— {new Date(guru.jamPulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                                    </span>
-                                  )}
-                                </span>
+                <Table>
+                  <TableHeader className="bg-muted/30">
+                    <TableRow>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">No</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">Nama Guru</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">Jadwal Mengajar Hari Ini</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground text-center">Status</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">Jam Absen</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">Keterangan</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {!guruData.guruTerjadwal || guruData.guruTerjadwal.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-xs">
+                          Tidak ada jadwal mengajar pada hari {guruData.namaHari}.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      guruData.guruTerjadwal.map((guru: any, idx: number) => (
+                        <TableRow key={guru.id}>
+                          <TableCell className="px-4 py-3 text-muted-foreground text-xs">{idx + 1}</TableCell>
+                          <TableCell className="px-4 py-3 font-medium text-foreground">
+                            {guru.nama}
+                            {guru.nip && <div className="text-[11px] text-muted-foreground font-mono">{guru.nip}</div>}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-xs">
+                            <div className="flex flex-wrap gap-1.5">
+                              {guru.jadwal && guru.jadwal.length > 0 ? (
+                                guru.jadwal.map((j: any, jIdx: number) => (
+                                  <span
+                                    key={jIdx}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
+                                  >
+                                    <BookOpen className="w-3 h-3 shrink-0" />
+                                    {j.mapel} ({j.kelas}) • {j.jamMulai}-{j.jamSelesai}
+                                  </span>
+                                ))
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs italic">
-                              {guru.keterangan || "-"}
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-center">
+                            {getStatusBadge(guru.status)}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-xs font-mono">
+                            {guru.jamMasuk ? (
+                              <span className="text-primary font-medium">
+                                {new Date(guru.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                {guru.jamPulang && (
+                                  <span className="text-muted-foreground font-normal">
+                                    {" "}— {new Date(guru.jamPulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                  </span>
+                                )}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-muted-foreground text-xs italic">
+                            {guru.keterangan || "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </div>
 
               {/* TABEL 2: GURU HADIR DI LUAR JADWAL MENGAJAR */}
@@ -520,64 +524,62 @@ export default function RekapKehadiranClient({
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-muted-foreground uppercase bg-muted/30 border-b border-border">
-                      <tr>
-                        <th className="px-4 py-3 font-semibold">No</th>
-                        <th className="px-4 py-3 font-semibold">Nama Guru</th>
-                        <th className="px-4 py-3 font-semibold text-center">Status</th>
-                        <th className="px-4 py-3 font-semibold">Jam Absen</th>
-                        <th className="px-4 py-3 font-semibold">Metode</th>
-                        <th className="px-4 py-3 font-semibold">Keterangan</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {!guruData.guruLuarJadwal || guruData.guruLuarJadwal.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-xs">
-                            Belum ada guru di luar jadwal mengajar yang melakukan presensi hari ini.
-                          </td>
-                        </tr>
-                      ) : (
-                        guruData.guruLuarJadwal.map((guru: any, idx: number) => (
-                          <tr key={guru.id} className="hover:bg-muted/40 transition-colors">
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{idx + 1}</td>
-                            <td className="px-4 py-3 font-medium text-foreground">
-                              {guru.nama}
-                              {guru.nip && <div className="text-[11px] text-muted-foreground font-mono">{guru.nip}</div>}
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {getStatusBadge(guru.status)}
-                            </td>
-                            <td className="px-4 py-3 text-xs font-mono">
-                              {guru.jamMasuk ? (
-                                <span className="text-primary font-medium">
-                                  {new Date(guru.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                                  {guru.jamPulang && (
-                                    <span className="text-muted-foreground font-normal">
-                                      {" "}— {new Date(guru.jamPulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                                    </span>
-                                  )}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-xs">
-                              <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground font-semibold text-[10px]">
-                                {guru.metode || "RFID"}
+                <Table>
+                  <TableHeader className="bg-muted/30">
+                    <TableRow>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">No</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">Nama Guru</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground text-center">Status</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">Jam Absen</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">Metode</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-muted-foreground">Keterangan</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {!guruData.guruLuarJadwal || guruData.guruLuarJadwal.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-xs">
+                          Belum ada guru di luar jadwal mengajar yang melakukan presensi hari ini.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      guruData.guruLuarJadwal.map((guru: any, idx: number) => (
+                        <TableRow key={guru.id}>
+                          <TableCell className="px-4 py-3 text-muted-foreground text-xs">{idx + 1}</TableCell>
+                          <TableCell className="px-4 py-3 font-medium text-foreground">
+                            {guru.nama}
+                            {guru.nip && <div className="text-[11px] text-muted-foreground font-mono">{guru.nip}</div>}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-center">
+                            {getStatusBadge(guru.status)}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-xs font-mono">
+                            {guru.jamMasuk ? (
+                              <span className="text-primary font-medium">
+                                {new Date(guru.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                {guru.jamPulang && (
+                                  <span className="text-muted-foreground font-normal">
+                                    {" "}— {new Date(guru.jamPulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                  </span>
+                                )}
                               </span>
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs italic">
-                              {guru.keterangan || "Hadir (di luar jadwal tatap muka)"}
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-xs">
+                            <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground font-semibold text-[10px]">
+                              {guru.metode || "RFID"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-muted-foreground text-xs italic">
+                            {guru.keterangan || "Hadir (di luar jadwal tatap muka)"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </div>
 
               {/* SEKSI COLLAPSIBLE: GURU TANPA JADWAL YANG BELUM ABSEN */}

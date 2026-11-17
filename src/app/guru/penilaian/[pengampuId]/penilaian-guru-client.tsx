@@ -7,6 +7,14 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table"
+import {
   simpanBatchNilaiSumatif,
   simpanBatchNilaiPAS,
   toggleRilisNilaiMapel
@@ -377,147 +385,145 @@ function TabInputSumatif({
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-muted/30 border-b border-border text-center">
-                <th className="text-left px-3 py-2.5 text-muted-foreground font-semibold w-8">No</th>
-                <th className="text-left px-3 py-2.5 text-muted-foreground font-semibold min-w-[150px]">Nama Santri</th>
-                
-                {/* Kolom Kehadiran */}
-                {modeKehadiran === "rincian" ? (
-                  <th className="px-2 py-2.5 text-muted-foreground font-semibold min-w-[240px]">
-                    <div className="flex items-center justify-center gap-1 text-[11px]">
-                      <span>Kehadiran (H / S / I / A)</span>
-                      <span className="text-[10px] text-primary font-normal">→ Konversi</span>
-                    </div>
-                  </th>
-                ) : (
-                  <th className="px-2.5 py-2.5 text-muted-foreground font-semibold w-28">Nilai Kehadiran</th>
-                )}
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow className="text-center">
+              <TableHead className="text-left px-3 py-2.5 text-muted-foreground font-semibold w-8">No</TableHead>
+              <TableHead className="text-left px-3 py-2.5 text-muted-foreground font-semibold min-w-[150px]">Nama Santri</TableHead>
+              
+              {/* Kolom Kehadiran */}
+              {modeKehadiran === "rincian" ? (
+                <TableHead className="px-2 py-2.5 text-muted-foreground font-semibold min-w-[240px] text-center">
+                  <div className="flex items-center justify-center gap-1 text-[11px]">
+                    <span>Kehadiran (H / S / I / A)</span>
+                    <span className="text-[10px] text-primary font-normal">→ Konversi</span>
+                  </div>
+                </TableHead>
+              ) : (
+                <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold w-28 text-center">Nilai Kehadiran</TableHead>
+              )}
 
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold w-24">Kurikuler</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold w-24">Tes Sumatif</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold w-24 bg-amber-500/10 text-amber-800">Rata-rata</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {santriList.map((s, i) => {
-                const khScore = getCalculatedKh(s.id)
-                const ku = parseNilai(getKu(s.id))
-                const tes = parseNilai(getTes(s.id))
-                const rata = hitungRataSumatif(khScore, ku, tes)
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold w-24 text-center">Kurikuler</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold w-24 text-center">Tes Sumatif</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold w-24 bg-amber-500/10 text-amber-800 text-center">Rata-rata</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {santriList.map((s, i) => {
+              const khScore = getCalculatedKh(s.id)
+              const ku = parseNilai(getKu(s.id))
+              const tes = parseNilai(getTes(s.id))
+              const rata = hitungRataSumatif(khScore, ku, tes)
 
-                return (
-                  <tr key={s.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                    <td className="px-3 py-2 font-medium text-foreground">
-                      <div className="truncate max-w-[200px]">{s.namaLengkap}</div>
-                      {s.nisn && <div className="text-[10px] text-muted-foreground">{s.nisn}</div>}
-                    </td>
+              return (
+                <TableRow key={s.id}>
+                  <TableCell className="px-3 py-2 text-muted-foreground">{i + 1}</TableCell>
+                  <TableCell className="px-3 py-2 font-medium text-foreground">
+                    <div className="truncate max-w-[200px]">{s.namaLengkap}</div>
+                    {s.nisn && <div className="text-[10px] text-muted-foreground">{s.nisn}</div>}
+                  </TableCell>
 
-                    {/* Cell Kehadiran */}
-                    {modeKehadiran === "rincian" ? (
-                      <td className="px-2 py-2">
-                        <div className="flex items-center justify-center gap-1.5 flex-nowrap">
-                          {/* Hadir */}
-                          <div className="flex items-center gap-0.5" title="Hadir (bobot 100)">
-                            <span className="text-[10px] font-bold text-emerald-600">H:</span>
-                            <input
-                              type="number" min={0} max={15}
-                              placeholder="5"
-                              value={getH(s.id)}
-                              onChange={e => setLocalHadir(prev => ({ ...prev, [s.id]: e.target.value }))}
-                              className="w-10 border border-input bg-background text-foreground rounded px-1 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
-                            />
-                          </div>
-
-                          {/* Sakit */}
-                          <div className="flex items-center gap-0.5" title="Sakit (bobot 80)">
-                            <span className="text-[10px] font-bold text-amber-600">S:</span>
-                            <input
-                              type="number" min={0} max={15}
-                              placeholder="0"
-                              value={getS(s.id)}
-                              onChange={e => setLocalSakit(prev => ({ ...prev, [s.id]: e.target.value }))}
-                              className="w-9 border border-input bg-background text-foreground rounded px-1 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
-                            />
-                          </div>
-
-                          {/* Izin */}
-                          <div className="flex items-center gap-0.5" title="Izin (bobot 70)">
-                            <span className="text-[10px] font-bold text-blue-600">I:</span>
-                            <input
-                              type="number" min={0} max={15}
-                              placeholder="0"
-                              value={getI(s.id)}
-                              onChange={e => setLocalIzin(prev => ({ ...prev, [s.id]: e.target.value }))}
-                              className="w-9 border border-input bg-background text-foreground rounded px-1 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
-                            />
-                          </div>
-
-                          {/* Alfa */}
-                          <div className="flex items-center gap-0.5" title="Alfa (bobot 0)">
-                            <span className="text-[10px] font-bold text-rose-600">A:</span>
-                            <input
-                              type="number" min={0} max={15}
-                              placeholder="0"
-                              value={getA(s.id)}
-                              onChange={e => setLocalAlfa(prev => ({ ...prev, [s.id]: e.target.value }))}
-                              className="w-9 border border-input bg-background text-foreground rounded px-1 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
-                            />
-                          </div>
-
-                          {/* Hasil Konversi */}
-                          <div className="ml-1 px-1.5 py-0.5 rounded text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 min-w-10 text-center" title="Hasil konversi nilai kehadiran">
-                            {fmt(khScore)}
-                          </div>
+                  {/* Cell Kehadiran */}
+                  {modeKehadiran === "rincian" ? (
+                    <TableCell className="px-2 py-2">
+                      <div className="flex items-center justify-center gap-1.5 flex-nowrap">
+                        {/* Hadir */}
+                        <div className="flex items-center gap-0.5" title="Hadir (bobot 100)">
+                          <span className="text-[10px] font-bold text-emerald-600">H:</span>
+                          <input
+                            type="number" min={0} max={15}
+                            placeholder="5"
+                            value={getH(s.id)}
+                            onChange={e => setLocalHadir(prev => ({ ...prev, [s.id]: e.target.value }))}
+                            className="w-10 border border-input bg-background text-foreground rounded px-1 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
+                          />
                         </div>
-                      </td>
-                    ) : (
-                      <td className="px-2.5 py-2 text-center">
-                        <input
-                          type="number" min={0} max={100} step={0.1}
-                          placeholder="0-100"
-                          value={getDirectKh(s.id)}
-                          onChange={e => setLocalDirectKh(prev => ({ ...prev, [s.id]: e.target.value }))}
-                          className="w-20 border border-input bg-background text-foreground rounded-lg px-2 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
-                        />
-                      </td>
-                    )}
 
-                    {/* Kurikuler */}
-                    <td className="px-2.5 py-2 text-center">
+                        {/* Sakit */}
+                        <div className="flex items-center gap-0.5" title="Sakit (bobot 80)">
+                          <span className="text-[10px] font-bold text-amber-600">S:</span>
+                          <input
+                            type="number" min={0} max={15}
+                            placeholder="0"
+                            value={getS(s.id)}
+                            onChange={e => setLocalSakit(prev => ({ ...prev, [s.id]: e.target.value }))}
+                            className="w-9 border border-input bg-background text-foreground rounded px-1 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
+                          />
+                        </div>
+
+                        {/* Izin */}
+                        <div className="flex items-center gap-0.5" title="Izin (bobot 70)">
+                          <span className="text-[10px] font-bold text-blue-600">I:</span>
+                          <input
+                            type="number" min={0} max={15}
+                            placeholder="0"
+                            value={getI(s.id)}
+                            onChange={e => setLocalIzin(prev => ({ ...prev, [s.id]: e.target.value }))}
+                            className="w-9 border border-input bg-background text-foreground rounded px-1 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
+                          />
+                        </div>
+
+                        {/* Alfa */}
+                        <div className="flex items-center gap-0.5" title="Alfa (bobot 0)">
+                          <span className="text-[10px] font-bold text-rose-600">A:</span>
+                          <input
+                            type="number" min={0} max={15}
+                            placeholder="0"
+                            value={getA(s.id)}
+                            onChange={e => setLocalAlfa(prev => ({ ...prev, [s.id]: e.target.value }))}
+                            className="w-9 border border-input bg-background text-foreground rounded px-1 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
+                          />
+                        </div>
+
+                        {/* Hasil Konversi */}
+                        <div className="ml-1 px-1.5 py-0.5 rounded text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 min-w-10 text-center" title="Hasil konversi nilai kehadiran">
+                          {fmt(khScore)}
+                        </div>
+                      </div>
+                    </TableCell>
+                  ) : (
+                    <TableCell className="px-2.5 py-2 text-center">
                       <input
                         type="number" min={0} max={100} step={0.1}
                         placeholder="0-100"
-                        value={getKu(s.id)}
-                        onChange={e => setLocalKu(prev => ({ ...prev, [s.id]: e.target.value }))}
+                        value={getDirectKh(s.id)}
+                        onChange={e => setLocalDirectKh(prev => ({ ...prev, [s.id]: e.target.value }))}
                         className="w-20 border border-input bg-background text-foreground rounded-lg px-2 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
                       />
-                    </td>
+                    </TableCell>
+                  )}
 
-                    {/* Tes Sumatif */}
-                    <td className="px-2.5 py-2 text-center">
-                      <input
-                        type="number" min={0} max={100} step={0.1}
-                        placeholder="0-100"
-                        value={getTes(s.id)}
-                        onChange={e => setLocalTes(prev => ({ ...prev, [s.id]: e.target.value }))}
-                        className="w-20 border border-input bg-background text-foreground rounded-lg px-2 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
-                      />
-                    </td>
+                  {/* Kurikuler */}
+                  <TableCell className="px-2.5 py-2 text-center">
+                    <input
+                      type="number" min={0} max={100} step={0.1}
+                      placeholder="0-100"
+                      value={getKu(s.id)}
+                      onChange={e => setLocalKu(prev => ({ ...prev, [s.id]: e.target.value }))}
+                      className="w-20 border border-input bg-background text-foreground rounded-lg px-2 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
+                    />
+                  </TableCell>
 
-                    {/* Rata-rata Sumatif */}
-                    <td className="px-2.5 py-2 text-center font-bold bg-amber-500/10 text-amber-900">
-                      {fmt(rata)}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                  {/* Tes Sumatif */}
+                  <TableCell className="px-2.5 py-2 text-center">
+                    <input
+                      type="number" min={0} max={100} step={0.1}
+                      placeholder="0-100"
+                      value={getTes(s.id)}
+                      onChange={e => setLocalTes(prev => ({ ...prev, [s.id]: e.target.value }))}
+                      className="w-20 border border-input bg-background text-foreground rounded-lg px-2 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
+                    />
+                  </TableCell>
+
+                  {/* Rata-rata Sumatif */}
+                  <TableCell className="px-2.5 py-2 text-center font-bold bg-amber-500/10 text-amber-900">
+                    {fmt(rata)}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
 
         <div className="px-4 py-2.5 bg-muted/30 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between text-[10px] text-muted-foreground gap-2">
           <span>Formula Nilai Sumatif = (Kehadiran × 60%) + (Kurikuler × 20%) + (Tes Sumatif × 20%)</span>
@@ -599,52 +605,50 @@ function TabInputPAS({
             Simpan Semua
           </button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-muted/30 border-b border-border text-center">
-                <th className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold w-8">No</th>
-                <th className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">Nama Santri</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold w-32 bg-amber-500/10 text-amber-800">Nilai PAS</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold w-24">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {santriList.map((s, i) => {
-                const nilaiStr = getPAS(s.id)
-                const nilai = parseNilai(nilaiStr)
-                const lulus = nilai !== null && nilai >= kkm
-                return (
-                  <tr key={s.id} className={`transition-colors ${nilai !== null && !lulus ? "bg-destructive/5" : "hover:bg-muted/30"}`}>
-                    <td className="px-3.5 py-2.5 text-muted-foreground">{i + 1}</td>
-                    <td className="px-3.5 py-2.5 font-medium text-foreground">
-                      {s.namaLengkap}
-                      {s.nisn && <div className="text-[10px] text-muted-foreground">{s.nisn}</div>}
-                    </td>
-                    <td className="px-2.5 py-2.5 text-center bg-amber-500/5">
-                      <input
-                        type="number" min={0} max={100} step={0.1}
-                        placeholder="0-100"
-                        value={getPAS(s.id)}
-                        onChange={e => setLocalPAS(prev => ({ ...prev, [s.id]: e.target.value }))}
-                        className="w-24 border border-input bg-background text-foreground rounded-lg px-2 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
-                      />
-                    </td>
-                    <td className="px-2.5 py-2.5 text-center">
-                      {nilai === null ? (
-                        <span className="text-muted-foreground text-[10px]">Belum diisi</span>
-                      ) : lulus ? (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-primary/10 text-primary">Lulus</span>
-                      ) : (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-destructive/10 text-destructive">Remedial</span>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow className="text-center">
+              <TableHead className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold w-8">No</TableHead>
+              <TableHead className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">Nama Santri</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold w-32 bg-amber-500/10 text-amber-800 text-center">Nilai PAS</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold w-24 text-center">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {santriList.map((s, i) => {
+              const nilaiStr = getPAS(s.id)
+              const nilai = parseNilai(nilaiStr)
+              const lulus = nilai !== null && nilai >= kkm
+              return (
+                <TableRow key={s.id} className={nilai !== null && !lulus ? "bg-destructive/5" : undefined}>
+                  <TableCell className="px-3.5 py-2.5 text-muted-foreground">{i + 1}</TableCell>
+                  <TableCell className="px-3.5 py-2.5 font-medium text-foreground">
+                    {s.namaLengkap}
+                    {s.nisn && <div className="text-[10px] text-muted-foreground">{s.nisn}</div>}
+                  </TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center bg-amber-500/5">
+                    <input
+                      type="number" min={0} max={100} step={0.1}
+                      placeholder="0-100"
+                      value={getPAS(s.id)}
+                      onChange={e => setLocalPAS(prev => ({ ...prev, [s.id]: e.target.value }))}
+                      className="w-24 border border-input bg-background text-foreground rounded-lg px-2 py-1 text-center text-xs font-semibold focus:ring-1 focus:ring-ring outline-none"
+                    />
+                  </TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center">
+                    {nilai === null ? (
+                      <span className="text-muted-foreground text-[10px]">Belum diisi</span>
+                    ) : lulus ? (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-primary/10 text-primary">Lulus</span>
+                    ) : (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-destructive/10 text-destructive">Remedial</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
       </div>
     </div>
   )
@@ -709,68 +713,66 @@ function TabRekap({
             KKM: <strong className="text-primary">{kkm}</strong>
           </span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-muted/30 border-b border-border text-center">
-                <th className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">No</th>
-                <th className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">Nama Santri</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">S1</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">S2</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">S3</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">Rata Sumatif</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">PAS</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold bg-amber-500/10 text-amber-800">Nilai Akhir</th>
-                <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {santriList.map((s, i) => {
-                const s1 = (() => {
-                  const ns = pengampu.nilaiSumatif.find(n => n.santriId === s.id && n.sumatifKe === 1)
-                  const kh = ns?.nilaiKehadiran ?? hitungNilaiKehadiranDariJurnal(pengampu.jurnalMengajar, s.id, 1).nilai
-                  return hitungRataSumatif(kh, ns?.nilaiKurikuler ?? null, ns?.nilaiTesSumatif ?? null)
-                })()
-                const s2 = (() => {
-                  const ns = pengampu.nilaiSumatif.find(n => n.santriId === s.id && n.sumatifKe === 2)
-                  const kh = ns?.nilaiKehadiran ?? hitungNilaiKehadiranDariJurnal(pengampu.jurnalMengajar, s.id, 2).nilai
-                  return hitungRataSumatif(kh, ns?.nilaiKurikuler ?? null, ns?.nilaiTesSumatif ?? null)
-                })()
-                const s3 = (() => {
-                  const ns = pengampu.nilaiSumatif.find(n => n.santriId === s.id && n.sumatifKe === 3)
-                  const kh = ns?.nilaiKehadiran ?? hitungNilaiKehadiranDariJurnal(pengampu.jurnalMengajar, s.id, 3).nilai
-                  return hitungRataSumatif(kh, ns?.nilaiKurikuler ?? null, ns?.nilaiTesSumatif ?? null)
-                })()
-                const rata = getRataAllSumatif(pengampu, s.id)
-                const pas = pengampu.nilaiPAS.find(n => n.santriId === s.id)?.nilai ?? null
-                const nilaiAkhir = getNilaiAkhir(rata, pas)
-                const lulus = nilaiAkhir !== null && nilaiAkhir >= kkm
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow className="text-center">
+              <TableHead className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">No</TableHead>
+              <TableHead className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">Nama Santri</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">S1</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">S2</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">S3</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">Rata Sumatif</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">PAS</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold bg-amber-500/10 text-amber-800 text-center">Nilai Akhir</TableHead>
+              <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {santriList.map((s, i) => {
+              const s1 = (() => {
+                const ns = pengampu.nilaiSumatif.find(n => n.santriId === s.id && n.sumatifKe === 1)
+                const kh = ns?.nilaiKehadiran ?? hitungNilaiKehadiranDariJurnal(pengampu.jurnalMengajar, s.id, 1).nilai
+                return hitungRataSumatif(kh, ns?.nilaiKurikuler ?? null, ns?.nilaiTesSumatif ?? null)
+              })()
+              const s2 = (() => {
+                const ns = pengampu.nilaiSumatif.find(n => n.santriId === s.id && n.sumatifKe === 2)
+                const kh = ns?.nilaiKehadiran ?? hitungNilaiKehadiranDariJurnal(pengampu.jurnalMengajar, s.id, 2).nilai
+                return hitungRataSumatif(kh, ns?.nilaiKurikuler ?? null, ns?.nilaiTesSumatif ?? null)
+              })()
+              const s3 = (() => {
+                const ns = pengampu.nilaiSumatif.find(n => n.santriId === s.id && n.sumatifKe === 3)
+                const kh = ns?.nilaiKehadiran ?? hitungNilaiKehadiranDariJurnal(pengampu.jurnalMengajar, s.id, 3).nilai
+                return hitungRataSumatif(kh, ns?.nilaiKurikuler ?? null, ns?.nilaiTesSumatif ?? null)
+              })()
+              const rata = getRataAllSumatif(pengampu, s.id)
+              const pas = pengampu.nilaiPAS.find(n => n.santriId === s.id)?.nilai ?? null
+              const nilaiAkhir = getNilaiAkhir(rata, pas)
+              const lulus = nilaiAkhir !== null && nilaiAkhir >= kkm
 
-                return (
-                  <tr key={s.id} className={`transition-colors ${nilaiAkhir !== null && !lulus ? "bg-destructive/5" : "hover:bg-muted/40"}`}>
-                    <td className="px-3.5 py-2.5 text-muted-foreground">{i + 1}</td>
-                    <td className="px-3.5 py-2.5 font-medium text-foreground">{s.namaLengkap}</td>
-                    <td className="px-2.5 py-2.5 text-center text-muted-foreground">{fmt(s1)}</td>
-                    <td className="px-2.5 py-2.5 text-center text-muted-foreground">{fmt(s2)}</td>
-                    <td className="px-2.5 py-2.5 text-center text-muted-foreground">{fmt(s3)}</td>
-                    <td className="px-2.5 py-2.5 text-center font-medium text-foreground">{fmt(rata)}</td>
-                    <td className="px-2.5 py-2.5 text-center text-muted-foreground">{fmt(pas)}</td>
-                    <td className="px-2.5 py-2.5 text-center font-bold bg-amber-500/10 text-amber-900">{fmt(nilaiAkhir)}</td>
-                    <td className="px-2.5 py-2.5 text-center">
-                      {nilaiAkhir === null ? (
-                        <span className="text-muted-foreground text-[10px]">Belum Lengkap</span>
-                      ) : lulus ? (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-primary/10 text-primary">Lulus</span>
-                      ) : (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-destructive/10 text-destructive">Remedial</span>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+              return (
+                <TableRow key={s.id} className={nilaiAkhir !== null && !lulus ? "bg-destructive/5" : undefined}>
+                  <TableCell className="px-3.5 py-2.5 text-muted-foreground">{i + 1}</TableCell>
+                  <TableCell className="px-3.5 py-2.5 font-medium text-foreground">{s.namaLengkap}</TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center text-muted-foreground">{fmt(s1)}</TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center text-muted-foreground">{fmt(s2)}</TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center text-muted-foreground">{fmt(s3)}</TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center font-medium text-foreground">{fmt(rata)}</TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center text-muted-foreground">{fmt(pas)}</TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center font-bold bg-amber-500/10 text-amber-900">{fmt(nilaiAkhir)}</TableCell>
+                  <TableCell className="px-2.5 py-2.5 text-center">
+                    {nilaiAkhir === null ? (
+                      <span className="text-muted-foreground text-[10px]">Belum Lengkap</span>
+                    ) : lulus ? (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-primary/10 text-primary">Lulus</span>
+                    ) : (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-destructive/10 text-destructive">Remedial</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

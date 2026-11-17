@@ -2,6 +2,14 @@
 
 import { useState, useTransition } from "react"
 import { BarChart2, Settings2, Save, Loader2, CheckCircle2, AlertCircle, TrendingUp, Eye, EyeOff, Globe } from "lucide-react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { toggleRilisNilaiPengampu, toggleRilisSemuaNilaiSemester } from "./actions"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -224,21 +232,21 @@ function TabRekapNilai({ pengampuList, kelasList, semesterId }: {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-muted/30 border-b border-border text-center">
-                  <th className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">No</th>
-                  <th className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">Nama Santri</th>
-                  <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">S1</th>
-                  <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">S2</th>
-                  <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">S3</th>
-                  <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">Rata Sumatif</th>
-                  <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">PAS</th>
-                  <th className="px-2.5 py-2.5 text-muted-foreground font-semibold bg-amber-500/10 text-amber-800">Nilai Akhir</th>
-                  <th className="px-2.5 py-2.5 text-muted-foreground font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <Table className="w-full text-xs">
+              <TableHeader>
+                <TableRow className="bg-muted/30 border-b border-border text-center">
+                  <TableHead className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">No</TableHead>
+                  <TableHead className="text-left px-3.5 py-2.5 text-muted-foreground font-semibold">Nama Santri</TableHead>
+                  <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">S1</TableHead>
+                  <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">S2</TableHead>
+                  <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">S3</TableHead>
+                  <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">Rata Sumatif</TableHead>
+                  <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">PAS</TableHead>
+                  <TableHead className="px-2.5 py-2.5 font-semibold bg-amber-500/10 text-amber-800 text-center">Nilai Akhir</TableHead>
+                  <TableHead className="px-2.5 py-2.5 text-muted-foreground font-semibold text-center">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-border">
                 {santriList.map((s, i) => {
                   const s1 = (() => {
                     const ns = pengampu.nilaiSumatif.find(n => n.santriId === s.id && n.sumatifKe === 1)
@@ -261,19 +269,19 @@ function TabRekapNilai({ pengampuList, kelasList, semesterId }: {
                   const lulus = nilaiAkhir !== null && nilaiAkhir >= kkm
 
                   return (
-                    <tr key={s.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-3.5 py-2 text-muted-foreground">{i + 1}</td>
-                      <td className="px-3.5 py-2 font-medium text-foreground">
+                    <TableRow key={s.id} className="hover:bg-muted/30 transition-colors">
+                      <TableCell className="px-3.5 py-2 text-muted-foreground">{i + 1}</TableCell>
+                      <TableCell className="px-3.5 py-2 font-medium text-foreground">
                         {s.namaLengkap}
                         {s.nisn && <div className="text-[10px] text-muted-foreground">{s.nisn}</div>}
-                      </td>
-                      <td className="px-2.5 py-2 text-center text-muted-foreground">{fmt(s1)}</td>
-                      <td className="px-2.5 py-2 text-center text-muted-foreground">{fmt(s2)}</td>
-                      <td className="px-2.5 py-2 text-center text-muted-foreground">{fmt(s3)}</td>
-                      <td className="px-2.5 py-2 text-center font-medium text-foreground">{fmt(rata)}</td>
-                      <td className="px-2.5 py-2 text-center text-muted-foreground">{fmt(pas)}</td>
-                      <td className="px-2.5 py-2 text-center font-bold bg-amber-500/10 text-amber-900">{fmt(nilaiAkhir)}</td>
-                      <td className="px-2.5 py-2 text-center">
+                      </TableCell>
+                      <TableCell className="px-2.5 py-2 text-center text-muted-foreground">{fmt(s1)}</TableCell>
+                      <TableCell className="px-2.5 py-2 text-center text-muted-foreground">{fmt(s2)}</TableCell>
+                      <TableCell className="px-2.5 py-2 text-center text-muted-foreground">{fmt(s3)}</TableCell>
+                      <TableCell className="px-2.5 py-2 text-center font-medium text-foreground">{fmt(rata)}</TableCell>
+                      <TableCell className="px-2.5 py-2 text-center text-muted-foreground">{fmt(pas)}</TableCell>
+                      <TableCell className="px-2.5 py-2 text-center font-bold bg-amber-500/10 text-amber-900">{fmt(nilaiAkhir)}</TableCell>
+                      <TableCell className="px-2.5 py-2 text-center">
                         {nilaiAkhir === null ? (
                           <span className="text-muted-foreground text-[10px]">Belum Lengkap</span>
                         ) : lulus ? (
@@ -281,12 +289,12 @@ function TabRekapNilai({ pengampuList, kelasList, semesterId }: {
                         ) : (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-destructive/10 text-destructive">Remedial</span>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}

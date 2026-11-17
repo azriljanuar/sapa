@@ -16,6 +16,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { uploadTemplateAction, getTemplateAction, getGuruListAction, getSantriListAction } from "./actions"
 
 export function KartuIdentitasClient() {
@@ -287,28 +295,28 @@ export function KartuIdentitasClient() {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-muted-foreground">
-                  <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
-                    <tr>
-                      <th className="px-4 py-3">Nama Guru</th>
-                      <th className="px-4 py-3">NIP/NIK</th>
-                      <th className="px-4 py-3 text-right">Aksi Unduh</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table className="w-full text-sm text-left text-muted-foreground">
+                  <TableHeader className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
+                    <TableRow>
+                      <TableHead className="px-4 py-3">Nama Guru</TableHead>
+                      <TableHead className="px-4 py-3">NIP/NIK</TableHead>
+                      <TableHead className="px-4 py-3 text-right">Aksi Unduh</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {guruList.map(g => (
-                      <tr key={g.id} className="border-b border-border hover:bg-muted/50">
-                        <td className="px-4 py-3 font-medium text-foreground">{g.nama}</td>
-                        <td className="px-4 py-3">{g.nip || "-"}</td>
-                        <td className="px-4 py-3 text-right">
+                      <TableRow key={g.id} className="border-b border-border hover:bg-muted/50">
+                        <TableCell className="px-4 py-3 font-medium text-foreground">{g.nama}</TableCell>
+                        <TableCell className="px-4 py-3">{g.nip || "-"}</TableCell>
+                        <TableCell className="px-4 py-3 text-right">
                           <Button size="sm" variant="outline" onClick={() => setPreviewUser({ user: g, tipe: "GURU" })}>
                             <Eye className="size-4 mr-2" /> Preview & Cetak
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
@@ -323,28 +331,28 @@ export function KartuIdentitasClient() {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-muted-foreground">
-                  <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
-                    <tr>
-                      <th className="px-4 py-3">Nama Santri</th>
-                      <th className="px-4 py-3">NISN</th>
-                      <th className="px-4 py-3 text-right">Aksi Unduh</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table className="w-full text-sm text-left text-muted-foreground">
+                  <TableHeader className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
+                    <TableRow>
+                      <TableHead className="px-4 py-3">Nama Santri</TableHead>
+                      <TableHead className="px-4 py-3">NISN</TableHead>
+                      <TableHead className="px-4 py-3 text-right">Aksi Unduh</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {santriList.map(s => (
-                      <tr key={s.id} className="border-b border-border hover:bg-muted/50">
-                        <td className="px-4 py-3 font-medium text-foreground">{s.namaLengkap}</td>
-                        <td className="px-4 py-3">{s.nisn || "-"}</td>
-                        <td className="px-4 py-3 text-right">
+                      <TableRow key={s.id} className="border-b border-border hover:bg-muted/50">
+                        <TableCell className="px-4 py-3 font-medium text-foreground">{s.namaLengkap}</TableCell>
+                        <TableCell className="px-4 py-3">{s.nisn || "-"}</TableCell>
+                        <TableCell className="px-4 py-3 text-right">
                           <Button size="sm" variant="outline" onClick={() => setPreviewUser({ user: s, tipe: "SANTRI" })}>
                             <Eye className="size-4 mr-2" /> Preview & Cetak
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>

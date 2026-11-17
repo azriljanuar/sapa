@@ -9,6 +9,14 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
 type KelasItem = {
@@ -394,160 +402,158 @@ export function WaliRekapClient({
         </div>
 
         {error && (
-          <div className="p-4 bg-rose-500/10 border-b border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs">
+          <div className="p-4 bg-destructive/10 border-b border-destructive/20 text-destructive text-xs">
             {error}
           </div>
         )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider">
-              <tr>
-                <th className="py-3 px-4 w-12 text-center">No</th>
-                <th className="py-3 px-4 w-32">NISN</th>
-                <th className="py-3 px-4">Nama Lengkap Santri</th>
-                <th className="py-3 px-4 w-40 text-center">Status Kehadiran</th>
-                <th className="py-3 px-4 w-32">Jam Absen</th>
-                <th className="py-3 px-4 w-48">Keterangan</th>
-                <th className="py-3 px-4 w-48 text-right print:hidden">Aksi Wali Kelas</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-muted-foreground">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
-                    Memuat data presensi santri...
-                  </td>
-                </tr>
-              ) : filteredSantri.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-muted-foreground">
-                    Tidak ada data santri yang cocok dengan filter.
-                  </td>
-                </tr>
-              ) : (
-                filteredSantri.map((santri, idx) => {
-                  const isSaving = savingId === santri.id
+        <Table>
+          <TableHeader className="bg-muted/50">
+            <TableRow>
+              <TableHead className="py-3 px-4 w-12 text-center font-semibold text-xs uppercase text-muted-foreground">No</TableHead>
+              <TableHead className="py-3 px-4 w-32 font-semibold text-xs uppercase text-muted-foreground">NISN</TableHead>
+              <TableHead className="py-3 px-4 font-semibold text-xs uppercase text-muted-foreground">Nama Lengkap Santri</TableHead>
+              <TableHead className="py-3 px-4 w-40 text-center font-semibold text-xs uppercase text-muted-foreground">Status Kehadiran</TableHead>
+              <TableHead className="py-3 px-4 w-32 font-semibold text-xs uppercase text-muted-foreground">Jam Absen</TableHead>
+              <TableHead className="py-3 px-4 w-48 font-semibold text-xs uppercase text-muted-foreground">Keterangan</TableHead>
+              <TableHead className="py-3 px-4 w-48 text-right print:hidden font-semibold text-xs uppercase text-muted-foreground">Aksi Wali Kelas</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
+                  <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+                  Memuat data presensi santri...
+                </TableCell>
+              </TableRow>
+            ) : filteredSantri.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
+                  Tidak ada data santri yang cocok dengan filter.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredSantri.map((santri, idx) => {
+                const isSaving = savingId === santri.id
 
-                  return (
-                    <tr key={santri.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="py-3 px-4 text-center font-medium text-muted-foreground">
-                        {idx + 1}
-                      </td>
-                      <td className="py-3 px-4 font-mono font-medium text-foreground">
-                        {santri.nisn}
-                      </td>
-                      <td className="py-3 px-4 font-semibold text-foreground">
-                        {santri.namaLengkap}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {santri.status === "HADIR" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-primary/10 text-primary">
-                            <CheckCircle2 className="w-3 h-3" /> Hadir
-                          </span>
-                        ) : santri.status === "TERLAMBAT" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-amber-500/15 text-amber-700 dark:text-amber-400">
-                            <Clock className="w-3 h-3" /> Terlambat
-                          </span>
-                        ) : santri.status === "SAKIT" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-orange-500/10 text-orange-600 dark:text-orange-400">
-                            <AlertCircle className="w-3 h-3" /> Sakit
-                          </span>
-                        ) : santri.status === "IZIN" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                            <Clock className="w-3 h-3" /> Izin
-                          </span>
-                        ) : santri.status === "ALPA" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-destructive/10 text-destructive">
-                            <AlertCircle className="w-3 h-3" /> Alpa
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-muted text-muted-foreground">
-                            Belum Presensi
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 font-mono text-[11px]">
-                        {santri.jamMasuk ? (
-                          <span className="text-primary font-medium">
-                            {new Date(santri.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                            {santri.jamPulang && (
-                              <span className="text-muted-foreground font-normal">
-                                {" "}— {new Date(santri.jamPulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                              </span>
-                            )}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground text-[11px]">
-                        {santri.keterangan || "-"}
-                      </td>
-                      <td className="py-3 px-4 text-right print:hidden">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            disabled={isSaving}
-                            onClick={() => handleUpdateStatus(santri.id, "HADIR")}
-                            title="Tandai Hadir"
-                            className={cn(
-                              "px-2 py-1 rounded text-[10px] font-bold transition-colors",
-                              santri.status === "HADIR"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted hover:bg-primary/20 text-primary"
-                            )}
-                          >
-                            H
-                          </button>
-                          <button
-                            disabled={isSaving}
-                            onClick={() => handleUpdateStatus(santri.id, "SAKIT")}
-                            title="Tandai Sakit"
-                            className={cn(
-                              "px-2 py-1 rounded text-[10px] font-bold transition-colors",
-                              santri.status === "SAKIT"
-                                ? "bg-orange-600 text-white"
-                                : "bg-muted hover:bg-orange-500/20 text-orange-600 dark:text-orange-400"
-                            )}
-                          >
-                            S
-                          </button>
-                          <button
-                            disabled={isSaving}
-                            onClick={() => handleUpdateStatus(santri.id, "IZIN")}
-                            title="Tandai Izin"
-                            className={cn(
-                              "px-2 py-1 rounded text-[10px] font-bold transition-colors",
-                              santri.status === "IZIN"
-                                ? "bg-blue-600 text-white"
-                                : "bg-muted hover:bg-blue-500/20 text-blue-600 dark:text-blue-400"
-                            )}
-                          >
-                            I
-                          </button>
-                          <button
-                            disabled={isSaving}
-                            onClick={() => handleUpdateStatus(santri.id, "ALPA")}
-                            title="Tandai Alpa"
-                            className={cn(
-                              "px-2 py-1 rounded text-[10px] font-bold transition-colors",
-                              santri.status === "ALPA"
-                                ? "bg-rose-600 text-white"
-                                : "bg-muted hover:bg-rose-500/20 text-rose-600 dark:text-rose-400"
-                            )}
-                          >
-                            A
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                return (
+                  <TableRow key={santri.id}>
+                    <TableCell className="py-3 px-4 text-center font-medium text-muted-foreground">
+                      {idx + 1}
+                    </TableCell>
+                    <TableCell className="py-3 px-4 font-mono font-medium text-foreground">
+                      {santri.nisn}
+                    </TableCell>
+                    <TableCell className="py-3 px-4 font-semibold text-foreground">
+                      {santri.namaLengkap}
+                    </TableCell>
+                    <TableCell className="py-3 px-4 text-center">
+                      {santri.status === "HADIR" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-primary/10 text-primary">
+                          <CheckCircle2 className="w-3 h-3" /> Hadir
+                        </span>
+                      ) : santri.status === "TERLAMBAT" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                          <Clock className="w-3 h-3" /> Terlambat
+                        </span>
+                      ) : santri.status === "SAKIT" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                          <AlertCircle className="w-3 h-3" /> Sakit
+                        </span>
+                      ) : santri.status === "IZIN" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                          <Clock className="w-3 h-3" /> Izin
+                        </span>
+                      ) : santri.status === "ALPA" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-destructive/10 text-destructive">
+                          <AlertCircle className="w-3 h-3" /> Alpa
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold text-[11px] bg-muted text-muted-foreground">
+                          Belum Presensi
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-3 px-4 font-mono text-[11px]">
+                      {santri.jamMasuk ? (
+                        <span className="text-primary font-medium">
+                          {new Date(santri.jamMasuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                          {santri.jamPulang && (
+                            <span className="text-muted-foreground font-normal">
+                              {" "}— {new Date(santri.jamPulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-3 px-4 text-muted-foreground text-[11px]">
+                      {santri.keterangan || "-"}
+                    </TableCell>
+                    <TableCell className="py-3 px-4 text-right print:hidden">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          disabled={isSaving}
+                          onClick={() => handleUpdateStatus(santri.id, "HADIR")}
+                          title="Tandai Hadir"
+                          className={cn(
+                            "px-2 py-1 rounded text-[10px] font-bold transition-colors",
+                            santri.status === "HADIR"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted hover:bg-primary/20 text-primary"
+                          )}
+                        >
+                          H
+                        </button>
+                        <button
+                          disabled={isSaving}
+                          onClick={() => handleUpdateStatus(santri.id, "SAKIT")}
+                          title="Tandai Sakit"
+                          className={cn(
+                            "px-2 py-1 rounded text-[10px] font-bold transition-colors",
+                            santri.status === "SAKIT"
+                              ? "bg-orange-600 text-white"
+                              : "bg-muted hover:bg-orange-500/20 text-orange-600 dark:text-orange-400"
+                          )}
+                        >
+                          S
+                        </button>
+                        <button
+                          disabled={isSaving}
+                          onClick={() => handleUpdateStatus(santri.id, "IZIN")}
+                          title="Tandai Izin"
+                          className={cn(
+                            "px-2 py-1 rounded text-[10px] font-bold transition-colors",
+                            santri.status === "IZIN"
+                              ? "bg-blue-600 text-white"
+                              : "bg-muted hover:bg-blue-500/20 text-blue-600 dark:text-blue-400"
+                          )}
+                        >
+                          I
+                        </button>
+                        <button
+                          disabled={isSaving}
+                          onClick={() => handleUpdateStatus(santri.id, "ALPA")}
+                          title="Tandai Alpa"
+                          className={cn(
+                            "px-2 py-1 rounded text-[10px] font-bold transition-colors",
+                            santri.status === "ALPA"
+                              ? "bg-destructive text-destructive-foreground"
+                              : "bg-muted hover:bg-destructive/20 text-destructive"
+                          )}
+                        >
+                          A
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
+            )}
+          </TableBody>
+        </Table>
 
         {/* Footer Info */}
         <div className="p-4 bg-muted/30 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
