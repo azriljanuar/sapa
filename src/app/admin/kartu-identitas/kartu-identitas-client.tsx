@@ -235,8 +235,8 @@ export function KartuIdentitasClient() {
   const activeTemplate = previewUser?.tipe === "GURU" ? guruTemplate : santriTemplate
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6 text-slate-800">Manajemen Kartu Identitas</h1>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Kartu Identitas</h1>
       
       {/* Preview Modal */}
       <Dialog open={!!previewUser} onOpenChange={(open) => !open && setPreviewUser(null)}>

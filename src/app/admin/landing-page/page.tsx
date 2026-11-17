@@ -13,10 +13,10 @@ export default async function CMSLandingPage() {
 
   // Default content is handled by API/client, but we provide empty or current here
   return (
-    <div className="p-4 sm:p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Pengaturan Landing Page</h1>
-        <p className="text-slate-600 mt-2">Sesuaikan konten yang akan ditampilkan di halaman utama publik portal SAPA.</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Pengaturan Landing Page</h1>
+        <p className="text-sm text-muted-foreground mt-1">Sesuaikan konten yang akan ditampilkan di halaman utama publik portal SAPA.</p>
       </div>
 
       <LandingPageClient initialData={content as any} />

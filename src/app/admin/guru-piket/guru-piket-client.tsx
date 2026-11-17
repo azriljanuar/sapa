@@ -241,7 +241,7 @@ export function GuruPiketClient({
   }
 
   return (
-    <div className={isEmbedded ? "space-y-4" : "p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto"}>
+    <div className={isEmbedded ? "space-y-4" : "space-y-6"}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         {!isEmbedded ? (

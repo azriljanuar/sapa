@@ -80,14 +80,12 @@ export default async function KurikulumJadwalPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <JadwalClient
-        activeTa={activeTa}
-        activeSemester={activeSemester}
-        kelasFormalList={kelasFormalList}
-        pengampuList={pengampuList as any}
-        initialJadwal={initialJadwal}
-      />
-    </div>
+    <JadwalClient
+      activeTa={activeTa}
+      activeSemester={activeSemester}
+      kelasFormalList={kelasFormalList}
+      pengampuList={pengampuList as any}
+      initialJadwal={initialJadwal}
+    />
   )
 }

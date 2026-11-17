@@ -115,7 +115,7 @@ export function GuruLayoutClient({
       )}>
         {/* Sidebar Header */}
         <div className={cn(
-          "h-16 flex items-center border-b border-sidebar-border px-4 transition-all duration-300",
+          "h-14 flex items-center border-b border-sidebar-border px-4 transition-all duration-300",
           isCollapsed ? "justify-center px-0" : "justify-between"
         )}>
           {!isCollapsed ? (
@@ -369,7 +369,7 @@ export function GuruLayoutClient({
       <div className="flex-1 flex flex-col min-w-0 min-h-dvh">
         
         {/* Top Navbar */}
-        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30 shadow-2xs">
+        <header className="h-14 bg-card border-b border-border flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30 shadow-2xs">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsSidebarOpen(true)}

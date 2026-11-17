@@ -108,7 +108,7 @@ export function GuruPiketJadwalClient({
   const isTodayPiket = hariPiketGuru.includes(todayHari)
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -120,7 +120,7 @@ export function GuruPiketJadwalClient({
               {activeTaName} - {activeSemesterName}
             </Badge>
             {isTodayPiket && (
-              <Badge className="bg-emerald-600 text-white hover:bg-emerald-700">
+              <Badge className="bg-primary text-primary-foreground">
                 Jadwal Piket Anda Hari Ini
               </Badge>
             )}
