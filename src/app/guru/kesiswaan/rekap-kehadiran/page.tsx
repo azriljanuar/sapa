@@ -17,7 +17,7 @@ export default async function KesiswaanRekapKehadiranPage() {
   const activeTA = await getSelectedTahunAjaran()
 
   if (!activeTA) {
-    return <div className="p-8 text-center text-slate-500">Tahun ajaran belum diatur.</div>
+    return <div className="p-8 text-center text-muted-foreground">Tahun ajaran belum diatur.</div>
   }
 
   const kelasList = await prisma.kelasFormal.findMany({

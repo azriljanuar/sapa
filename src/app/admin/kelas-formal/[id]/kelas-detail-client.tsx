@@ -224,7 +224,7 @@ export function KelasDetailClient({
                 variant="outline" 
                 onClick={() => setIsPromoDialogOpen(true)}
                 disabled={!canPromote || tableSelectedIds.length === 0}
-                className={canPromote && tableSelectedIds.length > 0 ? "border-emerald-500 text-emerald-600 hover:bg-emerald-50" : ""}
+                className={canPromote && tableSelectedIds.length > 0 ? "border-primary text-primary hover:bg-primary/10" : ""}
                 title={!canPromote ? "Naik kelas hanya bisa dilakukan di Semester Genap dan jika Tahun Ajaran berikutnya sudah dibuat." : "Naik Kelas"}
               >
                 <ArrowUpRight className="mr-2 h-4 w-4" /> Naik Kelas ({tableSelectedIds.length})
@@ -236,7 +236,7 @@ export function KelasDetailClient({
                 variant="outline"
                 onClick={handleGraduate}
                 disabled={isSubmitting}
-                className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20"
               >
                 <CheckCircle2 className="mr-2 h-4 w-4" /> Luluskan Angkatan ({tableSelectedIds.length})
               </Button>
@@ -249,14 +249,14 @@ export function KelasDetailClient({
         </div>
       </div>
 
-      <div className="rounded-md border bg-white shadow-sm">
+      <div className="rounded-md border bg-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px] text-center">
                 <input 
                   type="checkbox" 
-                  className="w-4 h-4 rounded border-gray-300"
+                  className="w-4 h-4 rounded border-border accent-primary"
                   checked={dataAnggota.length > 0 && tableSelectedIds.length === dataAnggota.length}
                   onChange={toggleAllTableSelection}
                 />
@@ -271,23 +271,23 @@ export function KelasDetailClient({
           <TableBody>
             {dataAnggota.length > 0 ? (
               dataAnggota.map((item, index) => (
-                <TableRow key={item.id} className={tableSelectedIds.includes(item.id) ? "bg-slate-50" : ""}>
+                <TableRow key={item.id} className={tableSelectedIds.includes(item.id) ? "bg-muted/50" : ""}>
                   <TableCell className="text-center">
                     <input 
                       type="checkbox" 
-                      className="w-4 h-4 rounded border-gray-300"
+                      className="w-4 h-4 rounded border-border accent-primary"
                       checked={tableSelectedIds.includes(item.id)}
                       onChange={() => toggleTableSelection(item.id)}
                     />
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell className="font-medium text-slate-500">{item.nisn}</TableCell>
-                  <TableCell className="font-semibold text-slate-900">{item.namaLengkap}</TableCell>
+                  <TableCell className="font-medium text-muted-foreground">{item.nisn}</TableCell>
+                  <TableCell className="font-semibold text-foreground">{item.namaLengkap}</TableCell>
                   <TableCell className="text-center">
                     {item.statusMukim ? (
-                      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shadow-none font-medium">Mukim</Badge>
+                      <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shadow-none font-medium">Mukim</Badge>
                     ) : (
-                      <Badge className="bg-slate-100 text-slate-500 hover:bg-slate-100 shadow-none font-medium text-xs">Tidak</Badge>
+                      <Badge variant="secondary" className="shadow-none font-medium text-xs">Tidak</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -306,7 +306,7 @@ export function KelasDetailClient({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-slate-500">
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                   Belum ada anggota kelas.
                 </TableCell>
               </TableRow>
@@ -322,7 +322,7 @@ export function KelasDetailClient({
             <DialogTitle>Kenaikan Kelas</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Anda akan memproses <strong>{tableSelectedIds.length} santri</strong> ke kelas pada Tahun Ajaran berikutnya.
             </p>
             <div className="space-y-2">
@@ -337,7 +337,7 @@ export function KelasDetailClient({
                     onChange={() => setPromoStatus("NAIK_KELAS")}
                     className="accent-primary"
                   />
-                  <span className="font-medium text-emerald-700">Naik Kelas</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">Naik Kelas</span>
                 </label>
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input
@@ -348,7 +348,7 @@ export function KelasDetailClient({
                     onChange={() => setPromoStatus("TINGGAL_KELAS")}
                     className="accent-primary"
                   />
-                  <span className="font-medium text-amber-700">Tinggal Kelas (Mengulang)</span>
+                  <span className="font-medium text-amber-600 dark:text-amber-400">Tinggal Kelas (Mengulang)</span>
                 </label>
               </div>
             </div>
@@ -418,7 +418,7 @@ export function KelasDetailClient({
                         <TableCell>
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 rounded border-gray-300"
+                            className="w-4 h-4 rounded border-border accent-primary"
                             checked={selectedSantriIds.includes(santri.id)}
                             readOnly
                           />

@@ -17,8 +17,8 @@ export default async function MataPelajaranPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Manajemen Mata Pelajaran</h1>
-        <p className="text-slate-500">Kelola data mata pelajaran khusus untuk jenjang ini.</p>
+        <h1 className="text-2xl font-bold text-foreground">Manajemen Mata Pelajaran</h1>
+        <p className="text-muted-foreground">Kelola data mata pelajaran khusus untuk jenjang ini.</p>
       </div>
       
       <MataPelajaranClient initialData={mataPelajaran} />

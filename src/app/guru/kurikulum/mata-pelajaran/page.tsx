@@ -25,8 +25,8 @@ export default async function KurikulumMataPelajaranPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Mata Pelajaran & Pengampu</h1>
-        <p className="text-slate-500">Kelola kurikulum mata pelajaran dan penugasan guru pengampu di setiap rombel.</p>
+        <h1 className="text-2xl font-bold text-foreground">Mata Pelajaran & Pengampu</h1>
+        <p className="text-muted-foreground">Kelola kurikulum mata pelajaran dan penugasan guru pengampu di setiap rombel.</p>
       </div>
 
       <MataPelajaranClient initialData={mataPelajaran} />

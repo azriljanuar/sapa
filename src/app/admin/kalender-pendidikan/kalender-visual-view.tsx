@@ -291,7 +291,7 @@ export function KalenderVisualView({
                         </span>
                         {agenda.allowAbsensiRfid && (
                           <span title="Presensi RFID Aktif" className="inline-flex shrink-0">
-                            <Radio className="w-2.5 h-2.5 text-emerald-600" />
+                            <Radio className="w-2.5 h-2.5 text-primary" />
                           </span>
                         )}
                       </div>
@@ -340,7 +340,7 @@ export function KalenderVisualView({
             <span className="text-foreground">Libur Ramadhan & Idulfitri</span>
           </div>
           <div className="flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <Radio className="w-3.5 h-3.5 text-primary shrink-0" />
             <span className="text-foreground">Presensi RFID Diizinkan</span>
           </div>
         </div>

@@ -275,7 +275,7 @@ export function AgendaModal({
               />
               <div className="text-sm">
                 <div className="font-semibold text-foreground flex items-center gap-1.5">
-                  <Radio className="w-4 h-4 text-emerald-600" />
+                  <Radio className="w-4 h-4 text-primary" />
                   <span>Izinkan Presensi RFID Berjalan</span>
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
