@@ -9,8 +9,15 @@ export const metadata = {
   description: "Kelola penugasan tugas tambahan guru: Pimpinan & Waka, Wali Kelas, dan Guru Piket",
 }
 
-export default async function TugasTambahanPage() {
+export default async function TugasTambahanPage(props: {
+  searchParams?: Promise<{ tab?: string }>
+}) {
   await getLoggedInAdminJenjang()
+
+  const searchParams = props.searchParams ? await props.searchParams : undefined
+  const initialTab = (searchParams?.tab === "piket" || searchParams?.tab === "wali-kelas") 
+    ? searchParams.tab 
+    : "struktural"
 
   const res = await getTugasTambahanData()
 
@@ -25,6 +32,7 @@ export default async function TugasTambahanPage() {
 
   return (
     <TugasTambahanClient
+      initialTab={initialTab}
       initialAssignments={res.data.assignments as any}
       availableGurus={res.data.availableGurus as any}
       activeTA={res.data.activeTA}

@@ -105,6 +105,7 @@ interface TugasTambahanClientProps {
   activeTA: { id: number; nama: string }
   kelasList: KelasItem[]
   piketList: any[]
+  initialTab?: "struktural" | "wali-kelas" | "piket"
 }
 
 const ROLE_CONFIGS: Record<PeranType, {
@@ -171,9 +172,10 @@ export function TugasTambahanClient({
   activeTA,
   kelasList: initialKelasList,
   piketList,
+  initialTab = "struktural",
 }: TugasTambahanClientProps) {
   // Tab State
-  const [activeTab, setActiveTab] = useState<"struktural" | "wali-kelas" | "piket">("struktural")
+  const [activeTab, setActiveTab] = useState<"struktural" | "wali-kelas" | "piket">(initialTab)
 
   // Struktural State
   const [assignments, setAssignments] = useState<AssignmentData[]>(initialAssignments)

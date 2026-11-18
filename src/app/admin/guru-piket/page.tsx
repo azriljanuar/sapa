@@ -1,46 +1,7 @@
-import { getLoggedInAdminJenjang } from "@/lib/auth"
-import { getSelectedTahunAjaran } from "@/lib/ta-context"
-import { getGuruPiketList, getAvailableGurus } from "./actions"
-import { GuruPiketClient } from "./guru-piket-client"
+import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
-export const metadata = {
-  title: "Manajemen Guru Piket - Admin | SAPA",
-  description: "Penugasan dan manajemen guru piket harian",
-}
-
-export default async function GuruPiketPage() {
-  const admin = await getLoggedInAdminJenjang()
-
-  if (!admin.jenjangId) {
-    return (
-      <div className="p-6 text-center text-destructive">
-        Admin Jenjang ini belum memiliki jenjang yang dikelola.
-      </div>
-    )
-  }
-
-  const activeTA = await getSelectedTahunAjaran()
-
-  if (!activeTA) {
-    return (
-      <div className="p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 text-sm font-medium">
-          Belum ada Tahun Ajaran aktif yang dipilih. Silakan pilih Tahun Ajaran terlebih dahulu.
-        </div>
-    )
-  }
-
-  const [piketList, guruList] = await Promise.all([
-    getGuruPiketList(),
-    getAvailableGurus(),
-  ])
-
-  return (
-    <GuruPiketClient
-      initialData={piketList}
-      guruList={guruList}
-      activeTaName={activeTA.nama}
-    />
-  )
+export default function GuruPiketPage() {
+  redirect("/admin/tugas-tambahan?tab=piket")
 }
