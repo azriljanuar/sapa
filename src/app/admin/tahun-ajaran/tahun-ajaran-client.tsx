@@ -162,11 +162,11 @@ export function TahunAjaranClient({ initialData }: { initialData: TahunAjaranTyp
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="inline-flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                      <span className="inline-flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                         <BookOpen className="w-3 h-3" />
                         {item.jumlahKelas ?? 0} Kelas
                       </span>
-                      <span className="inline-flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+                      <span className="inline-flex items-center gap-1 font-medium px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
                         <Layers className="w-3 h-3" />
                         {item.jumlahPengampu ?? 0} Guru Mapel
                       </span>

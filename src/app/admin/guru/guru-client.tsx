@@ -285,7 +285,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
             onClick={() => setIsExportDialogOpen(true)}
             className="border-border text-foreground hover:bg-muted/50"
           >
-            <KeyRound className="mr-2 h-4 w-4 text-blue-600" /> Ekspor Akun
+            <KeyRound className="mr-2 h-4 w-4 text-primary" /> Ekspor Akun
           </Button>
         </div>
       </div>
@@ -339,7 +339,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-muted/50/80">
+            <TableHeader className="bg-muted/50">
               <TableRow>
                 <TableHead className="w-[50px] text-center font-semibold">No</TableHead>
                 <TableHead className="min-w-[220px] font-semibold">Nama Lengkap & NIP</TableHead>
@@ -352,7 +352,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
             <TableBody>
               {filteredData.length > 0 ? (
                 filteredData.map((item, index) => (
-                  <TableRow key={item.id} className="hover:bg-muted/50/60 transition-colors">
+                  <TableRow key={item.id} className="hover:bg-muted/50 transition-colors">
                     <TableCell className="text-center font-medium text-muted-foreground text-xs">
                       {index + 1}
                     </TableCell>
@@ -360,7 +360,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                     {/* Nama & NIP */}
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs shrink-0">
                           {item.nama.substring(0, 2).toUpperCase()}
                         </div>
                         <div className="min-w-0">
@@ -369,8 +369,8 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                             {item.jenisKelamin && (
                               <span className={`text-[10px] px-1.5 py-0.2 rounded font-medium ${
                                 item.jenisKelamin.toLowerCase().startsWith("l")
-                                  ? "bg-blue-50 text-blue-700 border border-blue-200/60"
-                                  : "bg-pink-50 text-pink-700 border border-pink-200/60"
+                                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                                  : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
                               }`}>
                                 {item.jenisKelamin.toLowerCase().startsWith("l") ? "L" : "P"}
                               </span>
@@ -448,7 +448,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted"
                           onClick={() => {
                             setDetailGuru(item)
                             setIsDetailOpen(true)
@@ -463,7 +463,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-amber-600 hover:bg-amber-50"
+                          className="h-8 w-8 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10"
                           onClick={() => handleOpenEdit(item)}
                           title="Edit Data Guru"
                         >
@@ -475,7 +475,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
                           onClick={async () => {
                             if (!confirm(`Reset password akun guru "${item.nama}" ke default ("password123")?`)) return
                             const res = await resetPasswordGuru(item.id)
@@ -513,7 +513,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                     <div className="flex flex-col items-center justify-center space-y-1">
-                      <User className="w-8 h-8 text-slate-300" />
+                      <User className="w-8 h-8 text-muted-foreground/40" />
                       <p className="font-medium text-muted-foreground">Tidak ada data guru yang cocok.</p>
                       <p className="text-xs text-muted-foreground">Coba ubah kata kunci pencarian atau filter status.</p>
                     </div>
@@ -534,14 +534,14 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
             <DialogTitle className="text-lg font-bold flex items-center gap-2">
               {formMode === "create" ? (
                 <>
-                  <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
+                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
                     <Plus className="h-4 w-4" />
                   </div>
                   <span>Tambah Guru Baru</span>
                 </>
               ) : (
                 <>
-                  <div className="p-1.5 rounded-lg bg-amber-50 text-amber-600">
+                  <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
                     <Pencil className="h-4 w-4" />
                   </div>
                   <span>Edit Data Guru</span>
@@ -569,7 +569,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
               <TabsContent value="utama" className="space-y-3.5 pt-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   <div className="space-y-1.5 md:col-span-2">
-                    <Label className="text-xs font-semibold">Nama Lengkap & Gelar <span className="text-red-500">*</span></Label>
+                    <Label className="text-xs font-semibold">Nama Lengkap & Gelar <span className="text-destructive">*</span></Label>
                     <Input
                       placeholder="Contoh: Ust. H. Abdullah, M.Pd.I"
                       value={formData.nama}
@@ -579,7 +579,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Email Resmi (Username Login) <span className="text-red-500">*</span></Label>
+                    <Label className="text-xs font-semibold">Email Resmi (Username Login) <span className="text-destructive">*</span></Label>
                     <Input
                       type="email"
                       placeholder="Contoh: guru@sapa.sch.id"
@@ -770,7 +770,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold flex items-center gap-2">
-              <User className="h-5 w-5 text-indigo-600" />
+              <User className="h-5 w-5 text-primary" />
               Profil Lengkap Guru
             </DialogTitle>
           </DialogHeader>
@@ -779,7 +779,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
             <div className="space-y-4 pt-1">
               {/* Header Card */}
               <div className="p-4 bg-muted/50 rounded-xl border border-border flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
+                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
                   {detailGuru.nama.substring(0, 2).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -788,7 +788,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                     {detailGuru.nip ? `NIP: ${detailGuru.nip}` : "NIP belum diset"}
                   </div>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <Badge variant="outline" className="text-[11px] bg-card">
+                    <Badge variant="outline" className="text-[11px] bg-card border-border">
                       {detailGuru.statusPegawai || "Guru"}
                     </Badge>
                     {detailGuru.rfidCardId && (
@@ -802,38 +802,38 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
 
               {/* Data Grid */}
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 bg-card border rounded-lg space-y-1">
+                <div className="p-3 bg-card border border-border rounded-lg space-y-1">
                   <span className="text-muted-foreground font-medium">Email Akun</span>
                   <p className="font-semibold text-foreground break-all">{detailGuru.email}</p>
                 </div>
-                <div className="p-3 bg-card border rounded-lg space-y-1">
+                <div className="p-3 bg-card border border-border rounded-lg space-y-1">
                   <span className="text-muted-foreground font-medium">No. Telepon / WA</span>
                   <p className="font-semibold text-foreground">{detailGuru.noTelepon || "-"}</p>
                 </div>
-                <div className="p-3 bg-card border rounded-lg space-y-1">
+                <div className="p-3 bg-card border border-border rounded-lg space-y-1">
                   <span className="text-muted-foreground font-medium">NUPTK</span>
                   <p className="font-semibold text-foreground">{detailGuru.nuptk || "-"}</p>
                 </div>
-                <div className="p-3 bg-card border rounded-lg space-y-1">
+                <div className="p-3 bg-card border border-border rounded-lg space-y-1">
                   <span className="text-muted-foreground font-medium">NIK</span>
                   <p className="font-semibold text-foreground">{detailGuru.nik || "-"}</p>
                 </div>
-                <div className="p-3 bg-card border rounded-lg space-y-1">
+                <div className="p-3 bg-card border border-border rounded-lg space-y-1">
                   <span className="text-muted-foreground font-medium">Jenis Kelamin</span>
                   <p className="font-semibold text-foreground">{detailGuru.jenisKelamin || "-"}</p>
                 </div>
-                <div className="p-3 bg-card border rounded-lg space-y-1">
+                <div className="p-3 bg-card border border-border rounded-lg space-y-1">
                   <span className="text-muted-foreground font-medium">Pendidikan</span>
                   <p className="font-semibold text-foreground">{detailGuru.pendidikanTerakhir || "-"} {detailGuru.jurusan ? `(${detailGuru.jurusan})` : ""}</p>
                 </div>
-                <div className="p-3 bg-card border rounded-lg space-y-1 col-span-2">
+                <div className="p-3 bg-card border border-border rounded-lg space-y-1 col-span-2">
                   <span className="text-muted-foreground font-medium">Tempat, Tanggal Lahir</span>
                   <p className="font-semibold text-foreground">
                     {detailGuru.tempatLahir ? `${detailGuru.tempatLahir}, ` : ""}
                     {detailGuru.tanggalLahir || "-"}
                   </p>
                 </div>
-                <div className="p-3 bg-card border rounded-lg space-y-1 col-span-2">
+                <div className="p-3 bg-card border border-border rounded-lg space-y-1 col-span-2">
                   <span className="text-muted-foreground font-medium">Alamat Lengkap</span>
                   <p className="font-semibold text-foreground">{detailGuru.alamatLengkap || "-"}</p>
                 </div>
@@ -841,15 +841,15 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
 
               {/* Assignment Counts */}
               {detailGuru._count && (
-                <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-lg flex items-center justify-around text-center text-xs">
+                <div className="p-3 bg-muted/50 border border-border rounded-lg flex items-center justify-around text-center text-xs">
                   <div>
                     <span className="text-muted-foreground block">Wali Kelas</span>
-                    <strong className="text-base text-indigo-700">{detailGuru._count.waliKelas}</strong>
+                    <strong className="text-base text-primary">{detailGuru._count.waliKelas}</strong>
                   </div>
-                  <div className="h-8 w-px bg-indigo-200" />
+                  <div className="h-8 w-px bg-border" />
                   <div>
                     <span className="text-muted-foreground block">Mata Pelajaran Diampu</span>
-                    <strong className="text-base text-indigo-700">{detailGuru._count.pengampu}</strong>
+                    <strong className="text-base text-primary">{detailGuru._count.pengampu}</strong>
                   </div>
                 </div>
               )}
@@ -879,7 +879,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-red-600 flex items-center gap-2">
+            <DialogTitle className="text-lg font-bold text-destructive flex items-center gap-2">
               <Trash2 className="h-5 w-5" />
               Hapus Data Guru
             </DialogTitle>
@@ -902,7 +902,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
                 <Button 
                   onClick={handleDeleteConfirm} 
                   disabled={isPending}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  variant="destructive"
                 >
                   {isPending ? "Menghapus..." : "Ya, Hapus Guru"}
                 </Button>
@@ -954,10 +954,10 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
             </div>
 
             {importResult && (
-              <div className="p-3 bg-muted/50 border rounded-lg text-xs space-y-1.5">
+              <div className="p-3 bg-muted/50 border border-border rounded-lg text-xs space-y-1.5">
                 <p className="font-semibold text-foreground">{importResult.message}</p>
                 {importResult.errors && importResult.errors.length > 0 && (
-                  <ul className="list-disc list-inside text-red-600 space-y-0.5">
+                  <ul className="list-disc list-inside text-destructive space-y-0.5">
                     {importResult.errors.map((err, i) => (
                       <li key={i}>{err}</li>
                     ))}
@@ -985,20 +985,20 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
-              <KeyRound className="h-5 w-5 text-blue-600" />
+              <KeyRound className="h-5 w-5 text-primary" />
               Ekspor Akun Guru (Username & Password)
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
-            <div className="rounded-lg border border-blue-100 bg-blue-50/60 p-3.5 text-xs text-blue-900 space-y-2">
-              <div className="font-semibold flex items-center gap-1.5 text-blue-800">
+            <div className="rounded-lg border border-primary/20 bg-primary/10 p-3.5 text-xs text-foreground space-y-2">
+              <div className="font-semibold flex items-center gap-1.5 text-primary">
                 <span>ℹ️</span> Format Kredensial Login Guru
               </div>
-              <ul className="list-disc list-inside space-y-1 text-foreground pl-1">
-                <li><strong>Username:</strong> Email resmi masing-masing guru (guru juga dapat login menggunakan NIP jika terisi).</li>
-                <li><strong>Password Default:</strong> <code className="bg-card px-1.5 py-0.5 rounded text-blue-700 font-mono font-bold">password123</code></li>
-                <li><strong>Format File:</strong> Excel (.xlsx) dengan kolom No, NIP, Nama Lengkap, Username (Email), Password Default, dan Status Akun.</li>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground pl-1">
+                <li><strong className="text-foreground">Username:</strong> Email resmi masing-masing guru (guru juga dapat login menggunakan NIP jika terisi).</li>
+                <li><strong className="text-foreground">Password Default:</strong> <code className="bg-card px-1.5 py-0.5 rounded text-primary font-mono font-bold">password123</code></li>
+                <li><strong className="text-foreground">Format File:</strong> Excel (.xlsx) dengan kolom No, NIP, Nama Lengkap, Username (Email), Password Default, dan Status Akun.</li>
               </ul>
             </div>
 
@@ -1013,7 +1013,7 @@ export function GuruClient({ initialData }: { initialData: GuruItem[] }) {
               </Button>
               <Button 
                 type="button"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleDownloadExport}
               >
                 <FileDown className="mr-2 h-4 w-4" /> Unduh Excel (.xlsx)

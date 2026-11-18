@@ -481,9 +481,9 @@ export function SantriClient({
                   setExportKelas(filterKelas)
                   setIsExportDialogOpen(true)
                 }}
-                className="border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
+                className="border-border text-foreground hover:bg-muted/50"
               >
-                <KeyRound className="mr-2 h-4 w-4" /> Ekspor Akun
+                <KeyRound className="mr-2 h-4 w-4 text-primary" /> Ekspor Akun
               </Button>
               <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
                 <Upload className="mr-2 h-4 w-4" /> Impor Excel
@@ -495,7 +495,7 @@ export function SantriClient({
           )}
           {activeTab === "alumni" && (
             <Link href="/admin/alumni">
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 Kelola di Data Alumni
               </Button>
             </Link>
@@ -511,11 +511,11 @@ export function SantriClient({
         </TabsList>
 
         {activeTab === "alumni" && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3.5 mb-3 bg-indigo-50/70 border border-indigo-200 rounded-lg text-indigo-900 text-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3.5 mb-3 bg-muted/50 border border-border rounded-lg text-foreground text-sm">
             <span>
               Menampilkan <strong>{alumniDataFiltered.length} alumni</strong> yang telah dinyatakan lulus dari jenjang ini.
             </span>
-            <Link href="/admin/alumni" className="inline-flex items-center gap-1 font-semibold text-indigo-700 hover:text-indigo-900 underline">
+            <Link href="/admin/alumni" className="inline-flex items-center gap-1 font-semibold text-primary hover:text-primary/80 underline">
               Buka menu Data Alumni lengkap <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -615,7 +615,7 @@ export function SantriClient({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-8 px-2"
+                            className="text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 h-8 px-2"
                             onClick={() => { setPindahData(item); setIsPindahDialogOpen(true); }}
                             title="Proses Pindah Sekolah / Keluar"
                           >
@@ -634,7 +634,7 @@ export function SantriClient({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="text-muted-foreground hover:text-amber-600 hover:bg-amber-50"
+                            className="text-muted-foreground hover:text-primary hover:bg-primary/10"
                             onClick={async () => {
                               if (!confirm(`Reset password akun ${item.namaLengkap} ke default ("password123")?`)) return
                               const { resetPasswordSantri } = await import("./actions")
@@ -691,7 +691,7 @@ export function SantriClient({
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 text-xs font-semibold text-indigo-700 hover:text-indigo-800"
+                              className="h-8 text-xs font-semibold text-primary hover:text-primary/80"
                             >
                               Detail Alumni
                             </Button>
@@ -1079,7 +1079,7 @@ export function SantriClient({
                 }}
                 required
               />
-              <div className="text-xs text-muted-foreground space-y-1 bg-blue-50/50 p-3 rounded-md border border-blue-100">
+              <div className="text-xs text-muted-foreground space-y-1 bg-muted/50 p-3 rounded-md border border-border">
                 <p>
                   <strong>✨ Auto-Mapping Aktif:</strong> Sistem kini otomatis mendeteksi struktur kolom. Anda dapat mengunggah file template maupun file <strong>Export Asli dari EMIS atau Dapodik</strong> secara langsung tanpa perlu mengubah <i>header</i>.
                 </p>
@@ -1089,14 +1089,14 @@ export function SantriClient({
               </div>
             </div>
             <div className="flex justify-between pt-4 items-center border-t border-border">
-              <Button type="button" variant="link" onClick={handleDownloadTemplate} className="px-0">
+              <Button type="button" variant="link" onClick={handleDownloadTemplate} className="px-0 text-primary">
                 <FileDown className="mr-2 h-4 w-4" /> Unduh Template
               </Button>
               <div className="flex gap-2">
                 <Button variant="outline" type="button" onClick={() => setIsImportDialogOpen(false)}>
                   Batal
                 </Button>
-                <Button type="submit" disabled={isSubmitting || !importFile}>
+                <Button type="submit" disabled={isSubmitting || !importFile} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   {isSubmitting ? "Mengimpor..." : "Mulai Impor"}
                 </Button>
               </div>
@@ -1173,7 +1173,7 @@ export function SantriClient({
               </Button>
               <Button 
                 type="button"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleDownloadExport}
               >
                 <FileDown className="mr-2 h-4 w-4" /> Unduh Excel (.xlsx)
@@ -1226,7 +1226,7 @@ export function SantriClient({
               setIsSubmitting(false)
             }
           }} className="space-y-4 pt-2">
-            <div className="bg-amber-50 p-3 rounded-md border border-amber-100 text-sm text-amber-800 mb-4">
+            <div className="bg-amber-500/10 p-3 rounded-md border border-amber-500/20 text-sm text-amber-800 dark:text-amber-300 mb-4">
               Anda akan memproses keluar santri <strong>{pindahData?.namaLengkap}</strong> ({pindahData?.nisn}).
             </div>
             

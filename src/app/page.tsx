@@ -101,7 +101,7 @@ export default async function Home() {
     <div className="min-h-screen bg-background flex flex-col font-sans text-foreground">
       {/* Navbar */}
       <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 bg-primary text-primary-foreground rounded-lg flex items-center justify-center shadow-sm">
               <span className="font-bold text-lg">S</span>
@@ -189,20 +189,20 @@ export default async function Home() {
               
               {/* HEADER / WELCOME BANNER (GURU & SANTRI) */}
               {(session.role === "GURU" || session.role === "SANTRI") && (
-                <div className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-3xl p-8 mb-8 text-white overflow-hidden shadow-xl">
+                <div className="relative bg-gradient-to-br from-primary via-emerald-800 to-teal-950 rounded-3xl p-8 mb-8 text-primary-foreground overflow-hidden shadow-xl">
                   <div className="absolute inset-0 pointer-events-none overflow-hidden">
                     <div className="absolute -top-10 -right-10 w-56 h-56 bg-white/10 rounded-full blur-3xl" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400/20 rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-400/20 rounded-full blur-3xl" />
                   </div>
                   <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                      <p className="text-indigo-200 text-sm font-medium mb-1">Selamat datang kembali 👋</p>
+                      <p className="text-emerald-100 text-sm font-medium mb-1">Selamat datang kembali 👋</p>
                       <h2 className="text-3xl font-extrabold mb-2">{userName}</h2>
                       {session.role === "SANTRI" && roleData.kelas && (
-                        <p className="text-indigo-200/80">Santri Kelas <strong className="text-white">{roleData.kelas}</strong> &middot; {roleData.jenjang}</p>
+                        <p className="text-emerald-100/80">Santri Kelas <strong className="text-white">{roleData.kelas}</strong> &middot; {roleData.jenjang}</p>
                       )}
                       {session.role === "GURU" && (
-                        <p className="text-indigo-200/80">Guru Pengajar &middot; Akses layanan e-learning SAPA</p>
+                        <p className="text-emerald-100/80">Guru Pengajar &middot; Akses layanan e-learning SAPA</p>
                       )}
                     </div>
                     {session.role === "GURU" && (
